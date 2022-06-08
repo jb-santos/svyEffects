@@ -3,6 +3,10 @@ title: "svyEffects"
 output: github_document
 ---
 
+```{r setup, include=  FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
   message = FALSE, 
@@ -13,11 +17,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Developer's note
+# Developer's note
 
 The primary functions of this package are complete. However, the functions in this GitHub repository are not. As I convert functions from their standalone versions to ones that fit within the overall package framework, they will be added to GitHub and the documentation will be fleshed out.
 
-## Introduction
+# Introduction
 
 `svyEffects` contains post-estimation functions for GLMs (or limited dependent variable models) estimated on survey-weighted data. 
 
@@ -33,16 +37,16 @@ After calculating predicted probabilities, it will then calculate differences in
 
 For both predictions and differences, it uses simulation methods (the parametric bootstrap) to derive confidence intervals.
 
-It works with the following survey-weighted models or (non-survey) weighted models (i.e. models estimated with the `weight=` option enabled):
+It works with the following survey-weighted models or (non-survey) weighted models (i.e. models estimated with `weight=` option enabled):
 
 - binary dependent variable models
   - `survey::svyglm`
   - `glm`
 - ordinal dependent variable models
-  - `MASS::polr`
-  - `survey::svyolr`
+ - `MASS::polr`
+ - `survey::svyolr`
 - multinomial dependent variable models
-  - `svrepmisc::svymultinom`
-  - `nnet::multinom`
+ - `svrepmisc::svymultinom`
+ - `nnet::multinom`
 
  
