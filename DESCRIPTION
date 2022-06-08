@@ -1,0 +1,32 @@
+Package: svyEffects
+Title: Simulation-based Marginal Effects for Survey-Weighted GLMs
+Version: 0.0.0.9000
+Authors@R: 
+    person("John", "Santos", , "jsanto27@uwo.ca", role = c("aut", "cre"))
+    person("Dave", "Armstrong", , "dave.armstrong@uwo.ca", role = c("aut", "cre"))
+Maintainer: John Santos <sjsanto27@uwo.ca>
+Description: Calculates marginal effects for limited dependent variable models
+  estimated on survey-weighted data using both the "average marginal effects" 
+  approach (a.k.a. marginal effects at observed values) and the "marginal effects
+  at reasonable/representative/typical values approach (a.k.a. the effect for
+  the "average case"). It uses simulation-based methods (parametric bootstrap) 
+  to derive confidence intervals. It is compatible with survey-weighted models 
+  of the classes \code{survey::svyglm}, \code{survey::svyolr}, and 
+  \code{svrepmisc::svymultinom}, as well as weightedmodels of the classes 
+  \code{glm}, \code{MASS::svyolr}, and \code{nnet::multinom}.
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    dplyr,
+    magrittr,
+    MASS,
+    rlang,
+    stringr,
+    survey,
+    tidyr
+Suggests: 
+    ggplot2,
+    nnet,
+    svrepmisc
