@@ -2,7 +2,8 @@
 % Please edit documentation in R/glm_functions.R
 \name{svyMER.glm}
 \alias{svyMER.glm}
-\title{Marginal effects a reasonable values for survey-weighted GLMs}
+\title{Marginal effects at reasonable values for binary dependent-variable models of
+survey-weighted data.}
 \usage{
 \method{svyMER}{glm}(
   obj,
@@ -49,7 +50,8 @@ A list with dataframes:
 }
 }
 \description{
-Marginal effects a reasonable values for survey-weighted GLMs
+Marginal effects at reasonable values for binary dependent-variable models of
+survey-weighted data.
 }
 \examples{
 

@@ -1,18 +1,12 @@
+# METHODS FOR BINARY-DEPENDENT VARIABLE MODELS
 
 
-#' S3 generic function for survey-weighted average marginal effects
-#'
-#' @param obj Model object on which to conduct post-estimation
-#' @param ... Other arguments (currently not implemented).
-#'
-#' @export
-#'
-svyAME <- function(obj, ...) {UseMethod("svyAME")}
+
 
 
 
 #' Average marginal effects (a.k.a. marginal effects at observed values) for
-#' survey-weighted GLMs.
+#' binary dependent-variable models of survey-weighted data.
 #'
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
@@ -28,7 +22,7 @@ svyAME <- function(obj, ...) {UseMethod("svyAME")}
 #' picks a random integer between 1 and 1,000,000. If you save the output of
 #' this function, it will save the seed value used for simulations in the slot
 #' \code{$seed}.
-#' @param ... Other arguments (currently no implemented).
+#' @param ... Other arguments (currently not implemented).
 #'
 #' @return A list with dataframes:
 #'   \describe{
@@ -57,17 +51,13 @@ svyAME.glm <- function(obj,
                        seed = NULL,
                        ...) {
 
-  # Object class check
-  if(!inherits(obj, "glm"))
-    stop(print("This function only works with objects of class `glm` or `svyglm`."))
-
+  #========== SETUP ============================================================
 
   # Get data
   data <- model.frame(obj)
   data <- data %>% rename(!!sym(weightvar) := `(weights)`)
   svydata <- survey::svydesign(ids=~1, strata=NULL, weights=data[weightvar], data=data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
-
 
   # Set random number generator
   if(is.null(seed)){
@@ -77,9 +67,7 @@ svyAME.glm <- function(obj,
   }
   set.seed(seed)
 
-
   #========== NUMERIC / CONTINUOUS predictors ==================================
-
 
   if(is.numeric(data[[varname]])) {
 
@@ -158,7 +146,7 @@ svyAME.glm <- function(obj,
 
     #========== FACTOR / CATEGORICAL predictors ================================
 
-    ## Pedicted probabilities --------------------------------------------------
+    ## Predicted probabilities -------------------------------------------------
 
     levs <- levels(data[[varname]])
     nlev <- length(levs)
@@ -216,17 +204,11 @@ svyAME.glm <- function(obj,
 
 
 
-#' S3 generic function for survey-weighted marginal effects at reasonable values
-#'
-#' @param obj Model object on which to conduct post-estimation
-#' @param ... Other arguments (currently not implemented).
-#' @export
-#'
-svyMER <- function(obj, ...) {UseMethod("svyMER")}
 
 
 
-#' Marginal effects a reasonable values for survey-weighted GLMs
+#' Marginal effects at reasonable values for binary dependent-variable models of
+#' survey-weighted data.
 #'
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
@@ -272,15 +254,11 @@ svyMER.glm <- function(obj,
                        seed = NULL,
                        ...) {
 
-  # Object class check
-  if(!inherits(obj, "glm"))
-    stop(print("This function only works with objects of class `glm` or `svyglm`."))
-
   #========== SETUP ============================================================
 
   # Get data
   data <- model.frame(obj)
-  data <- data %>% rename(!!sym(weightvar) := `(weights)`)
+  data <- data %>% dplyr::rename(!!sym(weightvar) := `(weights)`)
   svydata <- survey::svydesign(ids=~1, strata=NULL, weights=data[weightvar], data=data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
 
@@ -318,7 +296,7 @@ svyMER.glm <- function(obj,
       if(trms[[m]] == "factor") {
         l[[m]] <- svymode(names(trms)[m], svydata)
       } else {
-        l[[m]] <- svyquantile(reformulate(names(trms)[m]), svydata, 0.5)[[1]][1]
+        l[[m]] <- survey::svyquantile(reformulate(names(trms)[m]), svydata, 0.5)[[1]][1]
       }}}
 
   fake <- do.call(expand.grid, l)
@@ -361,7 +339,7 @@ svyMER.glm <- function(obj,
                 function(x, y){unlist(x) - unlist(y)})
     D <- as.data.frame(D)
 
-    diffs <- tibble(
+    diffs <- dplyr::tibble(
       varname1 = combn(levs, 2)[1,],
       varname2 = combn(levs, 2)[2,],
       predicted = sapply(D, mean),
@@ -403,7 +381,7 @@ svyMER.glm <- function(obj,
         if(trms[[m]] == "factor") {
           l[[m]] <- svymode(names(trms)[m], svydata)
         } else {
-          l[[m]] <- svyquantile(reformulate(names(trms)[m]), svydata, 0.5)[[1]][1]
+          l[[m]] <- survey::svyquantile(reformulate(names(trms)[m]), svydata, 0.5)[[1]][1]
         }}}
     fake <- do.call(expand.grid, l)
 
@@ -411,7 +389,7 @@ svyMER.glm <- function(obj,
     fakeX <- model.matrix(formula(obj), data=fake)
     probs <- t(plogis(fakeX %*% t(B)))
     diff_res <- apply(probs, 1, diff)
-    diffs <- tibble(
+    diffs <- dplyr::tibble(
       x = paste0("Delta (", diffchange, ") : ",
                  round(diffrange[[1]], 3),
                  " - ",
@@ -424,13 +402,13 @@ svyMER.glm <- function(obj,
 
   #========== Output ===========================================================
 
-  preds <- rename(preds, !!sym(varname) := x)
-  diffs <- rename(diffs, !!sym(varname) := x)
+  preds <- dplyr::rename(preds, !!sym(varname) := x)
+  diffs <- dplyr::rename(diffs, !!sym(varname) := x)
   output <- list(
     preds = preds,
     diffs = diffs,
     seed = seed,
-    typical = as_tibble(fake))
+    typical = dplyr::as_tibble(fake))
   return(output)
 
 }
