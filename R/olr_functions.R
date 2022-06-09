@@ -31,7 +31,7 @@
 #'     \item{\code{$seed}}{seed value used for random number generator}
 #'     }
 #'
-#' @importFrom dplyr arrange as_tibble mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter mutate rename relocate select summarize tibble
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
@@ -452,12 +452,12 @@ svyMER.svyolr <- function(obj,
       diff_res[[i]] <- expand.grid(
         x2 = 1:nlev,
         x1 = 1:nlev) %>%
-        filter(x2 > x1) %>%
+        dplyr::filter(x2 > x1) %>%
         dplyr::mutate(x = paste0(levs[x2],
                                  " - ",
                                  levs[x1])) %>%
         dplyr::select(-c("x1", "x2")) %>%
-        mutate(
+        dplyr::mutate(
           y = obj$lev[i],
           predicted = colMeans(diff_list[[i]]),
           conf.low = apply(diff_list[[i]], 2, low),
@@ -465,10 +465,10 @@ svyMER.svyolr <- function(obj,
     })
     diffs <- do.call("rbind", diff_res)
     diffs <- diffs %>%
-      mutate(y = factor(y, levels=obj$lev)) %>%
-      relocate(y, .before=1) %>%
-      mutate(type = "Difference") %>%
-      arrange(x)
+      dplyr::mutate(y = factor(y, levels=obj$lev)) %>%
+      dplyr::relocate(y, .before=1) %>%
+      dplyr::mutate(type = "Difference") %>%
+      dplyr::arrange(x)
 
   } else {
 
@@ -557,10 +557,10 @@ svyMER.svyolr <- function(obj,
   preds <- rename(preds, !!sym(varname) := x)
   diffs <- rename(diffs, !!sym(varname) := x)
   output <- list(
-    preds = as_tibble(preds),
-    diffs = as_tibble(diffs),
+    preds = dplyr::as_tibble(preds),
+    diffs = dplyr::as_tibble(diffs),
     seed = seed,
-    typical = as_tibble(fake))
+    typical = dplyr::as_tibble(fake))
   return(output)
 
 }
@@ -595,7 +595,7 @@ svyMER.svyolr <- function(obj,
 #'     \item{\code{$seed}}{seed value used for random number generator}
 #'     }
 #'
-#' @importFrom dplyr arrange as_tibble mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter mutate rename relocate select summarize tibble
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
@@ -881,7 +881,7 @@ svyAME.polr <- function(obj,
 #'     \item{\code{$typical}}{the values at which variables are set for the simulations}
 #'     }
 #'
-#' @importFrom dplyr arrange as_tibble mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter mutate rename relocate select summarize tibble
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym

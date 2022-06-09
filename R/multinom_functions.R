@@ -55,7 +55,7 @@
 #'     \item{\code{$seed}}{seed value used for random number generator}
 #'     }
 #'
-#' @importFrom dplyr arrange as_tibble mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter mutate rename relocate select summarize tibble
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
@@ -211,14 +211,14 @@ svyAME.svrepstatmisc <- function(obj,
       y = levels(droplevels(Yvar)),
       x1 = 1:2,
       x2 = 1:2) %>%
-      filter(x1 < x2) %>%
-      mutate(x = paste0("Delta (", diffchange, ") : ",
+      dplyr::filter(x1 < x2) %>%
+      dplyr::mutate(x = paste0("Delta (", diffchange, ") : ",
                         round(diff_seq[x1], 3),
                         " - ",
                         round(diff_seq[x2], 3))) %>%
       dplyr::select(-c("x1", "x2"))
     diffs <- diffs %>%
-      mutate(
+      dplyr::mutate(
         predicted = colMeans(Pr_diffs),
         conf.low = apply(Pr_diffs, 2, low),
         conf.high = apply(Pr_diffs, 2, high),
@@ -231,8 +231,8 @@ svyAME.svrepstatmisc <- function(obj,
     preds <- rename(preds, !!sym(varname) := x)
     diffs <- rename(diffs, !!sym(varname) := x)
     output <- list(
-      preds = as_tibble(preds),
-      diffs = as_tibble(diffs))
+      preds = dplyr::as_tibble(preds),
+      diffs = dplyr::as_tibble(diffs))
     output
 
   } else {
@@ -305,13 +305,13 @@ svyAME.svrepstatmisc <- function(obj,
       y = levels(droplevels(Yvar)),
       x1 = 1:nlev,
       x2 = 1:nlev) %>%
-      filter(x1 < x2) %>%
-      mutate(x = paste0(levs[x2],
+      dplyr::filter(x1 < x2) %>%
+      dplyr::mutate(x = paste0(levs[x2],
                         " - ",
                         levs[x1])) %>%
       dplyr::select(-c("x1", "x2"))
     diffs <- diffs %>%
-      mutate(
+      dplyr::mutate(
         predicted = colMeans(diff_res),
         conf.low = apply(diff_res, 2, low),
         conf.high = apply(diff_res, 2, high),
@@ -387,7 +387,7 @@ svyAME.svrepstatmisc <- function(obj,
 #'     \item{\code{$typical}}{the values at which variables are set for the simulations}
 #'     }
 #'
-#' @importFrom dplyr arrange as_tibble mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter mutate rename relocate select summarize tibble
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
@@ -506,11 +506,11 @@ svyMER.svrepstatmisc <- function(obj,
 
   preds <- cbind(preds, res_m, res_l, res_u)
   preds <- preds %>%
-    pivot_longer(-x,
+    tidyr::pivot_longer(-x,
                  names_pattern="(.*)_(.*)",
                  names_to=c(".value", "y")) %>%
-    mutate(type = "Probability") %>%
-    relocate(y, .before=1)
+    dplyr::mutate(type = "Probability") %>%
+    dplyr::relocate(y, .before=1)
   preds$y <- factor(preds$y, levels=Ylevs)
 
 
@@ -528,13 +528,13 @@ svyMER.svrepstatmisc <- function(obj,
       y = factor(Ylevs, levels=Ylevs),
       x1 = 1:length(Xlevs),
       x2 = 1:length(Xlevs)) %>%
-      filter(x1 > x2) %>%
-      mutate(x = paste0(Xlevs[x1],
+      dplyr::filter(x1 > x2) %>%
+      dplyr::mutate(x = paste0(Xlevs[x1],
                         " - ",
                         Xlevs[x2])) %>%
       dplyr::select(-c("x1", "x2"))
     diffs <- diffs %>%
-      mutate(
+      dplyr::mutate(
         predicted = colMeans(diff_res),
         conf.low = apply(diff_res, 2, low),
         conf.high = apply(diff_res, 2, high),
@@ -613,9 +613,9 @@ svyMER.svrepstatmisc <- function(obj,
   preds <- rename(preds, !!sym(varname) := x)
   diffs <- rename(diffs, !!sym(varname) := x)
   output <- list(
-    preds = as_tibble(preds),
-    diffs = as_tibble(diffs),
-    typical = as_tibble(fake))
+    preds = dplyr::as_tibble(preds),
+    diffs = dplyr::as_tibble(diffs),
+    typical = dplyr::as_tibble(fake))
   return(output)
 
 }
