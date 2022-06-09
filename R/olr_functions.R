@@ -39,6 +39,9 @@
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
 #' @examples
+#' ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
+#' svyAME(ordmod, varname="educ", weightvar="weight", d)
+#' svyAME(ordmod, varname="market", weightvar="weight", diffchange="range", d)
 #'
 #' @export
 #'
@@ -325,6 +328,9 @@ svyAME.svyolr <- function(obj,
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
 #' @examples
+#' ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
+#' svyMER(ordmod, varname="educ", weightvar="weight", d)
+#' svyMER(ordmod, varname="market", weightvar="weight", diffchange="range", d)
 #'
 #' @export
 #'

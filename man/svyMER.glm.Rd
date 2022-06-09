@@ -54,5 +54,8 @@ Marginal effects at reasonable values for binary dependent-variable models of
 survey-weighted data.
 }
 \examples{
+mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
+svyMER(mod, varname="educ", weightvar="weight")
+svyMER(mod, varname="market", weightvar="weight", diffchange="sd")
 
 }

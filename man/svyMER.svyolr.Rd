@@ -56,5 +56,8 @@ Marginal effects at reasonable values for ordinal dependent-variable models
 ordinal dependent-variable models of survey-weighted data (survey::svyolr).
 }
 \examples{
+ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
+svyMER(ordmod, varname="educ", weightvar="weight", d)
+svyMER(ordmod, varname="market", weightvar="weight", diffchange="range", d)
 
 }

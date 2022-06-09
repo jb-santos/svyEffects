@@ -53,5 +53,8 @@ Average marginal effects (a.k.a. marginal effects at observed values) for
 binary dependent-variable models of survey-weighted data.
 }
 \examples{
+mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
+svyAME(mod, varname="educ", weightvar="weight")
+svyAME(mod, varname="market", weightvar="weight", diffchange="sd")
 
 }

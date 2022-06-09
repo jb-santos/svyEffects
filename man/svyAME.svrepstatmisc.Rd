@@ -56,10 +56,36 @@ A list with dataframes:
 }
 }
 \description{
-Average marginal effects (a.k.a. marginal effects at observed values) for
-multinomial dependent-variable models of survey-weighted data
-(svrepmisc::svrepstatmisc).
+READ THIS FIRST: YOU NEED THE GITHUB PACKAGE \code{svrepmisc} TO USE THIS
+FUNCTION!This function is designed to be used on a multinomial dependent
+variable model of class \code{svrepmisc::svymultinom}) estimated on a survey
+design object of class \code{survey::svrepstatmisc}). Currently, there are no
+multinomial logit \code{R} functions that work on survey-weighted data.
+However, Carl Ganz' \code{svrepmisc} package (available on GitHub,
+https://github.com/carlganz/svrepmisc) uses replicate weights and jackknife
+standard errors to approximate the same end result. (The output with this
+approach is nearly identical to results obtained in Stata using either
+sampling weights (i.e. "pweights") or replicate weights with jackknife
+standard errors.)
+}
+\details{
+To use this function, you use \code{survey::svydesign} to create a survey
+design object with your sampling/design weights. Then, you create
+survey design object with replicate weights. Then, you estimate your
+multinomial logit model on the second survey design object using
+\code{svrepmisc::svymultinom} (see the examples below).
 }
 \examples{
+library(survey)
+remotes::install_github("carlganz/svrepmisc")
+library(svrepmisc)
+ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
+ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
+ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
+votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
+educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
+                        modform = "vote ~ region + educ + relig + market")
+market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
+                          modform = "vote ~ region + educ + relig + market")
 
 }

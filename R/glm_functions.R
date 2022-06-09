@@ -39,6 +39,9 @@
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
 #' @examples
+#' mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
+#' svyAME(mod, varname="educ", weightvar="weight")
+#' svyAME(mod, varname="market", weightvar="weight", diffchange="sd")
 #'
 #' @export
 #'
@@ -242,6 +245,9 @@ svyAME.glm <- function(obj,
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
 #' @examples
+#' mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
+#' svyMER(mod, varname="educ", weightvar="weight")
+#' svyMER(mod, varname="market", weightvar="weight", diffchange="sd")
 #'
 #' @export
 #'
