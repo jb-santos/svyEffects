@@ -930,6 +930,7 @@ svyMER.polr <- function(obj,
 
   # Create fake dataset for simulations
   trms <- attr(terms(obj), "dataClasses")
+  trms <- trms[-length(trms)]   # `polr` class objects have weights in the termlist!
   l <- vector(mode="list", length=length(trms))
   names(l) <- names(trms)
   if(!is.null(varylist)) {   # varying terms
@@ -1053,6 +1054,7 @@ svyMER.polr <- function(obj,
 
     # Create fake dataset for simulations
     trms <- attr(terms(obj), "dataClasses")
+    trms <- trms[-length(trms)]   # `polr` class objects have weights in the termlist!
     l <- vector(mode="list", length=length(trms))
     names(l) <- names(trms)
     if(!is.null(varylist)) {   # varying terms

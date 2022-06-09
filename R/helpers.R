@@ -32,7 +32,7 @@ high <- function(x) {quantile(x, .975)}
 #'
 svymode <- function(x, design, ...) {
   levs <- levels(design$variables[[x]])
-  tab <- svytable(reformulate(x), design)
+  tab <- survey::svytable(reformulate(x), design)
   wmx <- unname(which.max(tab))
   factor(wmx,
          levels=seq_along(levs),
