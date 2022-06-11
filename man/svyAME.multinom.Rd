@@ -55,17 +55,3 @@ A list with dataframes:
 Average marginal effects (a.k.a. marginal effects at observed values) for
 (non-survey) weighted multinomial dependent-variable models (nnet::multinom).
 }
-\examples{
-library(survey)
-remotes::install_github("carlganz/svrepmisc")
-library(svrepmisc)
-ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
-ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
-votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
-educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
-                        modform = "vote ~ region + educ + relig + market")
-market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
-                          modform = "vote ~ region + educ + relig + market")
-
-}

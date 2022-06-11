@@ -38,13 +38,7 @@
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#' ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
-#' svyAME(ordmod, varname="educ", weightvar="weight", d)
-#' svyAME(ordmod, varname="market", weightvar="weight", diffchange="range", d)
-#'
 #' @export
-#'
 svyAME.svyolr <- function(obj,
                           varname,
                           weightvar,
@@ -183,6 +177,9 @@ svyAME.svyolr <- function(obj,
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(model.frame(obj))[1]
     return(output)
 
   } else {
@@ -232,7 +229,7 @@ svyAME.svyolr <- function(obj,
     # Apply weights
     Pr_ul <- unlist(Pr, recursive=FALSE)
     WgtPr <- lapply(1:length(Pr_ul), function(i){
-      apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data$weight))
+      apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
     })
 
     # Assemble table of predicted probabilities
@@ -283,6 +280,9 @@ svyAME.svyolr <- function(obj,
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(model.frame(obj))[1]
     return(output)
 
   }
@@ -328,12 +328,8 @@ svyAME.svyolr <- function(obj,
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
 #' @examples
-#' ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
-#' svyMER(ordmod, varname="educ", weightvar="weight", d)
-#' svyMER(ordmod, varname="market", weightvar="weight", diffchange="range", d)
 #'
 #' @export
-#'
 svyMER.svyolr <- function(obj,
                           varname,
                           weightvar,
@@ -561,6 +557,9 @@ svyMER.svyolr <- function(obj,
     diffs = dplyr::as_tibble(diffs),
     seed = seed,
     typical = dplyr::as_tibble(fake))
+  class(output) <- "svyEffects"
+  attributes(output)$predvar <- varname
+  attributes(output)$depvar <- colnames(obj$model)[1]
   return(output)
 
 }
@@ -602,10 +601,7 @@ svyMER.svyolr <- function(obj,
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#'
 #' @export
-#'
 svyAME.polr <- function(obj,
                         varname,
                         weightvar,
@@ -744,6 +740,9 @@ svyAME.polr <- function(obj,
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(model.frame(obj))[1]
     return(output)
 
   } else {
@@ -793,7 +792,7 @@ svyAME.polr <- function(obj,
     # Apply weights
     Pr_ul <- unlist(Pr, recursive=FALSE)
     WgtPr <- lapply(1:length(Pr_ul), function(i){
-      apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data$weight))
+      apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
     })
 
     # Assemble table of predicted probabilities
@@ -844,6 +843,9 @@ svyAME.polr <- function(obj,
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(model.frame(obj))[1]
     return(output)
 
   }
@@ -888,10 +890,7 @@ svyAME.polr <- function(obj,
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#'
 #' @export
-#'
 svyMER.polr <- function(obj,
                         varname,
                         weightvar,
@@ -1121,6 +1120,9 @@ svyMER.polr <- function(obj,
     diffs = as_tibble(diffs),
     seed = seed,
     typical = as_tibble(fake))
+  class(output) <- "svyEffects"
+  attributes(output)$predvar <- varname
+  attributes(output)$depvar <- colnames(model.frame(obj))[1]
   return(output)
 
 }

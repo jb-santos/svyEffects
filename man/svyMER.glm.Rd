@@ -2,8 +2,7 @@
 % Please edit documentation in R/glm_functions.R
 \name{svyMER.glm}
 \alias{svyMER.glm}
-\title{Marginal effects at reasonable values for binary dependent-variable models of
-survey-weighted data.}
+\title{Marginal effects at reasonable values for survey-weighted GLMs}
 \usage{
 \method{svyMER}{glm}(
   obj,
@@ -50,12 +49,9 @@ A list with dataframes:
 }
 }
 \description{
-Marginal effects at reasonable values for binary dependent-variable models of
-survey-weighted data.
-}
-\examples{
-mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
-svyMER(mod, varname="educ", weightvar="weight")
-svyMER(mod, varname="market", weightvar="weight", diffchange="sd")
-
+Calculates predicted probabilities for an independent variable,
+holding all other observations at reasonable/representative/typical values
+(i.e. for an "average case"). This involves setting all continuous variables
+to their medians and all categorical variables to their modes. Uses
+simulations (the parametric bootstrap) to derive 95\% confidence intervals.
 }

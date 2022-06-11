@@ -2,15 +2,28 @@
 % Please edit documentation in R/generic_functions.R
 \name{svyAME}
 \alias{svyAME}
-\title{S3 generic function for survey-weighted average marginal effects}
+\title{Average marginal effects for binary, ordinal, and multinomial
+dependent variable models of survey-weighted data}
 \usage{
-svyAME(obj, ...)
+svyAME(obj, varname, ...)
 }
 \arguments{
-\item{obj}{Model object on which to conduct post-estimation}
+\item{obj}{A model object. Currently, this package supports models of class
+\code{svyglm} and \code{svyolr} from the \pkg{survey} package, and models of
+class \code{svrepstatmisc} from the \pkg{svrepmisc} package (see note below).
+Models of class \code{glm}, \code{polr} (from \pkg{MASS}), and \code{multinom}
+(from \pkg{nnet}) that specify the \code{weight=} option also work.}
+
+\item{varname}{Character string denoting the name of the predictor variable
+for which effects are to be calculated.}
 
 \item{...}{Other arguments (currently not implemented).}
 }
 \description{
-S3 generic function for survey-weighted average marginal effects
+Calculates predicted probabilities for a predictor holding all
+other observations at observed values (i.e. a true average marginal effect).
+Uses simulations (the parametric bootstrap) to derive 95\% confidence intervals.
+Note: you will need to specify different arguments depending on whether your
+model has a binary, ordinal, or categorical dependent variable, so consult
+the documentation for this function's submethods for more details.
 }

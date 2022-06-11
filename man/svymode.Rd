@@ -14,7 +14,7 @@ svymode(x, design, ...)
 \item{...}{Other arguments (currently not implemented).}
 }
 \value{
-
+A list for input into the svyMER functions.
 }
 \description{
 Find central/average value for all variables (for MERs)

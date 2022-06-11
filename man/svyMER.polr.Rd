@@ -55,6 +55,3 @@ A list with dataframes:
 Marginal effects at reasonable values for ordinal dependent-variable models
 of weighted data (using MASS::polr).
 }
-\examples{
-
-}

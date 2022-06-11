@@ -54,6 +54,3 @@ A list with dataframes:
 Average marginal effects (a.k.a. marginal effects at observed values) for
 ordinal dependent-variable models of survey-weighted data.
 }
-\examples{
-
-}

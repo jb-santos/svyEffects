@@ -2,8 +2,7 @@
 % Please edit documentation in R/glm_functions.R
 \name{svyAME.glm}
 \alias{svyAME.glm}
-\title{Average marginal effects (a.k.a. marginal effects at observed values) for
-binary dependent-variable models of survey-weighted data.}
+\title{Average marginal effects survey-weighted GLMs}
 \usage{
 \method{svyAME}{glm}(
   obj,
@@ -49,12 +48,7 @@ A list with dataframes:
 }
 }
 \description{
-Average marginal effects (a.k.a. marginal effects at observed values) for
-binary dependent-variable models of survey-weighted data.
-}
-\examples{
-mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
-svyAME(mod, varname="educ", weightvar="weight")
-svyAME(mod, varname="market", weightvar="weight", diffchange="sd")
-
+Calculates predicted probabilities for a predictor holding all
+other observations at observed values (i.e. a true average marginal effect).
+Uses simulations (the parametric bootstrap) to derive 95\% confidence intervals.
 }

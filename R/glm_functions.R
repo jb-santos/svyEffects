@@ -5,8 +5,11 @@
 
 
 
-#' Average marginal effects (a.k.a. marginal effects at observed values) for
-#' binary dependent-variable models of survey-weighted data.
+#' @title Average marginal effects survey-weighted GLMs
+#'
+#' @description Calculates predicted probabilities for a predictor holding all
+#' other observations at observed values (i.e. a true average marginal effect).
+#' Uses simulations (the parametric bootstrap) to derive 95% confidence intervals.
 #'
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
@@ -35,16 +38,12 @@
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
+#' @importFrom stats as.formula coef formula model.frame model.matrix na.omit plogis quantile reformulate runif terms vcov weighted.mean
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
-#'
-#' @examples
-#' mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
-#' svyAME(mod, varname="educ", weightvar="weight")
-#' svyAME(mod, varname="market", weightvar="weight", diffchange="sd")
+#' @importFrom utils combn relist
 #'
 #' @export
-#'
 svyAME.glm <- function(obj,
                        varname,
                        weightvar,
@@ -92,8 +91,8 @@ svyAME.glm <- function(obj,
     preds <- tibble(
       x = varname_seq,
       predicted = colMeans(res),
-      conf.low = apply(unname(res), 2, low),
-      conf.high = apply(unname(res), 2, high),
+      conf.low = apply(res, 2, low),
+      conf.high = apply(res, 2, high),
       type = "Probability")
 
     ## Differences in predicted probabilities ----------------------------------
@@ -101,12 +100,14 @@ svyAME.glm <- function(obj,
     diffchange <- match.arg(diffchange)
     tmp0 <- tmp1 <- data
     tmp0[varname] <- switch(diffchange,
+                            NULL = min(data[varname]),
                             range = min(data[varname]),
                             unit = survey::svymean(data[varname], svydata) - .5,
                             sd = survey::svymean(data[varname], svydata) -
                               (sqrt(survey::svyvar(data[varname], svydata))/2)
     )
     tmp1[varname] <- switch(diffchange,
+                            NULL = max(data[varname]),
                             range = max(data[varname]),
                             unit = survey::svymean(data[varname], svydata) + .5,
                             sd = survey::svymean(data[varname], svydata) +
@@ -131,8 +132,8 @@ svyAME.glm <- function(obj,
                  " - ",
                  round(tmp1[[varname]][1], 3)),
       predicted = mean(mean_diff),
-      conf.low = unname(quantile(mean_diff, .025)),
-      conf.high = unname(quantile(mean_diff, .975)),
+      conf.low = quantile(mean_diff, .025),
+      conf.high = quantile(mean_diff, .975),
       type = "Difference")
 
     ## Output ------------------------------------------------------------------
@@ -143,6 +144,9 @@ svyAME.glm <- function(obj,
       preds = preds,
       diffs = diffs,
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(obj$model)[1]
     return(output)
 
   } else {
@@ -201,6 +205,9 @@ svyAME.glm <- function(obj,
       preds = preds,
       diffs = diffs,
       seed = seed)
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- colnames(obj$model)[1]
     return(output)
   }
 }
@@ -210,8 +217,13 @@ svyAME.glm <- function(obj,
 
 
 
-#' Marginal effects at reasonable values for binary dependent-variable models of
-#' survey-weighted data.
+#' @title Marginal effects at reasonable values for survey-weighted GLMs
+#'
+#' @description Calculates predicted probabilities for an independent variable,
+#' holding all other observations at reasonable/representative/typical values
+#' (i.e. for an "average case"). This involves setting all continuous variables
+#' to their medians and all categorical variables to their modes. Uses
+#' simulations (the parametric bootstrap) to derive 95% confidence intervals.
 #'
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
@@ -241,16 +253,12 @@ svyAME.glm <- function(obj,
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
+#' @importFrom stats as.formula coef formula model.frame model.matrix na.omit plogis quantile reformulate runif terms vcov weighted.mean
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
-#'
-#' @examples
-#' mod <- svyglm(votecon ~ agegrp + region + educ + market, design, family=binomial)
-#' svyMER(mod, varname="educ", weightvar="weight")
-#' svyMER(mod, varname="market", weightvar="weight", diffchange="sd")
+#' @importFrom utils combn relist
 #'
 #' @export
-#'
 svyMER.glm <- function(obj,
                        varname,
                        weightvar,
@@ -364,6 +372,7 @@ svyMER.glm <- function(obj,
     ## Differences for continuous variables ------------------------------------
     diffchange <- match.arg(diffchange)
     diffrange <- switch(diffchange,
+                        NULL = c(min(data[[varname]]), max(data[[varname]])),
                         range = c(min(data[[varname]]), max(data[[varname]])),
                         unit = survey::svymean(data[varname], svydata) + c(-.5,.5),
                         sd = survey::svymean(data[varname], svydata) +
@@ -415,6 +424,9 @@ svyMER.glm <- function(obj,
     diffs = diffs,
     seed = seed,
     typical = dplyr::as_tibble(fake))
+  class(output) <- "svyEffects"
+  attributes(output)$predvar <- varname
+  attributes(output)$depvar <- colnames(obj$model)[1]
   return(output)
 
 }

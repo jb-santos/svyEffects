@@ -8,7 +8,7 @@ Maintainer: John Santos <sjsanto27@uwo.ca>
 Description: Calculates marginal effects for limited dependent variable models
   estimated on survey-weighted data using both the "average marginal effects" 
   approach (a.k.a. marginal effects at observed values) and the "marginal effects
-  at reasonable/representative/typical values approach (a.k.a. the effect for
+  at reasonable/representative/typical values"" approach (a.k.a. the effect for
   the "average case"). It uses simulation-based methods (parametric bootstrap) 
   to derive confidence intervals. It is compatible with survey-weighted models 
   of the classes \code{survey::svyglm}, \code{survey::svyolr}, and 
@@ -20,13 +20,17 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     dplyr,
+    ggplot2,
     magrittr,
     MASS,
     rlang,
+    scales,
     stringr,
     survey,
     tidyr
 Suggests: 
-    ggplot2,
     nnet,
     svrepmisc
+Depends: 
+    R (>= 3.0.0)
+LazyData: true

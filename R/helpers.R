@@ -1,4 +1,4 @@
-
+# HELPER FUNCTIONS (not exported)
 
 
 
@@ -8,7 +8,7 @@
 #'
 #' @return
 #'
-low <- function(x) {quantile(x, .025)}
+low <- function(x) {unname(quantile(x, .025))}
 
 
 
@@ -18,7 +18,7 @@ low <- function(x) {quantile(x, .025)}
 #'
 #' @return
 #'
-high <- function(x) {quantile(x, .975)}
+high <- function(x) {unname(quantile(x, .975))}
 
 
 
@@ -28,7 +28,7 @@ high <- function(x) {quantile(x, .975)}
 #' @param design Survey design object.
 #' @param ... Other arguments (currently not implemented).
 #'
-#' @return
+#' @return A list for input into the svyMER functions.
 #'
 svymode <- function(x, design, ...) {
   levs <- levels(design$variables[[x]])
@@ -38,4 +38,3 @@ svymode <- function(x, design, ...) {
          levels=seq_along(levs),
          labels = levs)
 }
-

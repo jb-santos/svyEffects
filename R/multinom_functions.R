@@ -36,8 +36,8 @@
 #' @param design A survey design object with replicate weights of class
 #' \code{survey::svyrep.design}.
 #' @param modform Character string denoting the model formula used of the model.
-# Must be in the format of class \code{modform = "y ~ x"} and match the model's
-# formula exactly.
+#' Must be in the format of class \code{modform = "y ~ x"} and match the model's
+#' formula exactly.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -64,21 +64,7 @@
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#' library(survey)
-#' remotes::install_github("carlganz/svrepmisc")
-#' library(svrepmisc)
-#' ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-#' ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
-#' ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
-#' votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
-#' educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
-#'                         modform = "vote ~ region + educ + relig + market")
-#' market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
-#'                           modform = "vote ~ region + educ + relig + market")
-#'
 #' @export
-#'
 svyAME.svrepstatmisc <- function(obj,
                                  varname,
                                  weightvar,
@@ -234,7 +220,10 @@ svyAME.svrepstatmisc <- function(obj,
     output <- list(
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs))
-    output
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- Yname
+    return(output)
 
   } else {
 
@@ -327,7 +316,10 @@ svyAME.svrepstatmisc <- function(obj,
     output <- list(
       preds = as_tibble(preds),
       diffs = as_tibble(diffs))
-    output
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- Yname
+    return(output)
 
   }
 }
@@ -368,8 +360,8 @@ svyAME.svrepstatmisc <- function(obj,
 #' @param design A survey design object with replicate weights of class
 #' \code{survey::svyrep.design}.
 #' @param modform Character string denoting the model formula used of the model.
-# Must be in the format of class \code{modform = "y ~ x"} and match the model's
-# formula exactly.
+#' Must be in the format of class \code{modform = "y ~ x"} and match the model's
+#' formula exactly.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -397,21 +389,7 @@ svyAME.svrepstatmisc <- function(obj,
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#' library(survey)
-#' remotes::install_github("carlganz/svrepmisc")
-#' library(svrepmisc)
-#' ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-#' ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
-#' ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
-#' votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
-#' educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
-#'                         modform = "vote ~ region + educ + relig + market")
-#' market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
-#'                           modform = "vote ~ region + educ + relig + market")
-#'
 #' @export
-#'
 svyMER.svrepstatmisc <- function(obj,
                                  varname,
                                  weightvar,
@@ -619,6 +597,9 @@ svyMER.svrepstatmisc <- function(obj,
     diffs = dplyr::as_tibble(diffs),
     typical = dplyr::as_tibble(fake)
     )
+  class(output) <- "svyEffects"
+  attributes(output)$predvar <- varname
+  attributes(output)$depvar <- Yname
   return(output)
 
 }
@@ -664,21 +645,7 @@ svyMER.svrepstatmisc <- function(obj,
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#' library(survey)
-#' remotes::install_github("carlganz/svrepmisc")
-#' library(svrepmisc)
-#' ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-#' ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
-#' ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
-#' votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
-#' educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
-#'                         modform = "vote ~ region + educ + relig + market")
-#' market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
-#'                           modform = "vote ~ region + educ + relig + market")
-#'
 #' @export
-#'
 svyAME.multinom <- function(obj,
                             varname,
                             weightvar,
@@ -926,7 +893,10 @@ svyAME.multinom <- function(obj,
     output <- list(
       preds = as_tibble(preds),
       diffs = as_tibble(diffs))
-    output
+    class(output) <- "svyEffects"
+    attributes(output)$predvar <- varname
+    attributes(output)$depvar <- Yname
+    return(output)
 
   }
 }
@@ -974,15 +944,7 @@ svyAME.multinom <- function(obj,
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #'
-#' @examples
-#' ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-#' votemod <- multinom(vote ~ region + educ + relig + market, data=ces19w)
-#' educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", data=ces19w)
-#' market_ame <- svyAME(votemod, varname="market", weightvar="weight",
-#'                      diffchange="range")
-#'
 #' @export
-#'
 svyMER.multinom <- function(obj,
                             varname,
                             weightvar,
@@ -1185,6 +1147,9 @@ svyMER.multinom <- function(obj,
     preds = dplyr::as_tibble(preds),
     diffs = dplyr::as_tibble(diffs),
     typical = dplyr::as_tibble(fake))
+  class(output) <- "svyEffects"
+  attributes(output)$predvar <- varname
+  attributes(output)$depvar <- colnames(obj$model)[1]
   return(output)
 
 }

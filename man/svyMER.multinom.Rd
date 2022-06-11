@@ -56,11 +56,3 @@ A list with dataframes:
 Marginal effects at reasonable values for multinomial dependent-variable
 models of (non-survey) weighted data (nnet::multinom).
 }
-\examples{
-ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-votemod <- multinom(vote ~ region + educ + relig + market, data=ces19w)
-educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", data=ces19w)
-market_ame <- svyAME(votemod, varname="market", weightvar="weight",
-                     diffchange="range")
-
-}

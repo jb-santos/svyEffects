@@ -5,6 +5,7 @@ output: github_document
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
+  echo = TRUE,
   message = FALSE, 
   warning = FALSE,
   collapse = TRUE,
@@ -13,9 +14,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Developer's note
+```{r, echo = FALSE}
+library(tidyverse)
+library(ggplot2)
+```
 
-The primary functions of this package are complete. However, the functions in this GitHub repository are not. As I convert functions from their standalone versions to ones that fit within the overall package framework, they will be added to GitHub and the documentation will be fleshed out.
 
 ## Introduction
 
@@ -23,15 +26,15 @@ The primary functions of this package are complete. However, the functions in th
 
 Primarily, it calculates  predicted probabilities using either:
 
-- the "average marginal effects" approach (also known as "marginal effects at observed values", or "adjusted predictions"); and 
-- the "marginal effects at reasonable/representative/typical values" approach (also known as "marginal effects for the average case"). 
+- the *average marginal effects* approach (also known as *marginal effects at observed values*, or *adjusted predictions*); and 
+- the *marginal effects at reasonable/representative/typical values* approach (also known as *marginal effects for the average case*). 
 
-After calculating predicted probabilities, it will then calculate differences in probabilities (also known as "contrasts" or "first differences") using:
+After calculating predicted probabilities, it will then calculate differences in probabilities (also known as *contrasts*/*pairwise comparisons* for categorical predictors or *first differences* for continuous predictors) using:
 
-- for continuous variables, either a one-unit or one-standard-deviation change centred on the mean, or the change across the entire range of the variable; or
-- for categorical variables, all pairwise differences.
+- for continuous predictors, either the change across the entire range of the variable (by default), or a one-unit or one-standard-deviation change centred on the mean; 
+- for categorical predictors, all pairwise differences.
 
-For both predictions and differences, it uses simulation methods (the parametric bootstrap) to derive confidence intervals.
+For both predictions and differences, it uses simulation methods (the parametric bootstrap) to derive 95% confidence intervals.
 
 It works with the following survey-weighted models or (non-survey) weighted models (i.e. models estimated with the `weight=` option enabled):
 
@@ -45,4 +48,235 @@ It works with the following survey-weighted models or (non-survey) weighted mode
   - `svrepmisc::svymultinom`
   - `nnet::multinom`
 
- 
+A snippet of the 2019 Canadian Election Study online panel sample is included with the package for testing and demonstration purposes.
+
+# Binary dependent variable models
+
+To demonstrate how this function works with binary dependent variables, we'll model voting for the Conservative Party of Canada versus voting for any other party.
+
+```{r}
+data(ces19w)
+ces19w <- ces19w %>% na.omit()
+
+library(survey)
+ces19w_svy <- survey::svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
+                                data = ces19w, digits = 3)
+
+VOTECON <- survey::svyglm(votecon ~ agegrp + educ + region + market, 
+                          design = ces19w_svy, family = binomial)
+summary(VOTECON)
+```
+
+Let's look at the effect of educational attainment (`educ`), a categorical predictor with three levels: high school or less, some post-secondary, and a university degree at the bachelor's level or higher.
+
+The function `svyAME` will return average marginal effects for education, or the effect of a change in education, holding all other variables at observed values. We'll specify a seed value for reproducibility purposes.
+
+The function's output is a list that contains three data frames: 
+
+- `$preds`: predicted probabilities
+- `$diffs`: differences in predicted probabilities
+- `$seed`: the seed value used for the simulations
+
+```{r}
+library(svyEffects)
+VOTECON_educ_ame <- svyEffects::svyAME(VOTECON,
+                                       varname = "educ",
+                                       weightvar = "sampleweight",
+                                       seed = 2019)
+VOTECON_educ_ame$preds
+VOTECON_educ_ame$diffs
+VOTECON_educ_ame$seed
+```
+
+The outputs of this function lend themselves well to plotting using `ggplot2`. As an example, let's plot the predicted probabilities of voting Conservative across changes in education.
+
+```{r}
+library(ggplot2)
+ggplot(VOTECON_educ_ame$preds) +
+  aes(x = educ,
+      y = predicted,
+      ymin = conf.low,
+      ymax = conf.high) +
+  geom_pointrange() +
+  labs(title = "Probability of voting Conservative by education",
+       y = "Predicted probability",
+       x = "Education")
+```
+
+For convenience, `svyEffects` also includes a `plot()` method, which uses the `ggplot2` engine to visualize either predicted probabilities or differences in predicted probabilities.
+
+By default, the predicted probabilities are plotted, as shown below. 
+
+```{r}
+plot(VOTECON_educ_ame)
+```
+
+Note that labelling is minimal on the automatically-generated plots, but you can add your own customization using `ggplot2`'s code conventions.
+
+```{r}
+plot(VOTECON_educ_ame) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "My title",
+       subtitle = "My subtitle",
+       x = "My xvar label",
+       y = "My yvar label",
+       caption = "My caption") +
+  theme_classic()
+```
+
+You can also plot the differences in predicted probabilities by including the option `what = "diffs"` (or simply `"diffs"`) in the `plot()` function call.
+
+```{r}
+plot(VOTECON_educ_ame, "diffs")
+```
+
+Now, let's look at the effect of market liberalism, continuous predictor that ranges from -1 (minimal market liberalism, or the most left position) to +1 (maximal market liberalism, or the most right position).
+
+Note that, because the function returns a first difference for continuous predictors, the graph is not any more illuminating than the summary statistic.
+
+```{r}
+VOTECON_market_ame <- svyAME(VOTECON,
+                             varname = "market",
+                             weightvar = "sampleweight",
+                             seed = 2019)
+VOTECON_market_ame$preds
+VOTECON_market_ame$diffs
+VOTECON_market_ame$seed
+plot(VOTECON_market_ame)
+plot(VOTECON_market_ame, "diffs")
+```
+
+
+# Ordinal dependent variable models
+
+To demonstrate ordinal dependent variables, we'll model feeling thermometer ratings for the leader of the Conservative Party of Canada, which usually ranges from 0 to 100, but, for this example, is collapsed into an ordinal measure of "cold" (0-39), "lukewarm" (40-59), and "hot" (60-100). 
+
+
+```{r}
+data(ces19w)
+ces19w <- ces19w %>% na.omit()
+
+library(survey)
+ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
+                        data = ces19w, digits = 3)
+
+CONLDR <- svyolr(ldr_con_ft ~ agegrp + educ + region + market, 
+                 design = ces19w_svy)
+summary(CONLDR)
+```
+
+Here's the effect of education on feelings towards the Conservative Party leader.
+
+```{r}
+CONLDR_educ_ame <- svyEffects::svyAME(CONLDR,
+                                      varname = "educ",
+                                      weightvar = "sampleweight",
+                                      seed = 2019)
+CONLDR_educ_ame
+plot(CONLDR_educ_ame)
+plot(CONLDR_educ_ame, "diffs")
+```
+
+And, here's the effect of market liberalism.
+
+```{r}
+CONLDR_market_ame <- svyAME(CONLDR,
+                            varname = "market",
+                            weightvar = "sampleweight",
+                            diffchange = "range",
+                            seed = 2019)
+CONLDR_market_ame
+plot(CONLDR_market_ame)
+plot(CONLDR_market_ame, "diffs")
+```
+
+# Multinomial dependent variable models
+
+To demonstrate multinomial dependent variables, we'll model vote choice in the 2019 Canadian Federal Election. To keep things simple, we'll limit our analysis to the three major parties (the Liberals, Conservatives, and New Democrats) and exclude the province of Quebec (which has a different party system and patterns of vote choice).
+
+There is no way to directly estimate a multinomial model with the \code{survey} package in R. The \code{svyrepmisc} generates an approximation by turning the weighting scheme into replicate weights and estimating the model with those. It uses the jackknife to calculate variances.
+
+We'll go through this process step-by-step. First, we'll import the data, do some data cleaning, and then create our usual survey-design object.
+
+```{r}
+data(ces19w)
+ces19w <- ces19w %>%
+  filter(region != "Quebec") %>%
+  filter(vote %in% c("Liberal", "Conservative", "NDP")) %>%
+  mutate(region = droplevels(region),
+         vote = droplevels(vote)) %>% 
+  na.omit()
+
+library(survey)
+ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
+                        data = ces19w, digits = 3)
+```
+
+Now, we'll use the function `as.svrepdesign()` from \code{survey} to turn our sampling weights into replicate weights with variances calculated using the jackknife.
+
+```{r}
+ces19w_svy_r <- as.svrepdesign(ces19w_svy, type="JK1")
+```
+
+
+After our survey design object with replicate weights and jackknife variances is created, we can use the function `svymultinom()` from \code{svyrepmisc} to run our vote choice model. 
+
+Note: use the option `trace = FALSE` in the `svymultinom()` function call to suppress the reporting of each replication (similar to using the option `quietly` in Stata).
+
+Included with \code{svyEffects} the function `mnlSig`, which displays coefficients from multinomial logit models and flags statistically significant ones. `mnlSig` is adapted from Dave Armstrong's original function from his \code{DAMisc} package.
+
+
+```{r}
+# remotes::install_github("carlganz/svrepmisc")
+library(svrepmisc)
+
+VOTE <- svymultinom(vote ~ region + educ + relig + market, 
+                    design = ces19w_svy_r, trace = FALSE)
+mnlSig(VOTE)
+```
+
+For our post-estimation command, we'll need to specify a few more options because `svymultinom` does not store them in it's output. These are:
+
+- `design=`: the survey design object used to estimate the model; and
+- `modform`: the model formula used in the `svymultinom` call.
+
+Here's the effect of education.
+
+```{r}
+VOTE_educ_ame <- svyAME(VOTE,
+                        varname = "educ",
+                        weightvar = "sampleweight",
+                        seed = 2019,
+                        design = ces19w_svy_r,
+                        modform = "vote ~ region + educ + relig + market")
+VOTE_educ_ame
+plot(VOTE_educ_ame)
+plot(VOTE_educ_ame, "diffs")
+```
+
+Here's the effect of market liberalism.
+
+```{r}
+VOTE_market_ame <- svyAME(VOTE,
+                          varname = "market",
+                          weightvar = "sampleweight",
+                          design = ces19w_svy_r,
+                          diffchange = "range",
+                          modform = "vote ~ region + educ + relig + market",
+                          seed = 2019)
+VOTE_market_ame
+plot(VOTE_market_ame)
+plot(VOTE_market_ame, "diffs")
+```
+
+
+
+
+
+
+
+
+
+
+
+

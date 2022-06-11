@@ -29,7 +29,9 @@ for which effects are to be calculated.}
 \item{design}{A survey design object with replicate weights of class
 \code{survey::svyrep.design}.}
 
-\item{modform}{Character string denoting the model formula used of the model.}
+\item{modform}{Character string denoting the model formula used of the model.
+Must be in the format of class \code{modform = "y ~ x"} and match the model's
+formula exactly.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 11).}
@@ -74,18 +76,4 @@ design object with your sampling/design weights. Then, you create
 survey design object with replicate weights. Then, you estimate your
 multinomial logit model on the second survey design object using
 \code{svrepmisc::svymultinom} (see the examples below).
-}
-\examples{
-library(survey)
-remotes::install_github("carlganz/svrepmisc")
-library(svrepmisc)
-ces19w <- load(file("https://quantoid.net/files/9590/ces19w.rda"))
-ces19w_svy <- survey::svydesign(ids=~1, weights=~weight, data=ces19w, digits=3)
-ces19w_svyjk <- as.svrepdesign(ces19w_svy, type="JK1")
-votemod <- svymultinom(vote ~ region + educ + relig + market, design=ces19w_svyjk)
-educ_ame <- svyAME(votemod, varname="educ", weightvar="weight", design=ces19w_svyjk,
-                        modform = "vote ~ region + educ + relig + market")
-market_ame <- svyAME(votemod, varname="market", weightvar="weight", diffchange="range",
-                          modform = "vote ~ region + educ + relig + market")
-
 }

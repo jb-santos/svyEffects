@@ -54,9 +54,3 @@ A list with dataframes:
 Average marginal effects (a.k.a. marginal effects at observed values) for
 ordinal dependent-variable models of survey-weighted data (survey::svyolr).
 }
-\examples{
-ordmod <- svyolr(ord_con ~ agegrp + educ + region + market, d)
-svyAME(ordmod, varname="educ", weightvar="weight", d)
-svyAME(ordmod, varname="market", weightvar="weight", diffchange="range", d)
-
-}
