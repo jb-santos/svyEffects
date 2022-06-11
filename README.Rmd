@@ -22,33 +22,41 @@ library(ggplot2)
 
 ## Introduction
 
-`svyEffects` contains post-estimation functions for GLMs (or limited dependent variable models) estimated on survey-weighted data. 
+An oft-cited reason why `R` is not more widely used in social science research is its disjointed and incomplete set of tools to deal with weighted survey data. `svyEffects` address helps address this problem by providing a suite of post-estimation tool for working with limited dependent variable models (binary, ordinal, and multinomial logit) estimated on survey-weighted data.
 
-Primarily, it calculates  predicted probabilities using either:
+It's main set of functions calculate predicted probabilities using either:
 
-- the *average marginal effects* approach (also known as *marginal effects at observed values*, or *adjusted predictions*); and 
+- the *average marginal effects* approach (also known as *marginal effects at observed values*, or *adjusted predictions*); or 
 - the *marginal effects at reasonable/representative/typical values* approach (also known as *marginal effects for the average case*). 
+
+These approaches are analogous to Stata's commands `margins x` and `margins x, at`, respectively.
 
 After calculating predicted probabilities, it will then calculate differences in probabilities (also known as *contrasts*/*pairwise comparisons* for categorical predictors or *first differences* for continuous predictors) using:
 
-- for continuous predictors, either the change across the entire range of the variable (by default), or a one-unit or one-standard-deviation change centred on the mean; 
+- for continuous predictors, either the change across the entire range of the variable (by default), or a one-unit or one-standard-deviation change centred on the mean; or
 - for categorical predictors, all pairwise differences.
 
 For both predictions and differences, it uses simulation methods (the parametric bootstrap) to derive 95% confidence intervals.
 
 It works with the following survey-weighted models or (non-survey) weighted models (i.e. models estimated with the `weight=` option enabled):
 
-- binary dependent variable models
+- Binary logit models
   - `survey::svyglm`
   - `glm`
-- ordinal dependent variable models
+- Ordinal logit models
   - `MASS::polr`
   - `survey::svyolr`
-- multinomial dependent variable models
+- Multinomial logit models
   - `svrepmisc::svymultinom`
   - `nnet::multinom`
 
 A snippet of the 2019 Canadian Election Study online panel sample is included with the package for testing and demonstration purposes.
+
+# Development history and differences from other packages
+
+This package extends functions originally written by Dave Armstrong in his `DAMisc` package (https://github.com/davidaarmstrong/damisc). 
+
+The reporting functions and naming conventions are inspired by Daniel Ludecke's excellent `ggeffects` package (https://github.com/strengejacke/ggeffects), and current users of `ggeffects` will notice similarities between `svyEffects` and `ggeffects`. However, while `ggeffects` can estimate MER probabilities (what it calls *adjusted predictions*) with `svyglm` objects, it is not compatible with either `svyolr` or `svymultinom` objects. Moreover, `svyEffects` estimates true average marginal effects, which is the estimate of a variable's effect on a given outcome at the population level as opposed to a variable's effect for a hypothetical "average case" that may or may not exist or even be theoretically plausible. (A detailed discussion of the difference is in Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found in the reference section at the end of this readme.)
 
 # Binary dependent variable models
 
@@ -270,11 +278,29 @@ plot(VOTE_market_ame, "diffs")
 ```
 
 
+# Planned features
 
+This package is under active development, and several features will be added, 
+including:
 
+- support for interaction terms (interaction terms in MER probabilities is coming
+in the next major update; interaction in AME probabilities is still under development).
+- support for using an alternative variance-covariance matrix with the `sandwich` 
+package (note: this is only for binary logit models because `sandwich` does not
+play nice with ordinal or multinomial models; that said, survey-weighted models 
+do adjust the variance-covariance matrix, so this is only useful if you really 
+like one adjustment method in particular).
+- more documentation and in-depth comparison to results from Stata.
 
+# References
 
+Hanmer, M.J. and K.O. Kalkan.  2013. "Behind the Curve: Clarifying the Best 
+Approach to Calculating Predicted Probabilities and Marginal Effects from Limited 
+Dependent Variable Models." _American Journal of Political Science_. 57(1): 263-277.
 
+Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter John, 2020, 
+"2019 Canadian Election Study - Online Survey," \href{https://doi.org/10.7910/DVN/DUS88V}, 
+Harvard Dataverse, V1.
 
 
 

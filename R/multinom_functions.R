@@ -526,12 +526,14 @@ svyMER.svrepstatmisc <- function(obj,
     # Differences for continuous variables ------------------------------------
 
     tmp0 <- switch(diffchange,
+                   NULL = min(data[[varname]]),
                    range = min(data[[varname]]),
                    unit = survey::svymean(data[[varname]], svydata) - .5,
                    sd = survey::svymean(data[[varname]], svydata) -
                      (sqrt(survey::svyvar(data[[varname]], svydata))/2)
     )
     tmp1 <- switch(diffchange,
+                   NULL = max(data[[varname]]),
                    range = max(data[[varname]]),
                    unit = survey::svymean(data[[varname]], svydata) + .5,
                    sd = survey::svymean(data[[varname]], svydata) +
@@ -1076,12 +1078,14 @@ svyMER.multinom <- function(obj,
     # Differences for continuous variables ------------------------------------
 
     tmp0 <- switch(diffchange,
+                   NULL = min(data[[varname]]),
                    range = min(data[[varname]]),
                    unit = survey::svymean(data[[varname]], svydata) - .5,
                    sd = survey::svymean(data[[varname]], svydata) -
                      (sqrt(survey::svyvar(data[[varname]], svydata))/2)
     )
     tmp1 <- switch(diffchange,
+                   NULL = max(data[[varname]]),
                    range = max(data[[varname]]),
                    unit = survey::svymean(data[[varname]], svydata) + .5,
                    sd = survey::svymean(data[[varname]], svydata) +
