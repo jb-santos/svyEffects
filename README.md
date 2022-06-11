@@ -5,10 +5,10 @@ svyEffects
 
 An oft-cited reason why `R` is not more widely used in social science
 research is its disjointed and incomplete set of tools to deal with
-weights. `svyEffects` helps address this problem by providing a suite of
-post-estimation tools for working with limited dependent variable models
-(binary, ordinal, and multinomial logit) estimated on survey-weighted
-data.
+weights. `{svyEffects}` helps address this problem by providing a suite
+of post-estimation tools for working with limited dependent variable
+models (binary, ordinal, and multinomial logit) estimated on
+survey-weighted data.
 
 Its main set of functions calculate predicted probabilities using
 either:
@@ -50,41 +50,46 @@ enabled):
 
 Also included in the package are:
 
--   A snippet of the 2019 Canadian Election Study online panel sample
-    for testing and demonstration purposes. This can be loaded with the
+-   A snippet of the 2019 Canadian Election Study online survey for
+    testing and demonstration purposes. This can be loaded with the
     command `data(ces19w)`.
 -   A `plot()` method that creates a `ggplot` object of predicted
     probabilities or differences in predicted probabilities. This plot
     can be modified by adding further `ggplot` commands, which is shown
     below.
 -   A function `mnlSig` that displays a concise summary of multinomial
-    logit coefficients with statistical significance stars. (This has
-    been adapted for use on `svymultinom` objects Dave Armstrong’s
-    original function from `DAMisc` for `multinom` objects.)
+    logit coefficients with statistical significance stars. This has
+    been adapted for use on `svymultinom` objects from Dave Armstrong’s
+    original function from `{DAMisc}`, which works for `multinom`
+    objects.
 
 # Development history and differences from other packages
 
-This package extends functions originally written by Dave Armstrong in
-his `DAMisc` package (<https://github.com/davidaarmstrong/damisc>).
+This package extends functions originally written by Dave Armstrong,
+some of which are in his `{DAMisc}` package
+(<https://github.com/davidaarmstrong/damisc>).
 
 The reporting functions and naming conventions are inspired by Daniel
 Ludecke’s excellent `ggeffects` package
-(<https://github.com/strengejacke/ggeffects>), and current users of
-`ggeffects` will notice similarities between `svyEffects` and
-`ggeffects`. However, while `ggeffects` can estimate MER probabilities
-(what it calls *adjusted predictions*) with `svyglm` objects, it is not
-compatible with either `svyolr` or `svymultinom` objects. Moreover,
-`svyEffects` estimates true average marginal effects, which is the
-estimate of a variable’s effect on a given outcome at the population
-level as opposed to a variable’s effect for a hypothetical “average
-case” that may or may not exist or even be theoretically plausible. (A
-detailed discussion of the difference is in Hanmer and Kalkan 2013,
-*AJPS*, the full citation of which can be found in the reference section
-at the end of this readme.)
+(<https://github.com/strengejacke/ggeffects>). Current users of
+`ggeffects` will notice similarities between `{svyEffects}` and
+`{ggeffects}`. However, while `{ggeffects}` can estimate MER
+probabilities (what it calls *adjusted predictions*) with `svyglm`
+objects, it is not compatible with either `svyolr` or `svymultinom`
+objects. Moreover, `{svyEffects}` estimates true average marginal
+effects, which is the estimate of a variable’s effect on a given outcome
+at the population level as opposed to a variable’s effect for a
+hypothetical “average case” that may or may not exist or even be
+theoretically plausible. (A detailed discussion of the difference is in
+Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found
+in the reference section at the end of this readme.)
 
 Note: because AMEs run simulations on multiple copies of your dataset,
 they can take much more time to calculate than MERs, particularly on
-older computers.
+large datasets or when using an older computer. Those needing quick
+results can calculate MERs (which, in practice *usually* substantively
+similar to AMEs) and then decide from there for which variables they
+want to calculate AMEs.
 
 # Binary dependent variable models
 
@@ -172,8 +177,8 @@ VOTECON_educ_ame$seed
 ```
 
 The outputs of this function lend themselves well to plotting using
-`ggplot2`. As an example, let’s plot the predicted probabilities of
-voting Conservative across changes in education.
+`{ggplot2}`. As an example, let’s plot the predicted probabilities of
+voting Conservative across levels of education.
 
 ``` r
 library(ggplot2)
@@ -190,9 +195,9 @@ ggplot(VOTECON_educ_ame$preds) +
 
 ![](man/figures/unnamed-chunk-5-1.png)<!-- -->
 
-For convenience, `svyEffects` also includes a `plot()` method, which
-uses the `ggplot2` engine to visualize either predicted probabilities or
-differences in predicted probabilities.
+For convenience, `{svyEffects}` also includes a `plot()` method, which
+uses the `{ggplot2}` engine to visualize either predicted probabilities
+or differences in predicted probabilities.
 
 By default, the predicted probabilities are plotted, as shown below.
 
@@ -203,7 +208,7 @@ plot(VOTECON_educ_ame)
 ![](man/figures/unnamed-chunk-6-1.png)<!-- -->
 
 Note that labelling is minimal on the automatically-generated plots, but
-you can add your own customization using `ggplot2`’s code conventions.
+you can add your own customization using `{ggplot2}`’s code conventions.
 
 ``` r
 plot(VOTECON_educ_ame) +
@@ -218,9 +223,9 @@ plot(VOTECON_educ_ame) +
 
 ![](man/figures/unnamed-chunk-7-1.png)<!-- -->
 
-You can also plot the differences in predicted probabilities by
-including the option `what = "diffs"` (or simply `"diffs"`) in the
-`plot()` function call.
+You can also plot the differences in predicted probabilities between
+levels of education by including the option `what = "diffs"` (or simply
+`"diffs"`) in the `plot()` function call.
 
 ``` r
 plot(VOTECON_educ_ame, "diffs")
@@ -228,9 +233,10 @@ plot(VOTECON_educ_ame, "diffs")
 
 ![](man/figures/unnamed-chunk-8-1.png)<!-- -->
 
-Now, let’s look at the effect of market liberalism, continuous predictor
-that ranges from -1 (minimal market liberalism, or the most left
-position) to +1 (maximal market liberalism, or the most right position).
+Now, let’s look at the effect of market liberalism, a continuous
+predictor that ranges from -1 (minimal market liberalism, or the most
+left-wing position) to +1 (maximal market liberalism, or the most
+right-wing position).
 
 Note that, because the function returns a first difference for
 continuous predictors, the graph is not any more illuminating than the
@@ -277,10 +283,10 @@ plot(VOTECON_market_ame, "diffs")
 # Ordinal dependent variable models
 
 To demonstrate ordinal dependent variables, we’ll model feeling
-thermometer ratings for the leader of the Conservative Party of Canada,
-which usually ranges from 0 to 100, but, for this example, is collapsed
-into an ordinal measure of “cold” (0-39), “lukewarm” (40-59), and “hot”
-(60-100).
+thermometer ratings for the leader of the Conservative Party of Canada.
+This variable usually ranges from 0 to 100. But, for this example, we’ll
+collapse into an ordinal measure of “cold” (0-39), “lukewarm” (40-59),
+and “hot” (60-100).
 
 ``` r
 data(ces19w)
@@ -370,7 +376,7 @@ plot(CONLDR_educ_ame, "diffs")
 
 ![](man/figures/unnamed-chunk-11-2.png)<!-- -->
 
-And, here’s the effect of market liberalism.
+Here’s the effect of market liberalism.
 
 ``` r
 CONLDR_market_ame <- svyAME(CONLDR,
@@ -432,9 +438,10 @@ Conservatives, and New Democrats) and exclude the province of Quebec
 (which has a different party system and patterns of vote choice).
 
 There is no way to directly estimate a multinomial model with the
-package in R. The generates an approximation by turning the weighting
-scheme into replicate weights and estimating the model with those. It
-uses the jackknife to calculate variances.
+`{survey}` package in R. The package `{svyrepmisc}` generates an
+approximation by turning the weighting scheme into replicate weights and
+estimating the model with those. It uses the jackknife to calculate
+variances.
 
 We’ll go through this process step-by-step. First, we’ll import the
 data, do some data cleaning, and then create our usual survey-design
@@ -454,26 +461,26 @@ ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight,
                         data = ces19w, digits = 3)
 ```
 
-Now, we’ll use the function `as.svrepdesign()` from to turn our sampling
-weights into replicate weights with variances calculated using the
-jackknife.
+Now, we’ll use the function `as.svrepdesign()` from `{survey}` to turn
+our sampling weights into replicate weights with variances calculated
+using the jackknife.
 
 ``` r
 ces19w_svy_r <- as.svrepdesign(ces19w_svy, type="JK1")
 ```
 
 After our survey design object with replicate weights and jackknife
-variances is created, we can use the function `svymultinom()` from to
-run our vote choice model.
+variances is created, we can use the function `svymultinom()` from
+`{svyrepmisc}` to run our vote choice model.
 
 Note: use the option `trace = FALSE` in the `svymultinom()` function
 call to suppress the reporting of each replication (similar to using the
 option `quietly` in Stata).
 
-Included with the function `mnlSig`, which displays coefficients from
-multinomial logit models and flags statistically significant ones.
-`mnlSig` is adapted from Dave Armstrong’s original function from his
-package.
+Included with `{svyEffects}` the function `mnlSig`, which displays
+coefficients from multinomial logit models and flags statistically
+significant ones. `mnlSig` is adapted from Dave Armstrong’s original
+function from his `{DAMisc}` package.
 
 ``` r
 # remotes::install_github("carlganz/svrepmisc")
@@ -632,5 +639,5 @@ Effects from Limited Dependent Variable Models.” *American Journal of
 Political Science*. 57(1): 263-277.
 
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter
-John, 2020, “2019 Canadian Election Study - Online Survey,” Harvard
-Dataverse, V1.
+John, 2020, “2019 Canadian Election Study - Online Survey,”
+<https://doi.org/10.7910/DVN/DUS88V>, Harvard Dataverse, V1.

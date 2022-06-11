@@ -1,6 +1,6 @@
 #' 2019 Canadian Election Study Snippet
 #'
-#' Data from the 2019 Canadian Election Study, online panel sample.
+#' Data from the 2019 Canadian Election Study Online Survey.
 #'
 #' @docType data
 #'
