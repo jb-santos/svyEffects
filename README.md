@@ -5,12 +5,12 @@ svyEffects
 
 An oft-cited reason why `R` is not more widely used in social science
 research is its disjointed and incomplete set of tools to deal with
-weighted survey data. `svyEffects` address helps address this problem by
-providing a suite of post-estimation tool for working with limited
-dependent variable models (binary, ordinal, and multinomial logit)
-estimated on survey-weighted data.
+weights. `svyEffects` helps address this problem by providing a suite of
+post-estimation tools for working with limited dependent variable models
+(binary, ordinal, and multinomial logit) estimated on survey-weighted
+data.
 
-It’s main set of functions calculate predicted probabilities using
+Its main set of functions calculate predicted probabilities using
 either:
 
 -   the *average marginal effects* approach (also known as *marginal
@@ -26,9 +26,9 @@ differences in probabilities (also known as *contrasts*/*pairwise
 comparisons* for categorical predictors or *first differences* for
 continuous predictors) using:
 
--   for continuous predictors, either the change across the entire range
-    of the variable (by default), or a one-unit or
-    one-standard-deviation change centred on the mean; or
+-   for continuous predictors, the change across the entire range of the
+    variable (by default), or a one-unit or one-standard-deviation
+    change centred on the mean; or
 -   for categorical predictors, all pairwise differences.
 
 For both predictions and differences, it uses simulation methods (the
@@ -48,8 +48,19 @@ enabled):
     -   `svrepmisc::svymultinom`
     -   `nnet::multinom`
 
-A snippet of the 2019 Canadian Election Study online panel sample is
-included with the package for testing and demonstration purposes.
+Also included in the package are:
+
+-   A snippet of the 2019 Canadian Election Study online panel sample
+    for testing and demonstration purposes. This can be loaded with the
+    command `data(ces19w)`.
+-   A `plot()` method that creates a `ggplot` object of predicted
+    probabilities or differences in predicted probabilities. This plot
+    can be modified by adding further `ggplot` commands, which is shown
+    below.
+-   A function `mnlSig` that displays a concise summary of multinomial
+    logit coefficients with statistical significance stars. (This has
+    been adapted for use on `svymultinom` objects Dave Armstrong’s
+    original function from `DAMisc` for `multinom` objects.)
 
 # Development history and differences from other packages
 
@@ -70,6 +81,10 @@ case” that may or may not exist or even be theoretically plausible. (A
 detailed discussion of the difference is in Hanmer and Kalkan 2013,
 *AJPS*, the full citation of which can be found in the reference section
 at the end of this readme.)
+
+Note: because AMEs run simulations on multiple copies of your dataset,
+they can take much more time to calculate than MERs, particularly on
+older computers.
 
 # Binary dependent variable models
 
