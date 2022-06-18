@@ -37,7 +37,7 @@ mnlSig <- function(obj, ...) {UseMethod("mnlSig")}
 #' @return A data frame suitable for printing with the (optionally
 #' significance-flagged) coefficients from a multinomial logit model.
 #'
-#' @author John Santos & Dave Armstrong
+#' @author Dave Armstrong & John Santos
 #'
 #' @export
 mnlSig.svrepstatmisc <- function (obj,

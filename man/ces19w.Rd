@@ -11,7 +11,7 @@ An object of class \code{data.frame}
 data(ces19w)
 }
 \description{
-Data from the 2019 Canadian Election Study, online panel sample.
+Data from the 2019 Canadian Election Study Online Survey.
 }
 \references{
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen,

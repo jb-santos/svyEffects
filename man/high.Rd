@@ -10,7 +10,7 @@ high(x)
 \item{x}{Value for which the 95th percentile should be returned.}
 }
 \value{
-
+A numeric indicating the 97.5\% quantile
 }
 \description{
 Upper 95\% CI quantile

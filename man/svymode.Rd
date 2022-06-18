@@ -19,3 +19,6 @@ A list for input into the svyMER functions.
 \description{
 Find central/average value for all variables (for MERs)
 }
+\author{
+Dave Armstrong
+}

@@ -10,7 +10,7 @@ low(x)
 \item{x}{Value for which the 5th percentile should be returned.}
 }
 \value{
-
+A numeric indicating the 2.5\% quantile
 }
 \description{
 Lower 95\% CI quantile

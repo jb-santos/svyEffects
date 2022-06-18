@@ -38,5 +38,5 @@ significance-flagged) coefficients from a multinomial logit model.
 mnlSig method for \code{svrepstatmisc} objects
 }
 \author{
-John Santos & Dave Armstrong
+Dave Armstrong & John Santos
 }

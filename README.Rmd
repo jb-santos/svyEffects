@@ -60,7 +60,7 @@ Also included in the package are:
 
 This package extends functions originally written by Dave Armstrong, some of which are in his `{DAMisc}` package (https://github.com/davidaarmstrong/damisc). 
 
-The reporting functions and naming conventions are inspired by Daniel Ludecke's excellent `ggeffects` package (https://github.com/strengejacke/ggeffects). Current users of `ggeffects` will notice similarities between `{svyEffects}` and `{ggeffects}`. However, while `{ggeffects}` can estimate MER probabilities (what it calls *adjusted predictions*) with `svyglm` objects, it is not compatible with either `svyolr` or `svymultinom` objects. Moreover, `{svyEffects}` estimates true average marginal effects, which is the estimate of a variable's effect on a given outcome at the population level as opposed to a variable's effect for a hypothetical "average case" that may or may not exist or even be theoretically plausible. (A detailed discussion of the difference is in Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found in the reference section at the end of this readme.)
+The reporting functions and naming conventions are inspired by Daniel Ludecke's excellent `{ggeffects}` package (https://github.com/strengejacke/ggeffects). Current users of `ggeffects` will notice similarities between `{svyEffects}` and `{ggeffects}`. However, while `{ggeffects}` can estimate MER probabilities (what it calls *adjusted predictions*) with `svyglm` objects, it is not compatible with either `svyolr` or `svymultinom` objects. Moreover, `{svyEffects}` estimates true average marginal effects, which is the estimate of a variable's effect on a given outcome at the population level as opposed to a variable's effect for a hypothetical "average case" that may or may not exist or even be theoretically plausible. (A detailed discussion of the difference is in Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found in the reference section at the end of this readme.)
 
 Note: because AMEs run simulations on multiple copies of your dataset, they can take much more time to calculate than MERs, particularly on large datasets or when using an older computer. Those needing quick results can calculate MERs (which, in practice *usually* substantively similar to AMEs) and then decide from there for which variables they want to calculate AMEs. 
 
@@ -70,7 +70,6 @@ To demonstrate how this function works with binary dependent variables, we'll mo
 
 ```{r}
 data(ces19w)
-ces19w <- ces19w %>% na.omit()
 
 library(survey)
 ces19w_svy <- survey::svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
@@ -160,7 +159,6 @@ plot(VOTECON_market_ame)
 plot(VOTECON_market_ame, "diffs")
 ```
 
-
 # Ordinal dependent variable models
 
 To demonstrate ordinal dependent variables, we'll model feeling thermometer ratings for the leader of the Conservative Party of Canada. This variable usually ranges from 0 to 100. But, for this example, we'll collapse into an ordinal measure of "cold" (0-39), "lukewarm" (40-59), and "hot" (60-100). 
@@ -168,7 +166,7 @@ To demonstrate ordinal dependent variables, we'll model feeling thermometer rati
 
 ```{r}
 data(ces19w)
-ces19w <- ces19w %>% na.omit()
+ces19w <- ces19w
 
 library(survey)
 ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
@@ -182,11 +180,12 @@ summary(CONLDR)
 Here's the effect of education on feelings towards the Conservative Party leader.
 
 ```{r}
-CONLDR_educ_ame <- svyEffects::svyAME(CONLDR,
-                                      varname = "educ",
-                                      weightvar = "sampleweight",
-                                      seed = 2019)
-CONLDR_educ_ame
+CONLDR_educ_ame <- svyAME(CONLDR,
+                          varname = "educ",
+                          weightvar = "sampleweight",
+                          seed = 2019)
+CONLDR_educ_ame$preds
+CONLDR_educ_ame$diffs
 plot(CONLDR_educ_ame)
 plot(CONLDR_educ_ame, "diffs")
 ```
@@ -199,9 +198,23 @@ CONLDR_market_ame <- svyAME(CONLDR,
                             weightvar = "sampleweight",
                             diffchange = "range",
                             seed = 2019)
-CONLDR_market_ame
+CONLDR_market_ame$preds
+CONLDR_market_ame$diffs
 plot(CONLDR_market_ame)
 plot(CONLDR_market_ame, "diffs")
+```
+
+For ordinal and multinomial probabilities, the plot method follows the conventions used by the `{ggeffects}` package (i.e. facetting by response level). But, you can re-create the `Stata` default of colour-coding the response level, you can do this by writing your own `ggplot` command, as shown below.
+
+```{r}
+ggplot(CONLDR_market_ame$preds) +
+  aes(x = market, y = predicted, ymin = conf.low, ymax = conf.high, colour = y, fill = y) +
+  geom_line() +
+  geom_ribbon(colour = "transparent", alpha = 0.2) +
+  labs(title = "Effect of market liberalism on Conservative leader ratings",
+       x = "Market liberalism (least to most)",
+       y = "Predicted probability") +
+  theme_bw()
 ```
 
 # Multinomial dependent variable models
@@ -218,8 +231,7 @@ ces19w <- ces19w %>%
   filter(region != "Quebec") %>%
   filter(vote %in% c("Liberal", "Conservative", "NDP")) %>%
   mutate(region = droplevels(region),
-         vote = droplevels(vote)) %>% 
-  na.omit()
+         vote = droplevels(vote)) 
 
 library(survey)
 ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
@@ -229,11 +241,11 @@ ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight,
 Now, we'll use the function `as.svrepdesign()` from `{survey}` to turn our sampling weights into replicate weights with variances calculated using the jackknife.
 
 ```{r}
-ces19w_svy_r <- as.svrepdesign(ces19w_svy, type="JK1")
+ces19w_svy_r <- as.svrepdesign(ces19w_svy, type = "JK1")
 ```
 
 
-After our survey design object with replicate weights and jackknife variances is created, we can use the function `svymultinom()` from `{svyrepmisc}` to run our vote choice model. 
+After our survey design object with replicate weights and jackknife variances is created, we can use the function `svymultinom` from `{svyrepmisc}` to run our vote choice model. 
 
 Note: use the option `trace = FALSE` in the `svymultinom()` function call to suppress the reporting of each replication (similar to using the option `quietly` in Stata).
 
@@ -251,8 +263,8 @@ mnlSig(VOTE)
 
 For our post-estimation command, we'll need to specify a few more options because `svymultinom` does not store them in it's output. These are:
 
-- `design=`: the survey design object used to estimate the model; and
-- `modform`: the model formula used in the `svymultinom` call.
+- `design = `: the survey design object used to estimate the model; and
+- `modform = `: the model formula used in the `svymultinom` call.
 
 Here's the effect of education.
 
@@ -263,7 +275,8 @@ VOTE_educ_ame <- svyAME(VOTE,
                         seed = 2019,
                         design = ces19w_svy_r,
                         modform = "vote ~ region + educ + relig + market")
-VOTE_educ_ame
+VOTE_educ_ame$preds
+VOTE_educ_ame$diffs
 plot(VOTE_educ_ame)
 plot(VOTE_educ_ame, "diffs")
 ```
@@ -278,7 +291,8 @@ VOTE_market_ame <- svyAME(VOTE,
                           diffchange = "range",
                           modform = "vote ~ region + educ + relig + market",
                           seed = 2019)
-VOTE_market_ame
+VOTE_market_ame$preds
+VOTE_market_ame$diffs
 plot(VOTE_market_ame)
 plot(VOTE_market_ame, "diffs")
 ```
@@ -307,8 +321,4 @@ Dependent Variable Models." _American Journal of Political Science_. 57(1): 263-
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter John, 2020, 
 "2019 Canadian Election Study - Online Survey," https://doi.org/10.7910/DVN/DUS88V, 
 Harvard Dataverse, V1.
-
-
-
-
 

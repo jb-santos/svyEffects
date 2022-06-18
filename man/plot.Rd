@@ -25,3 +25,6 @@ Uses the \pkg{ggplot2} engine to visualize the predicted
 probabilities or differences in predicted probabilities calculated by
 \pkg{svyEffects}.
 }
+\author{
+John Santos
+}

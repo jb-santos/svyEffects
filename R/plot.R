@@ -17,16 +17,23 @@
 #' @importFrom rlang sym
 #'
 #' @return An object of class \code{ggplot}
+#'
+#' @author John Santos
+#'
 #' @export
 #'
 plot.svyEffects <- function(x,
                             what = c("preds", "diffs"),
                             ...) {
 
-  #---------- Setup ------------------------------------------------------------
+  # Setup ----------------------------------------------------------------------
 
   predvar <- attr(x, "predvar")
   depvar <- attr(x, "depvar")
+
+  if(!is.null(attr(x, "byvar"))) {
+    byvar <- attr(x, "byvar")
+  }
 
   plotwhat <- match.arg(what)
   plotwhat <- switch(plotwhat,
@@ -34,7 +41,7 @@ plot.svyEffects <- function(x,
                      "preds" = "preds",
                      "diffs" = "diffs")
 
-  #---------- Main plot command ------------------------------------------------
+  # Main plot command ----------------------------------------------------------
 
   p <-
     ggplot(x[[plotwhat]]) +
@@ -46,22 +53,17 @@ plot.svyEffects <- function(x,
          y = paste0("Probability of ", depvar)) +
     theme_bw()
 
-  #---------- Add geoms by variable type ---------------------------------------
+  ## If plotting ordinal/multinomial models ------------------------------------
 
-  if(is.factor(x$preds[[predvar]])) {
+  if("y" %in% colnames(x$preds)) {
+
+
     p <-
       p +
-      geom_pointrange()
+      facet_wrap(~y)
   }
 
-  if(is.numeric(x$preds[[predvar]])) {
-    p <-
-      p +
-      geom_line() +
-      geom_ribbon(colour="transparent", alpha=.2)
-  }
-
-  #---------- If plotting differences ------------------------------------------
+  # If plotting DIFFS ----------------------------------------------------------
 
   if(plotwhat=="diffs") {
     p <-
@@ -73,15 +75,52 @@ plot.svyEffects <- function(x,
       coord_flip()
   }
 
-  #---------- If plotting ordinal/multinomial models
+  # If plotting PREDS ----------------------------------------------------------
 
-  if("y" %in% colnames(x$preds)) {
-    p <-
-      p +
-      facet_wrap(~y)
+  if(plotwhat=="preds") {
+
+    ## Univariate model geoms --------------------------------------------------
+
+    if(is.null(attr(x, "byvar"))) {
+
+      if(is.factor(x$preds[[predvar]])) {
+        p <-
+          p +
+          geom_pointrange()
+      }
+
+      if(is.numeric(x$preds[[predvar]])) {
+        p <-
+          p +
+          geom_line() +
+          geom_ribbon(colour="transparent", alpha=.2)
+      }
+
+    }
+
+    ## Interactive model geoms -------------------------------------------------
+
+    if(!is.null(attr(x, "byvar"))) {
+
+      if(is.factor(x$preds[[predvar]])) {
+        p <-
+          p +
+          geom_pointrange(position = position_dodge2(.35)) +
+          aes(colour = !!sym(byvar))
+      }
+
+      if(is.numeric(x$preds[[predvar]])) {
+        p <-
+          p +
+          aes(colour = !!sym(byvar), fill = !!sym(byvar)) +
+          geom_line() +
+          geom_ribbon(colour="transparent", alpha=.2)
+      }
+    }
+
   }
 
-  #---------- Output -----------------------------------------------------------
+  # Output ---------------------------------------------------------------------
 
   return(p)
 
