@@ -61,22 +61,22 @@ mnlSig.svrepstatmisc <- function (obj,
 
   b <- as.data.frame(obj)$Coefficient
   se <- as.data.frame(obj)$SE
-  t = b / se
-  p = (2^as.numeric(two.sided)) * pnorm(abs(t), lower.tail = FALSE)
+  t  =  b / se
+  p  =  (2^as.numeric(two.sided)) * pnorm(abs(t), lower.tail  =  FALSE)
   nYlev <- length(grep("(Intercept)",  rownames(as.data.frame(obj))))
   nterms <- nrow(as.data.frame(obj)) / nYlev
   termnames <- unlist(stringr::str_split(
-    names(obj)[seq.int(from=1, to=length(b), by=nYlev)],
-    fixed("."))) [seq.int(from=2, to=((length(b)/nYlev)*2), by=2)]
-  Ylevnames <- unlist(stringr:str_split(
-    names(obj)[seq.int(from=1, to=nYlev)],
-    fixed("."))) [seq.int(from=1, to=(nYlev*2), by=2)]
+    names(obj)[seq.int(from = 1, to = length(b), by = nYlev)],
+    fixed("."))) [seq.int(from = 2, to = ((length(b) / nYlev) * 2), by = 2)]
+  Ylevnames <- unlist(stringr::str_split(
+    names(obj)[seq.int(from = 1, to = nYlev)],
+    fixed("."))) [seq.int(from = 1, to = (nYlev * 2), by = 2)]
 
-  b_mat <- matrix(sprintf("%.3f", b), ncol=nterms)
+  b_mat <- matrix(sprintf("%.3f", b), ncol = nterms)
   sig.vec <- c(" ", "*")
   sig.obs <- as.numeric(p < pval) + 1
   if (flag.sig) {
-    b_mat <- matrix(paste(b_mat, sig.vec[sig.obs], sep = ""), ncol=nterms)
+    b_mat <- matrix(paste(b_mat, sig.vec[sig.obs], sep = ""), ncol = nterms)
   }
   if (insig.blank) {
     b_mat[which(p > pval, arr.ind = TRUE)] <- ""
