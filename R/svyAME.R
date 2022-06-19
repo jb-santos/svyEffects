@@ -63,7 +63,7 @@
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
 #' @importFrom stats as.formula coef formula model.frame model.matrix na.omit plogis pnorm quantile reformulate runif terms vcov weighted.mean
-#' @importFrom stringr boundary str_extract_all
+#' @importFrom stringr boundary str_extract_all str_split
 #' @importFrom survey svydesign svymean svyquantile svytable
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom utils combn relist

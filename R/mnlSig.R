@@ -1,10 +1,9 @@
 #' @title Print Statistically Significant MNL Coefficients
 #'
-#' @description This is an adaptation of Dave Armstrong's original \code{mnlsig}
-#' function. By default, the summary for objects of class \code{multinom} is not
-#' particularly helpful. It still requires a lot of work on the part of the
+#' @description By default, the summary for objects of class \code{multinom} is not
+#' particularly helpful.  It still requires a lot of work on the part of the
 #' user to figure out which coefficients are significantly different from zero
-#' and which ones are not. \code{mnlSig} solves this problem by either
+#' and which ones are not.  \code{mnlSig} solves this problem by either
 #' flagging significant coefficients with an asterisk or only printing
 #' significant coefficients, leaving insignificant ones blank.
 #'
@@ -23,6 +22,17 @@ mnlSig <- function(obj, ...) {UseMethod("mnlSig")}
 
 #' @title mnlSig method for \code{svrepstatmisc} objects
 #'
+#' @description This is an adaptation of Dave Armstrong's original \code{mnlsig}
+#' function that has been adapted for survey-weight multinomial logit model
+#' objects of class \code{svrepstatmisc}.
+#'
+#' Original description from \code{DAMisc}: By default, the summary for objects
+#' of class \code{multinom} is not particularly helpful. It still requires a lot
+#' of work on the part of the user to figure out which coefficients are
+#' significantly different from zero and which ones are not. \code{mnlSig} solves
+#' this problem by either flagging significant coefficients with an asterisk or
+#' only printing significant coefficients, leaving insignificant ones blank.
+#'
 #' @param obj A model object of class \code{svrepstatmisc}.
 #' @param pval The desired Type I error rate to identify coefficients as
 #' statistically significant.
@@ -39,6 +49,8 @@ mnlSig <- function(obj, ...) {UseMethod("mnlSig")}
 #'
 #' @author Dave Armstrong & John Santos
 #'
+#' @importFrom stringr boundary str_extract_all str_split
+#'
 #' @export
 mnlSig.svrepstatmisc <- function (obj,
                                   pval = 0.05,
@@ -53,11 +65,11 @@ mnlSig.svrepstatmisc <- function (obj,
   p = (2^as.numeric(two.sided)) * pnorm(abs(t), lower.tail = FALSE)
   nYlev <- length(grep("(Intercept)",  rownames(as.data.frame(obj))))
   nterms <- nrow(as.data.frame(obj)) / nYlev
-  termnames <- unlist(str_split(
-    names(VOTE)[seq.int(from=1, to=length(b), by=nYlev)],
+  termnames <- unlist(stringr::str_split(
+    names(obj)[seq.int(from=1, to=length(b), by=nYlev)],
     fixed("."))) [seq.int(from=2, to=((length(b)/nYlev)*2), by=2)]
-  Ylevnames <- unlist(str_split(
-    names(VOTE)[seq.int(from=1, to=nYlev)],
+  Ylevnames <- unlist(stringr:str_split(
+    names(obj)[seq.int(from=1, to=nYlev)],
     fixed("."))) [seq.int(from=1, to=(nYlev*2), by=2)]
 
   b_mat <- matrix(sprintf("%.3f", b), ncol=nterms)

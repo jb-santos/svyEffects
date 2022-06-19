@@ -31,5 +31,5 @@ Suggests:
     nnet,
     svrepmisc
 Depends: 
-    R (>= 3.0.0)
+    R (>= 3.5.0)
 LazyData: true

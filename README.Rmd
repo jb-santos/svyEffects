@@ -56,6 +56,10 @@ Also included in the package are:
 - A `plot()` method that creates a `ggplot` object of predicted probabilities or differences in predicted probabilities. This plot can be modified by adding further `ggplot` commands, which is shown below.
 - A function `mnlSig` that displays a concise summary of multinomial logit coefficients with statistical significance stars. This has been adapted for use on `svymultinom` objects from Dave Armstrong's original function from `{DAMisc}`, which works for `multinom` objects.
 
+
+--------------------------------------------------------------------------------
+
+
 # Development history and differences from other packages
 
 This package extends functions originally written by Dave Armstrong, some of which are in his `{DAMisc}` package (https://github.com/davidaarmstrong/damisc). 
@@ -63,6 +67,10 @@ This package extends functions originally written by Dave Armstrong, some of whi
 The reporting functions and naming conventions are inspired by Daniel Ludecke's excellent `{ggeffects}` package (https://github.com/strengejacke/ggeffects). Current users of `ggeffects` will notice similarities between `{svyEffects}` and `{ggeffects}`. However, while `{ggeffects}` can estimate MER probabilities (what it calls *adjusted predictions*) with `svyglm` objects, it is not compatible with either `svyolr` or `svymultinom` objects. Moreover, `{svyEffects}` estimates true average marginal effects, which is the estimate of a variable's effect on a given outcome at the population level as opposed to a variable's effect for a hypothetical "average case" that may or may not exist or even be theoretically plausible. (A detailed discussion of the difference is in Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found in the reference section at the end of this readme.)
 
 Note: because AMEs run simulations on multiple copies of your dataset, they can take much more time to calculate than MERs, particularly on large datasets or when using an older computer. Those needing quick results can calculate MERs (which, in practice *usually* substantively similar to AMEs) and then decide from there for which variables they want to calculate AMEs. 
+
+
+--------------------------------------------------------------------------------
+
 
 # Binary dependent variable models
 
@@ -159,9 +167,13 @@ plot(VOTECON_market_ame)
 plot(VOTECON_market_ame, "diffs")
 ```
 
+
+--------------------------------------------------------------------------------
+
+
 # Ordinal dependent variable models
 
-To demonstrate ordinal dependent variables, we'll model feeling thermometer ratings for the leader of the Conservative Party of Canada. This variable usually ranges from 0 to 100. But, for this example, we'll collapse into an ordinal measure of "cold" (0-39), "lukewarm" (40-59), and "hot" (60-100). 
+To demonstrate ordinal dependent variables, we'll model feeling thermometer ratings for the leader of the Conservative Party of Canada. This variable usually ranges from 0 to 100. But, for this example, we'll used a binned ordinal measure of "cold" (0-39), "lukewarm" (40-59), and "hot" (60-100). 
 
 
 ```{r}
@@ -204,7 +216,7 @@ plot(CONLDR_market_ame)
 plot(CONLDR_market_ame, "diffs")
 ```
 
-For ordinal and multinomial probabilities, the plot method follows the conventions used by the `{ggeffects}` package (i.e. facetting by response level). But, you can re-create the `Stata` default of colour-coding the response level, you can do this by writing your own `ggplot` command, as shown below.
+For ordinal and multinomial probabilities, the plot method follows the conventions used by the `{ggeffects}` package (i.e. facetting by response level). But, you can re-create the `Stata` default of colour-coding the response level, by writing your own `ggplot` command, as shown below.
 
 ```{r}
 ggplot(CONLDR_market_ame$preds) +
@@ -213,9 +225,14 @@ ggplot(CONLDR_market_ame$preds) +
   geom_ribbon(colour = "transparent", alpha = 0.2) +
   labs(title = "Effect of market liberalism on Conservative leader ratings",
        x = "Market liberalism (least to most)",
-       y = "Predicted probability") +
+       y = "Predicted probability",
+       fill = "Rating",
+       colour = "Rating") +
   theme_bw()
 ```
+
+--------------------------------------------------------------------------------
+
 
 # Multinomial dependent variable models
 
@@ -298,6 +315,9 @@ plot(VOTE_market_ame, "diffs")
 ```
 
 
+--------------------------------------------------------------------------------
+
+
 # Planned features
 
 This package is under active development, and several features will be added, 
@@ -311,6 +331,10 @@ play nice with ordinal or multinomial models; that said, survey-weighted models
 do adjust the variance-covariance matrix, so this is only useful if you really 
 like one adjustment method in particular).
 - more documentation and in-depth comparison to results from Stata.
+
+
+--------------------------------------------------------------------------------
+
 
 # References
 

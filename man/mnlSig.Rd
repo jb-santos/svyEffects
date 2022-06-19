@@ -12,11 +12,10 @@ mnlSig(obj, ...)
 \item{...}{Other arguments (not currently implemented).}
 }
 \description{
-This is an adaptation of Dave Armstrong's original \code{mnlsig}
-function. By default, the summary for objects of class \code{multinom} is not
-particularly helpful. It still requires a lot of work on the part of the
+By default, the summary for objects of class \code{multinom} is not
+particularly helpful.  It still requires a lot of work on the part of the
 user to figure out which coefficients are significantly different from zero
-and which ones are not. \code{mnlSig} solves this problem by either
+and which ones are not.  \code{mnlSig} solves this problem by either
 flagging significant coefficients with an asterisk or only printing
 significant coefficients, leaving insignificant ones blank.
 }
