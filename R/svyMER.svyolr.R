@@ -49,7 +49,7 @@ svyMER.svyolr <- function(obj,
                           diffchange = c("range", "unit", "sd"),
                           byvar = NULL,
                           bynvals = 3,
-                          sims = 1500,
+                          sims = 2500,
                           seed = NULL,
                           ...) {
 
