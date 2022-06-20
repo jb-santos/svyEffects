@@ -63,6 +63,8 @@ Also included in the package are:
     original function from `{DAMisc}`, which works for `multinom`
     objects.
 
+------------------------------------------------------------------------
+
 # Development history and differences from other packages
 
 This package extends functions originally written by Dave Armstrong,
@@ -90,6 +92,8 @@ large datasets or when using an older computer. Those needing quick
 results can calculate MERs (which, in practice *usually* substantively
 similar to AMEs) and then decide from there for which variables they
 want to calculate AMEs.
+
+------------------------------------------------------------------------
 
 # Binary dependent variable models
 
@@ -277,15 +281,17 @@ plot(VOTECON_market_ame)
 plot(VOTECON_market_ame, "diffs")
 ```
 
-![](man/figures/unnamed-chunk-9-2.png)<!-- -->
+![](man/figures/unnamed-chunk-10-1.png)<!-- -->
+
+------------------------------------------------------------------------
 
 # Ordinal dependent variable models
 
 To demonstrate ordinal dependent variables, we’ll model feeling
 thermometer ratings for the leader of the Conservative Party of Canada.
 This variable usually ranges from 0 to 100. But, for this example, we’ll
-collapse into an ordinal measure of “cold” (0-39), “lukewarm” (40-59),
-and “hot” (60-100).
+used a binned ordinal measure of “cold” (0-39), “lukewarm” (40-59), and
+“hot” (60-100).
 
 ``` r
 data(ces19w)
@@ -356,13 +362,13 @@ CONLDR_educ_ame$diffs
 plot(CONLDR_educ_ame)
 ```
 
-![](man/figures/unnamed-chunk-11-1.png)<!-- -->
+![](man/figures/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 plot(CONLDR_educ_ame, "diffs")
 ```
 
-![](man/figures/unnamed-chunk-11-2.png)<!-- -->
+![](man/figures/unnamed-chunk-13-1.png)<!-- -->
 
 Here’s the effect of market liberalism.
 
@@ -397,19 +403,19 @@ CONLDR_market_ame$diffs
 plot(CONLDR_market_ame)
 ```
 
-![](man/figures/unnamed-chunk-12-1.png)<!-- -->
+![](man/figures/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 plot(CONLDR_market_ame, "diffs")
 ```
 
-![](man/figures/unnamed-chunk-12-2.png)<!-- -->
+![](man/figures/unnamed-chunk-15-1.png)<!-- -->
 
 For ordinal and multinomial probabilities, the plot method follows the
 conventions used by the `{ggeffects}` package (i.e. facetting by
 response level). But, you can re-create the `Stata` default of
-colour-coding the response level, you can do this by writing your own
-`ggplot` command, as shown below.
+colour-coding the response level by writing your own `ggplot` command,
+as shown below.
 
 ``` r
 ggplot(CONLDR_market_ame$preds) +
@@ -418,11 +424,15 @@ ggplot(CONLDR_market_ame$preds) +
   geom_ribbon(colour = "transparent", alpha = 0.2) +
   labs(title = "Effect of market liberalism on Conservative leader ratings",
        x = "Market liberalism (least to most)",
-       y = "Predicted probability") +
+       y = "Predicted probability",
+       fill = "Rating",
+       colour = "Rating") +
   theme_bw()
 ```
 
-![](man/figures/unnamed-chunk-13-1.png)<!-- -->
+![](man/figures/unnamed-chunk-16-1.png)<!-- -->
+
+------------------------------------------------------------------------
 
 # Multinomial dependent variable models
 
@@ -496,11 +506,12 @@ mnlSig(VOTE)
 ```
 
 For our post-estimation command, we’ll need to specify a few more
-options because `svymultinom` does not store them in it’s output. These
+options because `svymultinom` does not store them in its output. These
 are:
 
--   `design =`: the survey design object used to estimate the model; and
--   `modform =`: the model formula used in the `svymultinom` call.
+-   `design`: the survey design object used to estimate the model; and
+-   `modform`: the model formula used in the `svymultinom` call (in the
+    form `modform = "y ~ x1 + x2 + x3"`).
 
 Here’s the effect of education.
 
@@ -540,13 +551,13 @@ VOTE_educ_ame$diffs
 plot(VOTE_educ_ame)
 ```
 
-![](man/figures/unnamed-chunk-17-1.png)<!-- -->
+![](man/figures/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
 plot(VOTE_educ_ame, "diffs")
 ```
 
-![](man/figures/unnamed-chunk-17-2.png)<!-- -->
+![](man/figures/unnamed-chunk-21-1.png)<!-- -->
 
 Here’s the effect of market liberalism.
 
@@ -583,29 +594,84 @@ VOTE_market_ame$diffs
 plot(VOTE_market_ame)
 ```
 
-![](man/figures/unnamed-chunk-18-1.png)<!-- -->
+![](man/figures/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 plot(VOTE_market_ame, "diffs")
 ```
 
-![](man/figures/unnamed-chunk-18-2.png)<!-- -->
+![](man/figures/unnamed-chunk-23-1.png)<!-- -->
 
-# Planned features
+------------------------------------------------------------------------
 
-This package is under active development, and several features will be
-added, including:
+# Marginal effects at reasonable values
 
--   support for interaction terms (interaction terms in MER
-    probabilities is coming in the next major update; interaction in AME
-    probabilities is still under development).
--   support for using an alternative variance-covariance matrix with the
-    `sandwich` package (note: this is only for binary logit models
-    because `sandwich` does not play nice with ordinal or multinomial
-    models; that said, survey-weighted models do adjust the
-    variance-covariance matrix, so this is only useful if you really
-    like one adjustment method in particular).
--   more documentation and in-depth comparison to results from Stata.
+*(documentation in progress)*
+
+You can choose to calculate marginal effects at reasonable values (MER)
+probabilities and differences by using the `svyMER` function, which
+follows the same arguments as `svyAME`. This command would give you the
+estimated effect of a variable “for the ‘typical’ case” (which may or
+may not be typical, plausible, or even possible in the real world) as
+opposed to the effect of a variable across the population (see Hanmer
+and Kalkan 2013 for an in-depth discussion).
+
+MER probabilities are *usually* very similar to AME probabilities, but
+not always. However, they are *much* faster to calculate using
+simulation methods.
+
+------------------------------------------------------------------------
+
+# Interaction effects
+
+*(documentation in progress)*
+
+Both `svyAME` and `svyMER` support calculating predicted probabilities
+of combinations of two predictor variables. This can be done by using
+the argument `byvar = "x"` in the function call.
+
+This will not return differences in predicted probabilities. For
+limited-dependent variable models, one would need to calculate a second
+difference would be needed to test for the significance of an
+interaction between two variables, either from the inclusion of a
+product term or through the compression inherent in these types of
+models (see Norton, Wang, and Ai 2004).
+
+Dave Armstrong’s `{DAMisc}` package has an `R` port for Norton, Wang,
+and Ai’s original `Stata` function, and this will eventually be ported
+to `{svyEffects}` for use in survey-weighted models.
+
+------------------------------------------------------------------------
+
+# Planned updates
+
+This package is under active development, and updates will include:
+
+1.  Support for (non-survey) weighted models and weighted models. While
+    there are other packages that do this, some do not return confidence
+    intervals for predictions for some model types. And, to my
+    knowledge, none use simulation methods to derive confidence
+    intervals.
+
+-   \*Note: You can actually already do this with `{svyEffects}` by
+    creating a survey design object with a weight of “1”, but it would
+    be good to avoid having to use that workaround.
+
+2.  In-depth comparisons with Stata results.
+3.  Functions for calculating weighted model fit measures.
+4.  Support for using an alternative variance-covariance matrix using
+    `{sandwich}`. This would only be for binary logit models because
+    `{sandwich}` does not play nice with ordinal or multinomial models.
+    That said, survey-weighted models do adjust the variance-covariance
+    matrix (the documentation for `{survey}` does not specify the
+    correction method it uses, but it appears to be HC0, based on what
+    I’ve seen).
+5.  A second differences function to test for the significance of a
+    two-way interaction.
+6.  (Possibly) Use of the delta method to calculate confidence intervals
+    for AMEs probabilities to speed up computational time.
+
+------------------------------------------------------------------------
 
 # References
 
@@ -613,6 +679,14 @@ Hanmer, M.J. and K.O. Kalkan. 2013. “Behind the Curve: Clarifying the
 Best Approach to Calculating Predicted Probabilities and Marginal
 Effects from Limited Dependent Variable Models.” *American Journal of
 Political Science*. 57(1): 263-277.
+
+Rainey, Carlisle. 2016. “Compression and Conditional Effects: A Product
+Term Is Essential When Using Logistic Regression to Test for
+Interaction.” *Political Science Research and Methods* 4(3): 621-639.
+
+Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction
+Effects and Standard Errors in Logit and Probit Models. *The Stata
+Journal* 4(2): 154-167.
 
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter
 John, 2020, “2019 Canadian Election Study - Online Survey,”

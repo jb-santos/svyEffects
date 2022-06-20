@@ -10,6 +10,8 @@
 #' @param obj Model object for which to display model summary
 #' @param ... Other arguments (not currently implemented).
 #'
+#' @importFrom stringr boundary str_extract_all str_split
+#'
 #' @author Dave Armstrong
 #'
 #' @export
@@ -62,7 +64,7 @@ mnlSig.svrepstatmisc <- function (obj,
   b <- as.data.frame(obj)$Coefficient
   se <- as.data.frame(obj)$SE
   t  =  b / se
-  p  =  (2^as.numeric(two.sided)) * pnorm(abs(t), lower.tail  =  FALSE)
+  p  =  (2 ^ as.numeric(two.sided)) * pnorm(abs(t), lower.tail = FALSE)
   nYlev <- length(grep("(Intercept)",  rownames(as.data.frame(obj))))
   nterms <- nrow(as.data.frame(obj)) / nYlev
   termnames <- unlist(stringr::str_split(
