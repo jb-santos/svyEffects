@@ -651,12 +651,9 @@ This package is under active development, and updates will include:
     there are other packages that do this, some do not return confidence
     intervals for predictions for some model types. And, to my
     knowledge, none use simulation methods to derive confidence
-    intervals.
-
--   \*Note: You can actually already do this with `{svyEffects}` by
-    creating a survey design object with a weight of “1”, but it would
-    be good to avoid having to use that workaround.
-
+    intervals. *Note: You can actually already do this with
+    `{svyEffects}` by creating a survey design object with a weight of
+    “1”, but it would be good to avoid having to use that workaround.*
 2.  In-depth comparisons with Stata results.
 3.  Functions for calculating weighted model fit measures.
 4.  Support for using an alternative variance-covariance matrix using
@@ -680,13 +677,13 @@ Best Approach to Calculating Predicted Probabilities and Marginal
 Effects from Limited Dependent Variable Models.” *American Journal of
 Political Science*. 57(1): 263-277.
 
-Rainey, Carlisle. 2016. “Compression and Conditional Effects: A Product
-Term Is Essential When Using Logistic Regression to Test for
-Interaction.” *Political Science Research and Methods* 4(3): 621-639.
-
 Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction
 Effects and Standard Errors in Logit and Probit Models. *The Stata
 Journal* 4(2): 154-167.
+
+Rainey, Carlisle. 2016. “Compression and Conditional Effects: A Product
+Term Is Essential When Using Logistic Regression to Test for
+Interaction.” *Political Science Research and Methods* 4(3): 621-639.
 
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter
 John, 2020, “2019 Canadian Election Study - Online Survey,”
