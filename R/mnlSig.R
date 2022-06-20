@@ -51,7 +51,7 @@ mnlSig <- function(obj, ...) {UseMethod("mnlSig")}
 #'
 #' @author Dave Armstrong & John Santos
 #'
-#' @importFrom stringr boundary str_extract_all str_split
+#' @importFrom stringr boundary fixed str_extract_all str_split
 #'
 #' @export
 mnlSig.svrepstatmisc <- function (obj,

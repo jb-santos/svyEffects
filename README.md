@@ -34,25 +34,19 @@ continuous predictors) using:
 For both predictions and differences, it uses simulation methods (the
 parametric bootstrap) to derive 95% confidence intervals.
 
-It works with the following survey-weighted models or (non-survey)
-weighted models (i.e. models estimated with the `weight=` option
-enabled):
+It works with the following survey-weighted model objects:
+`survey::svyglm` (binary logit), `survey::svyolr` (ordered logit),
+`svrepmisc::svymultinom` (multinomial logit)
 
--   Binary logit models
-    -   `survey::svyglm`
-    -   `glm`
--   Ordinal logit models
-    -   `MASS::polr`
-    -   `survey::svyolr`
--   Multinomial logit models
-    -   `svrepmisc::svymultinom`
-    -   `nnet::multinom`
+Eventually, support for (non-survey) weighted model objects (i.e. models
+estimated with the `weight` option) will be added for `glm`,
+`MASS::polr`, and `nnet::multinom`.
 
 Also included in the package are:
 
 -   A snippet of the 2019 Canadian Election Study online survey for
     testing and demonstration purposes. This can be loaded with the
-    command `data(ces19w)`.
+    command `data(ces19)`.
 -   A `plot()` method that creates a `ggplot` object of predicted
     probabilities or differences in predicted probabilities. This plot
     can be modified by adding further `ggplot` commands, which is shown
@@ -74,7 +68,7 @@ some of which are in his `{DAMisc}` package
 The reporting functions and naming conventions are inspired by Daniel
 Ludecke’s excellent `{ggeffects}` package
 (<https://github.com/strengejacke/ggeffects>). Current users of
-`ggeffects` will notice similarities between `{svyEffects}` and
+`{ggeffects}` will notice similarities between `{svyEffects}` and
 `{ggeffects}`. However, while `{ggeffects}` can estimate MER
 probabilities (what it calls *adjusted predictions*) with `svyglm`
 objects, it is not compatible with either `svyolr` or `svymultinom`
@@ -84,7 +78,7 @@ at the population level as opposed to a variable’s effect for a
 hypothetical “average case” that may or may not exist or even be
 theoretically plausible. (A detailed discussion of the difference is in
 Hanmer and Kalkan 2013, *AJPS*, the full citation of which can be found
-in the reference section at the end of this readme.)
+in the reference section.)
 
 Note: because AMEs run simulations on multiple copies of your dataset,
 they can take much more time to calculate than MERs, particularly on
@@ -102,41 +96,45 @@ we’ll model voting for the Conservative Party of Canada versus voting
 for any other party.
 
 ``` r
-data(ces19w)
+data(ces19)
 
 library(survey)
-ces19w_svy <- survey::svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
-                                data = ces19w, digits = 3)
+ces19_svy <- survey::svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
+                                data = ces19, digits = 3)
 
-VOTECON <- survey::svyglm(votecon ~ agegrp + educ + region + market, 
-                          design = ces19w_svy, family = binomial)
+VOTECON <- survey::svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad, 
+                          design = ces19_svy, family = binomial)
 summary(VOTECON)
 #> 
 #> Call:
-#> svyglm(formula = votecon ~ agegrp + educ + region + market, design = ces19w_svy, 
-#>     family = binomial)
+#> svyglm(formula = votecon ~ agegrp + gender + educ + region + 
+#>     relig + marketlib + culturetrad, design = ces19_svy, family = binomial)
 #> 
 #> Survey design:
-#> survey::svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
-#>     data = ces19w, digits = 3)
+#> survey::svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
+#>     data = ces19, digits = 3)
 #> 
 #> Coefficients:
-#>                  Estimate Std. Error t value Pr(>|t|)    
-#> (Intercept)      -0.79435    0.22139  -3.588 0.000344 ***
-#> agegrp35-54       0.40053    0.18810   2.129 0.033382 *  
-#> agegrp55+         0.25436    0.19639   1.295 0.195465    
-#> educHS/College   -0.27230    0.16314  -1.669 0.095302 .  
-#> educCollege Grad -0.55948    0.16759  -3.338 0.000863 ***
-#> regionAtlantic    0.04245    0.26452   0.160 0.872517    
-#> regionWest        0.48065    0.15640   3.073 0.002155 ** 
-#> regionQuebec     -0.61201    0.18361  -3.333 0.000879 ***
-#> market            1.58673    0.20924   7.583 5.84e-14 ***
+#>                             Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)                 -0.72420    0.42951  -1.686  0.09202 .  
+#> agegrp35-54                  0.18969    0.30665   0.619  0.53630    
+#> agegrp55+                    0.37571    0.30225   1.243  0.21407    
+#> genderWoman/Other           -0.35954    0.18701  -1.923  0.05476 .  
+#> educSome PSE                 0.02885    0.24444   0.118  0.90605    
+#> educUni degree               0.08152    0.26961   0.302  0.76244    
+#> regionWest                   0.64625    0.19603   3.297  0.00101 ** 
+#> regionAtlantic               0.32897    0.35624   0.923  0.35596    
+#> religCatholic                0.45252    0.26196   1.727  0.08433 .  
+#> religNon-Catholic Christian  0.65283    0.22961   2.843  0.00454 ** 
+#> religOther                   0.75055    0.39610   1.895  0.05834 .  
+#> marketlib                    2.28579    0.30268   7.552 8.16e-14 ***
+#> culturetrad                  1.96134    0.23845   8.225 4.76e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
-#> (Dispersion parameter for binomial family taken to be 1.018649)
+#> (Dispersion parameter for binomial family taken to be 0.9166063)
 #> 
-#> Number of Fisher Scoring iterations: 4
+#> Number of Fisher Scoring iterations: 5
 ```
 
 Let’s look at the effect of educational attainment (`educ`), a
@@ -159,22 +157,22 @@ The function’s output is a list that contains three data frames:
 library(svyEffects)
 VOTECON_educ_ame <- svyEffects::svyAME(VOTECON,
                                        varname = "educ",
-                                       weightvar = "sampleweight",
+                                       weightvar = "pesweight",
                                        seed = 2019)
 VOTECON_educ_ame$preds
 #> # A tibble: 3 x 5
-#>   educ         predicted conf.low conf.high type       
-#>   <fct>            <dbl>    <dbl>     <dbl> <chr>      
-#> 1 <HS              0.337    0.294     0.384 Probability
-#> 2 HS/College       0.286    0.246     0.328 Probability
-#> 3 College Grad     0.236    0.199     0.276 Probability
+#>   educ       predicted conf.low conf.high type       
+#>   <fct>          <dbl>    <dbl>     <dbl> <chr>      
+#> 1 HS or less     0.404    0.342     0.472 Probability
+#> 2 Some PSE       0.409    0.369     0.448 Probability
+#> 3 Uni degree     0.417    0.372     0.457 Probability
 VOTECON_educ_ame$diffs
 #> # A tibble: 3 x 5
-#>   educ                      predicted conf.low conf.high type      
-#>   <chr>                         <dbl>    <dbl>     <dbl> <chr>     
-#> 1 HS/College - <HS            -0.0513   -0.115   0.0110  Difference
-#> 2 College Grad - <HS          -0.101    -0.162  -0.0421  Difference
-#> 3 College Grad - HS/College   -0.0494   -0.103   0.00552 Difference
+#>   educ                    predicted conf.low conf.high type      
+#>   <chr>                       <dbl>    <dbl>     <dbl> <chr>     
+#> 1 Some PSE - HS or less     0.00460  -0.0701    0.0763 Difference
+#> 2 Uni degree - HS or less   0.0128   -0.0695    0.0925 Difference
+#> 3 Uni degree - Some PSE     0.00815  -0.0532    0.0673 Difference
 VOTECON_educ_ame$seed
 #> [1] 2019
 ```
@@ -246,39 +244,39 @@ continuous predictors, the graph is not any more illuminating than the
 summary statistic.
 
 ``` r
-VOTECON_market_ame <- svyAME(VOTECON,
-                             varname = "market",
-                             weightvar = "sampleweight",
-                             seed = 2019)
-VOTECON_market_ame$preds
+VOTECON_marketlib_ame <- svyAME(VOTECON,
+                                varname = "marketlib",
+                                weightvar = "pesweight",
+                                seed = 2019)
+VOTECON_marketlib_ame$preds
 #> # A tibble: 11 x 5
-#>    market predicted conf.low conf.high type       
-#>     <dbl>     <dbl>    <dbl>     <dbl> <chr>      
-#>  1 -1        0.0901   0.0614     0.127 Probability
-#>  2 -0.8      0.118    0.0872     0.154 Probability
-#>  3 -0.6      0.154    0.123      0.190 Probability
-#>  4 -0.4      0.199    0.171      0.228 Probability
-#>  5 -0.2      0.251    0.227      0.277 Probability
-#>  6  0        0.312    0.286      0.339 Probability
-#>  7  0.200    0.380    0.340      0.417 Probability
-#>  8  0.4      0.453    0.395      0.508 Probability
-#>  9  0.6      0.526    0.453      0.597 Probability
-#> 10  0.8      0.598    0.513      0.683 Probability
-#> 11  1        0.667    0.568      0.758 Probability
-VOTECON_market_ame$diffs
+#>    marketlib predicted conf.low conf.high type       
+#>        <dbl>     <dbl>    <dbl>     <dbl> <chr>      
+#>  1    -1         0.125   0.0738     0.187 Probability
+#>  2    -0.8       0.171   0.117      0.227 Probability
+#>  3    -0.6       0.230   0.180      0.281 Probability
+#>  4    -0.4       0.300   0.258      0.340 Probability
+#>  5    -0.2       0.379   0.347      0.412 Probability
+#>  6     0         0.465   0.428      0.502 Probability
+#>  7     0.200     0.551   0.500      0.604 Probability
+#>  8     0.4       0.635   0.567      0.706 Probability
+#>  9     0.6       0.708   0.624      0.784 Probability
+#> 10     0.8       0.775   0.681      0.859 Probability
+#> 11     1         0.831   0.733      0.912 Probability
+VOTECON_marketlib_ame$diffs
 #> # A tibble: 1 x 5
-#>   market                 predicted conf.low conf.high type      
+#>   marketlib              predicted conf.low conf.high type      
 #>   <chr>                      <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Delta (range) : -1 - 1     0.576    0.446     0.693 Difference
-VOTECON_market_ame$seed
+#> 1 Delta (range) : -1 - 1     0.705    0.558     0.826 Difference
+VOTECON_marketlib_ame$seed
 #> [1] 2019
-plot(VOTECON_market_ame)
+plot(VOTECON_marketlib_ame)
 ```
 
 ![](man/figures/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
-plot(VOTECON_market_ame, "diffs")
+plot(VOTECON_marketlib_ame, "diffs")
 ```
 
 ![](man/figures/unnamed-chunk-10-1.png)<!-- -->
@@ -294,78 +292,81 @@ used a binned ordinal measure of “cold” (0-39), “lukewarm” (40-59), and
 “hot” (60-100).
 
 ``` r
-data(ces19w)
-ces19w <- ces19w
+data(ces19)
 
 library(survey)
-ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
-                        data = ces19w, digits = 3)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
+                        data = ces19, digits = 3)
 
-CONLDR <- svyolr(ldr_con_ft ~ agegrp + educ + region + market, 
-                 design = ces19w_svy)
+CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + relig + marketlib + culturetrad, 
+                 design = ces19_svy)
 summary(CONLDR)
 #> Call:
-#> svyolr(ldr_con_ft ~ agegrp + educ + region + market, design = ces19w_svy)
+#> svyolr(ftconldr ~ agegrp + gender + educ + region + relig + marketlib + 
+#>     culturetrad, design = ces19_svy)
 #> 
 #> Coefficients:
-#>                        Value Std. Error    t value
-#> agegrp35-54       0.15664575  0.1475754  1.0614624
-#> agegrp55+        -0.10921024  0.1546726 -0.7060738
-#> educHS/College    0.15437828  0.1348708  1.1446384
-#> educCollege Grad -0.06967856  0.1364041 -0.5108247
-#> regionAtlantic    0.03972267  0.2281063  0.1741410
-#> regionWest        0.22507026  0.1426774  1.5774765
-#> regionQuebec      0.28055289  0.1317431  2.1295449
-#> market            1.54297494  0.1701424  9.0687278
+#>                                   Value Std. Error    t value
+#> agegrp35-54                  0.17796372  0.2665702  0.6676055
+#> agegrp55+                    0.04601115  0.2686809  0.1712483
+#> genderWoman/Other           -0.49866393  0.1707825 -2.9198766
+#> educSome PSE                -0.20802018  0.2231985 -0.9319963
+#> educUni degree              -0.10211120  0.2430419 -0.4201383
+#> regionWest                   0.41572273  0.1792462  2.3192838
+#> regionAtlantic              -0.09551799  0.2884670 -0.3311228
+#> religCatholic                0.46488829  0.2245240  2.0705501
+#> religNon-Catholic Christian  0.60848101  0.2202608  2.7625480
+#> religOther                   0.79950865  0.3459580  2.3109994
+#> marketlib                    1.96343442  0.2572774  7.6315846
+#> culturetrad                  1.95794984  0.2263782  8.6490220
 #> 
 #> Intercepts:
 #>               Value   Std. Error t value
-#> Cold|Lukewarm -0.8686  0.1896    -4.5808
-#> Lukewarm|Hot   0.7938  0.1911     4.1537
-#> (2532 observations deleted due to missingness)
+#> Cold|Lukewarm -0.4716  0.3817    -1.2356
+#> Lukewarm|Hot   0.1141  0.3704     0.3079
 ```
 
 Here’s the effect of education on feelings towards the Conservative
 Party leader.
 
 ``` r
-CONLDR_educ_ame <- svyAME(CONLDR,
-                          varname = "educ",
-                          weightvar = "sampleweight",
-                          seed = 2019)
-CONLDR_educ_ame$preds
+CONLDR_region_ame <- svyAME(CONLDR,
+                            varname = "region",
+                            weightvar = "pesweight",
+                            seed = 2019)
+CONLDR_region_ame$preds
 #> # A tibble: 9 x 6
-#>   y        educ         predicted conf.low conf.high type       
-#>   <fct>    <fct>            <dbl>    <dbl>     <dbl> <chr>      
-#> 1 Cold     <HS              0.313    0.271     0.356 Probability
-#> 2 Lukewarm <HS              0.369    0.341     0.396 Probability
-#> 3 Hot      <HS              0.318    0.278     0.362 Probability
-#> 4 Cold     HS/College       0.281    0.248     0.315 Probability
-#> 5 Lukewarm HS/College       0.367    0.340     0.395 Probability
-#> 6 Hot      HS/College       0.351    0.314     0.391 Probability
-#> 7 Cold     College Grad     0.327    0.287     0.369 Probability
-#> 8 Lukewarm College Grad     0.369    0.341     0.396 Probability
-#> 9 Hot      College Grad     0.304    0.265     0.342 Probability
-CONLDR_educ_ame$diffs
+#>   y        region   predicted conf.low conf.high type       
+#>   <fct>    <fct>        <dbl>    <dbl>     <dbl> <chr>      
+#> 1 Cold     Ontario     0.501    0.458      0.541 Probability
+#> 2 Lukewarm Ontario     0.0952   0.0746     0.116 Probability
+#> 3 Hot      Ontario     0.404    0.369      0.442 Probability
+#> 4 Cold     West        0.434    0.394      0.476 Probability
+#> 5 Lukewarm West        0.0946   0.0742     0.115 Probability
+#> 6 Hot      West        0.471    0.427      0.512 Probability
+#> 7 Cold     Atlantic    0.517    0.432      0.601 Probability
+#> 8 Lukewarm Atlantic    0.0944   0.0741     0.114 Probability
+#> 9 Hot      Atlantic    0.388    0.307      0.476 Probability
+CONLDR_region_ame$diffs
 #> # A tibble: 9 x 6
-#>   y        educ                      predicted conf.low conf.high type      
-#>   <fct>    <chr>                         <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Cold     HS/College - <HS          -0.0313   -0.0809    0.0188  Difference
-#> 2 Lukewarm HS/College - <HS          -0.00167  -0.00710   0.00212 Difference
-#> 3 Hot      HS/College - <HS           0.0330   -0.0200    0.0857  Difference
-#> 4 Cold     College Grad - <HS         0.0147   -0.0421    0.0717  Difference
-#> 5 Lukewarm College Grad - <HS        -0.000171 -0.00378   0.00298 Difference
-#> 6 Hot      College Grad - <HS        -0.0145   -0.0722    0.0412  Difference
-#> 7 Cold     College Grad - HS/College  0.0460   -0.00182   0.0967  Difference
-#> 8 Lukewarm College Grad - HS/College  0.00150  -0.00251   0.00678 Difference
-#> 9 Hot      College Grad - HS/College -0.0475   -0.0993    0.00184 Difference
-plot(CONLDR_educ_ame)
+#>   y        region             predicted conf.low conf.high type      
+#>   <fct>    <chr>                  <dbl>    <dbl>     <dbl> <chr>     
+#> 1 Cold     West - Ontario     -0.0667   -0.119   -0.0112   Difference
+#> 2 Lukewarm West - Ontario     -0.000599 -0.00226  0.000644 Difference
+#> 3 Hot      West - Ontario      0.0673    0.0112   0.120    Difference
+#> 4 Cold     Atlantic - Ontario  0.0168   -0.0762   0.108    Difference
+#> 5 Lukewarm Atlantic - Ontario -0.000787 -0.00463  0.000677 Difference
+#> 6 Hot      Atlantic - Ontario -0.0160   -0.105    0.0771   Difference
+#> 7 Cold     Atlantic - West     0.0835   -0.0136   0.179    Difference
+#> 8 Lukewarm Atlantic - West    -0.000187 -0.00413  0.00210  Difference
+#> 9 Hot      Atlantic - West    -0.0833   -0.176    0.0139   Difference
+plot(CONLDR_region_ame)
 ```
 
 ![](man/figures/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
-plot(CONLDR_educ_ame, "diffs")
+plot(CONLDR_region_ame, "diffs")
 ```
 
 ![](man/figures/unnamed-chunk-13-1.png)<!-- -->
@@ -373,40 +374,40 @@ plot(CONLDR_educ_ame, "diffs")
 Here’s the effect of market liberalism.
 
 ``` r
-CONLDR_market_ame <- svyAME(CONLDR,
-                            varname = "market",
-                            weightvar = "sampleweight",
+CONLDR_marketlib_ame <- svyAME(CONLDR,
+                            varname = "marketlib",
+                            weightvar = "pesweight",
                             diffchange = "range",
                             seed = 2019)
-CONLDR_market_ame$preds
+CONLDR_marketlib_ame$preds
 #> # A tibble: 33 x 6
-#>    y        market predicted conf.low conf.high type       
-#>    <fct>     <dbl>     <dbl>    <dbl>     <dbl> <chr>      
-#>  1 Cold     -1         0.613   0.538      0.682 Probability
-#>  2 Lukewarm -1         0.278   0.233      0.322 Probability
-#>  3 Hot      -1         0.110   0.0820     0.145 Probability
-#>  4 Cold     -0.813     0.544   0.484      0.605 Probability
-#>  5 Lukewarm -0.813     0.316   0.277      0.351 Probability
-#>  6 Hot      -0.813     0.140   0.109      0.176 Probability
-#>  7 Cold     -0.627     0.475   0.426      0.525 Probability
-#>  8 Lukewarm -0.627     0.348   0.318      0.378 Probability
-#>  9 Hot      -0.627     0.177   0.147      0.210 Probability
-#> 10 Cold     -0.440     0.405   0.367      0.442 Probability
+#>    y        marketlib predicted conf.low conf.high type       
+#>    <fct>        <dbl>     <dbl>    <dbl>     <dbl> <chr>      
+#>  1 Cold          -1      0.756    0.682      0.825 Probability
+#>  2 Lukewarm      -1      0.0781   0.0562     0.101 Probability
+#>  3 Hot           -1      0.166    0.109      0.226 Probability
+#>  4 Cold          -0.8    0.698    0.634      0.764 Probability
+#>  5 Lukewarm      -0.8    0.0895   0.0687     0.111 Probability
+#>  6 Hot           -0.8    0.213    0.156      0.267 Probability
+#>  7 Cold          -0.6    0.627    0.574      0.680 Probability
+#>  8 Lukewarm      -0.6    0.101    0.0781     0.123 Probability
+#>  9 Hot           -0.6    0.272    0.226      0.321 Probability
+#> 10 Cold          -0.4    0.555    0.514      0.594 Probability
 #> # ... with 23 more rows
-CONLDR_market_ame$diffs
+CONLDR_marketlib_ame$diffs
 #> # A tibble: 3 x 6
-#>   y        market                     predicted conf.low conf.high type      
-#>   <fct>    <fct>                          <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Cold     Delta (range) : -1 - 0.866   -0.528    -0.605   -0.451  Difference
-#> 2 Lukewarm Delta (range) : -1 - 0.866   -0.0386   -0.100    0.0256 Difference
-#> 3 Hot      Delta (range) : -1 - 0.866    0.566     0.483    0.642  Difference
-plot(CONLDR_market_ame)
+#>   y        marketlib              predicted conf.low conf.high type      
+#>   <fct>    <fct>                      <dbl>    <dbl>     <dbl> <chr>     
+#> 1 Cold     Delta (range) : -1 - 1   -0.630   -0.720    -0.529  Difference
+#> 2 Lukewarm Delta (range) : -1 - 1   -0.0139  -0.0451    0.0178 Difference
+#> 3 Hot      Delta (range) : -1 - 1    0.644    0.539     0.741  Difference
+plot(CONLDR_marketlib_ame)
 ```
 
 ![](man/figures/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
-plot(CONLDR_market_ame, "diffs")
+plot(CONLDR_marketlib_ame, "diffs")
 ```
 
 ![](man/figures/unnamed-chunk-15-1.png)<!-- -->
@@ -418,8 +419,8 @@ colour-coding the response level by writing your own `ggplot` command,
 as shown below.
 
 ``` r
-ggplot(CONLDR_market_ame$preds) +
-  aes(x = market, y = predicted, ymin = conf.low, ymax = conf.high, colour = y, fill = y) +
+ggplot(CONLDR_marketlib_ame$preds) +
+  aes(x = marketlib, y = predicted, ymin = conf.low, ymax = conf.high, colour = y, fill = y) +
   geom_line() +
   geom_ribbon(colour = "transparent", alpha = 0.2) +
   labs(title = "Effect of market liberalism on Conservative leader ratings",
@@ -453,16 +454,10 @@ data, do some data cleaning, and then create our usual survey-design
 object.
 
 ``` r
-data(ces19w)
-ces19w <- ces19w %>%
-  filter(region != "Quebec") %>%
-  filter(vote %in% c("Liberal", "Conservative", "NDP")) %>%
-  mutate(region = droplevels(region),
-         vote = droplevels(vote)) 
-
+data(ces19)
 library(survey)
-ces19w_svy <- svydesign(ids = ~1, strata = NULL, weights = ~sampleweight, 
-                        data = ces19w, digits = 3)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
+                        data = ces19, digits = 3)
 ```
 
 Now, we’ll use the function `as.svrepdesign()` from `{survey}` to turn
@@ -470,7 +465,7 @@ our sampling weights into replicate weights with variances calculated
 using the jackknife.
 
 ``` r
-ces19w_svy_r <- as.svrepdesign(ces19w_svy, type = "JK1")
+ces19_svy_r <- as.svrepdesign(ces19_svy, type = "JK1")
 ```
 
 After our survey design object with replicate weights and jackknife
@@ -490,19 +485,23 @@ function from his `{DAMisc}` package.
 # remotes::install_github("carlganz/svrepmisc")
 library(svrepmisc)
 
-VOTE <- svymultinom(vote ~ region + educ + relig + market, 
-                    design = ces19w_svy_r, trace = FALSE)
+VOTE <- svymultinom(vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad, 
+                    design = ces19_svy_r, trace = FALSE)
 mnlSig(VOTE)
 #>                             Conservative     NDP
-#> (Intercept)                       0.174  -0.528 
-#> regionAtlantic                   -0.115  -0.019 
-#> regionWest                        1.008*  0.839*
-#> educHS/College                   -0.433  -0.164 
-#> educCollege Grad                 -0.810*  0.042 
-#> religNon-Catholic Christian       0.700* -0.249 
-#> religCatholic                     0.149  -0.487 
-#> religOther                       -2.161* -2.683 
-#> market                            1.690* -1.261*
+#> (Intercept)                      -0.281  -0.764 
+#> agegrp35-54                       0.075  -0.286 
+#> agegrp55+                         0.052  -0.959*
+#> genderWoman/Other                -0.267   0.266 
+#> educSome PSE                      0.195   0.486 
+#> educUni degree                    0.032  -0.166 
+#> regionWest                        0.898*  0.751*
+#> regionAtlantic                    0.334   0.017 
+#> religCatholic                     0.418  -0.049 
+#> religNon-Catholic Christian       0.581* -0.181 
+#> religOther                        0.440  -1.083*
+#> marketlib                         2.113* -0.516 
+#> culturetrad                       1.990*  0.076
 ```
 
 For our post-estimation command, we’ll need to specify a few more
@@ -516,45 +515,58 @@ are:
 Here’s the effect of education.
 
 ``` r
-VOTE_educ_ame <- svyAME(VOTE,
-                        varname = "educ",
-                        weightvar = "sampleweight",
-                        seed = 2019,
-                        design = ces19w_svy_r,
-                        modform = "vote ~ region + educ + relig + market")
-VOTE_educ_ame$preds
-#> # A tibble: 9 x 6
-#>   y            educ         predicted conf.low conf.high type       
-#>   <fct>        <fct>            <dbl>    <dbl>     <dbl> <chr>      
-#> 1 Liberal      <HS              0.270    0.208     0.338 Probability
-#> 2 Conservative <HS              0.517    0.451     0.588 Probability
-#> 3 NDP          <HS              0.212    0.158     0.281 Probability
-#> 4 Liberal      HS/College       0.337    0.273     0.399 Probability
-#> 5 Conservative HS/College       0.441    0.383     0.500 Probability
-#> 6 NDP          HS/College       0.222    0.171     0.282 Probability
-#> 7 Liberal      College Grad     0.361    0.302     0.429 Probability
-#> 8 Conservative College Grad     0.351    0.297     0.408 Probability
-#> 9 NDP          College Grad     0.288    0.236     0.342 Probability
-VOTE_educ_ame$diffs
-#> # A tibble: 9 x 6
-#>   y            educ                      predicted  conf.low conf.high type     
-#>   <fct>        <chr>                         <dbl>     <dbl>     <dbl> <chr>    
-#> 1 Liberal      HS/College - <HS            0.0667  -0.0274     0.158   Differen~
-#> 2 Conservative HS/College - <HS           -0.0764  -0.165      0.0128  Differen~
-#> 3 NDP          HS/College - <HS            0.00969 -0.0776     0.0937  Differen~
-#> 4 Liberal      College Grad - <HS          0.0908   0.000869   0.182   Differen~
-#> 5 Conservative College Grad - <HS         -0.166   -0.258     -0.0786  Differen~
-#> 6 NDP          College Grad - <HS          0.0753  -0.00788    0.153   Differen~
-#> 7 Liberal      College Grad - HS/College   0.0241  -0.0607     0.116   Differen~
-#> 8 Conservative College Grad - HS/College  -0.0897  -0.174     -0.00673 Differen~
-#> 9 NDP          College Grad - HS/College   0.0657  -0.0130     0.142   Differen~
-plot(VOTE_educ_ame)
+VOTE_relig_ame <- svyAME(
+  VOTE,
+  varname = "relig",
+  weightvar = "pesweight",
+  seed = 2019,
+  design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+VOTE_relig_ame$preds
+#> # A tibble: 12 x 6
+#>    y            relig                  predicted conf.low conf.high type       
+#>    <fct>        <fct>                      <dbl>    <dbl>     <dbl> <chr>      
+#>  1 Liberal      None                       0.401   0.341      0.463 Probability
+#>  2 Conservative None                       0.346   0.292      0.403 Probability
+#>  3 NDP          None                       0.254   0.207      0.303 Probability
+#>  4 Liberal      Catholic                   0.366   0.301      0.438 Probability
+#>  5 Conservative Catholic                   0.413   0.357      0.470 Probability
+#>  6 NDP          Catholic                   0.221   0.169      0.282 Probability
+#>  7 Liberal      Non-Catholic Christian     0.360   0.307      0.415 Probability
+#>  8 Conservative Non-Catholic Christian     0.446   0.399      0.493 Probability
+#>  9 NDP          Non-Catholic Christian     0.194   0.149      0.247 Probability
+#> 10 Liberal      Other                      0.438   0.320      0.563 Probability
+#> 11 Conservative Other                      0.456   0.334      0.578 Probability
+#> 12 NDP          Other                      0.106   0.0513     0.182 Probability
+VOTE_relig_ame$diffs
+#> # A tibble: 18 x 6
+#>    y            relig                         predicted conf.low conf.high type 
+#>    <fct>        <chr>                             <dbl>    <dbl>     <dbl> <chr>
+#>  1 Liberal      Catholic - None                -0.0341   -0.127    0.0602  Diff~
+#>  2 Conservative Catholic - None                 0.0671   -0.0151   0.149   Diff~
+#>  3 NDP          Catholic - None                -0.0329   -0.110    0.0429  Diff~
+#>  4 Liberal      Non-Catholic Christian - None  -0.0405   -0.122    0.0402  Diff~
+#>  5 Conservative Non-Catholic Christian - None   0.100     0.0244   0.173   Diff~
+#>  6 NDP          Non-Catholic Christian - None  -0.0596   -0.129    0.0144  Diff~
+#>  7 Liberal      Non-Catholic Christian - Cat~   0.0370   -0.0945   0.174   Diff~
+#>  8 Conservative Non-Catholic Christian - Cat~   0.110    -0.0249   0.241   Diff~
+#>  9 NDP          Non-Catholic Christian - Cat~  -0.147    -0.223   -0.0599  Diff~
+#> 10 Liberal      Other - None                   -0.00631  -0.0901   0.0757  Diff~
+#> 11 Conservative Other - None                    0.0330   -0.0396   0.0996  Diff~
+#> 12 NDP          Other - None                   -0.0267   -0.0993   0.0459  Diff~
+#> 13 Liberal      Other - Catholic                0.0711   -0.0694   0.217   Diff~
+#> 14 Conservative Other - Catholic                0.0432   -0.0857   0.177   Diff~
+#> 15 NDP          Other - Catholic               -0.114    -0.198   -0.0254  Diff~
+#> 16 Liberal      Other - Non-Catholic Christi~   0.0775   -0.0481   0.206   Diff~
+#> 17 Conservative Other - Non-Catholic Christi~   0.0102   -0.117    0.144   Diff~
+#> 18 NDP          Other - Non-Catholic Christi~  -0.0876   -0.162    0.00427 Diff~
+plot(VOTE_relig_ame)
 ```
 
 ![](man/figures/unnamed-chunk-20-1.png)<!-- -->
 
 ``` r
-plot(VOTE_educ_ame, "diffs")
+plot(VOTE_relig_ame, "diffs")
 ```
 
 ![](man/figures/unnamed-chunk-21-1.png)<!-- -->
@@ -562,42 +574,43 @@ plot(VOTE_educ_ame, "diffs")
 Here’s the effect of market liberalism.
 
 ``` r
-VOTE_market_ame <- svyAME(VOTE,
-                          varname = "market",
-                          weightvar = "sampleweight",
-                          design = ces19w_svy_r,
-                          diffchange = "range",
-                          modform = "vote ~ region + educ + relig + market",
-                          seed = 2019)
-VOTE_market_ame$preds
+VOTE_marketlib_ame <- svyAME(
+  VOTE,
+  varname = "marketlib",
+  weightvar = "pesweight",
+  seed = 2019,
+  diffchange = "range",
+  design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+VOTE_marketlib_ame$preds
 #> # A tibble: 33 x 6
-#>    y            market predicted conf.low conf.high type       
-#>    <fct>         <dbl>     <dbl>    <dbl>     <dbl> <chr>      
-#>  1 Liberal      -1        0.311    0.212      0.424 Probability
-#>  2 Conservative -1        0.0978   0.0568     0.151 Probability
-#>  3 NDP          -1        0.591    0.473      0.706 Probability
-#>  4 Liberal      -0.813    0.338    0.253      0.428 Probability
-#>  5 Conservative -0.813    0.144    0.0960     0.201 Probability
-#>  6 NDP          -0.813    0.519    0.424      0.615 Probability
-#>  7 Liberal      -0.627    0.356    0.288      0.427 Probability
-#>  8 Conservative -0.627    0.205    0.154      0.262 Probability
-#>  9 NDP          -0.627    0.439    0.367      0.514 Probability
-#> 10 Liberal      -0.440    0.363    0.309      0.416 Probability
+#>    y            marketlib predicted conf.low conf.high type       
+#>    <fct>            <dbl>     <dbl>    <dbl>     <dbl> <chr>      
+#>  1 Liberal           -1       0.500   0.408      0.595 Probability
+#>  2 Conservative      -1       0.122   0.0754     0.186 Probability
+#>  3 NDP               -1       0.378   0.281      0.480 Probability
+#>  4 Liberal           -0.8     0.491   0.420      0.565 Probability
+#>  5 Conservative      -0.8     0.170   0.120      0.232 Probability
+#>  6 NDP               -0.8     0.339   0.269      0.414 Probability
+#>  7 Liberal           -0.6     0.472   0.420      0.528 Probability
+#>  8 Conservative      -0.6     0.229   0.181      0.282 Probability
+#>  9 NDP               -0.6     0.298   0.249      0.353 Probability
+#> 10 Liberal           -0.4     0.444   0.402      0.486 Probability
 #> # ... with 23 more rows
-VOTE_market_ame$diffs
+VOTE_marketlib_ame$diffs
 #> # A tibble: 3 x 6
-#>   y            market                     predicted conf.low conf.high type     
-#>   <fct>        <chr>                          <dbl>    <dbl>     <dbl> <chr>    
-#> 1 Liberal      Delta (range) : -1 - 0.866    -0.214   -0.333   -0.0989 Differen~
-#> 2 Conservative Delta (range) : -1 - 0.866     0.495    0.341    0.630  Differen~
-#> 3 NDP          Delta (range) : -1 - 0.866    -0.434   -0.552   -0.306  Differen~
-plot(VOTE_market_ame)
+#>   y            marketlib              predicted conf.low conf.high type      
+#>   <fct>        <chr>                      <dbl>    <dbl>     <dbl> <chr>     
+#> 1 Liberal      Delta (range) : -1 - 1    -0.380   -0.494    -0.258 Difference
+#> 2 Conservative Delta (range) : -1 - 1     0.256    0.123     0.389 Difference
+#> 3 NDP          Delta (range) : -1 - 1    -0.243   -0.365    -0.124 Difference
+plot(VOTE_marketlib_ame)
 ```
 
 ![](man/figures/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
-plot(VOTE_market_ame, "diffs")
+plot(VOTE_marketlib_ame, "diffs")
 ```
 
 ![](man/figures/unnamed-chunk-23-1.png)<!-- -->
@@ -647,30 +660,36 @@ to `{svyEffects}` for use in survey-weighted models.
 
 This package is under active development, and updates will include:
 
-1.  Support for (non-survey) weighted models and weighted models. While
+1.  More user-friendly error-checking and reporting (e.g. checking at
+    the beginning of the function that the variables in the function
+    don’t have typos).
+2.  Support for (non-survey) weighted models and weighted models. While
     there are other packages that do this, some do not return confidence
     intervals for predictions for some model types. And, to my
     knowledge, none use simulation methods to derive confidence
     intervals. *Note: You can actually already do this with
     `{svyEffects}` by creating a survey design object with a weight of
     “1”, but it would be good to avoid having to use that workaround.*
-2.  In-depth comparisons with Stata results.
-3.  Functions for calculating weighted model fit measures.
-4.  Support for using an alternative variance-covariance matrix using
+3.  In-depth comparisons with Stata results.
+4.  Functions for calculating weighted model fit measures.
+5.  Support for using an alternative variance-covariance matrix using
     `{sandwich}`. This would only be for binary logit models because
     `{sandwich}` does not play nice with ordinal or multinomial models.
     That said, survey-weighted models do adjust the variance-covariance
     matrix (the documentation for `{survey}` does not specify the
     correction method it uses, but it appears to be HC0, based on what
     I’ve seen).
-5.  A second differences function to test for the significance of a
+6.  A second differences function to test for the significance of a
     two-way interaction.
-6.  (Possibly) Use of the delta method to calculate confidence intervals
-    for AMEs probabilities to speed up computational time.
+7.  (Eventually) Use of the delta method to calculate confidence
+    intervals for AMEs probabilities to speed up computational time.
 
 ------------------------------------------------------------------------
 
 # References
+
+Armstrong, Dave. 2022. *DAMisc: Dave Armstrong’s Miscellaneous
+Functions.* R package version 1.7.2.
 
 Hanmer, M.J. and K.O. Kalkan. 2013. “Behind the Curve: Clarifying the
 Best Approach to Calculating Predicted Probabilities and Marginal
