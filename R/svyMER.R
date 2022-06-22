@@ -32,7 +32,7 @@
 #' @param bynvals For interaction effects with a numerical moderator, a scalar
 #' denoting the sequence length  spanning the range of the moderator variable
 #' for which effects are to be calculated (default: 3).
-#' @param sims Scalar denoting how many simulations to conduct (default: 1500).
+#' @param sims Scalar denoting how many simulations to conduct (default: 2500).
 #' @param seed Seed value for random number generator. By default, the function
 #' picks a random integer between 1 and 1,000,000. If you save the output of
 #' this function, it will save the seed value used for simulations in the slot
