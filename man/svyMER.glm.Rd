@@ -64,6 +64,15 @@ values (i.e. for an "average case"). This involves setting all continuous
 variables to their medians and all categorical variables to their modes. Uses
 simulations (the parametric bootstrap) to derive 95\% confidence intervals.
 }
+\examples{
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
+VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
+svyMER(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
+svyMER(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+
+}
 \author{
 John Santos & Dave Armstrong
 }

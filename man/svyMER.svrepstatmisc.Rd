@@ -89,6 +89,24 @@ To use this function...
 \item Now, you're ready to use \code{svyAME} to calculate probabilities.
 }
 }
+\examples{
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+  data = ces19, digits = 3)
+ces19_svy_r <- as.svrepdesign(ces19_svy, type = "JK1")
+# remotes::install_github("carlganz/svrepmisc") # (if not already installed)
+library(svrepmisc)
+VOTE <- svymultinom(vote ~ agegrp + gender + educ + region + marketlib,
+  design = ces19_svy_r, trace = FALSE)
+svyMER(VOTE, varname = "region", weightvar = "pesweight",
+  seed = 2019, design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + marketlib")
+svyMER(VOTE, varname = "marketlib", weightvar = "pesweight",
+  seed = 2019, design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + marketlib")
+
+}
 \author{
 John Santos & Dave Armstrong
 }

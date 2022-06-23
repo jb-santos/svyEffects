@@ -77,6 +77,46 @@ specify the survey design and the model formula. Please consult the
 documentation for the method \code{svyMER.svrepstatmisc} for more details
 (accessible by running the command \code{?svyMER.svrepstatmisc}).
 }
+\examples{
+# Binary models:
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+  data = ces19, digits = 3)
+VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
+  design = ces19_svy, family = binomial)
+svyMER(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
+svyMER(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+
+# Ordinal models:
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+  data = ces19, digits = 3)
+CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
+  design = ces19_svy)
+svyMER(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
+svyMER(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+
+
+# Multinomial models:
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+  data = ces19, digits = 3)
+ces19_svy_r <- as.svrepdesign(ces19_svy, type = "JK1")
+# remotes::install_github("carlganz/svrepmisc")  # (if not already installed)
+library(svrepmisc)
+VOTE <- svymultinom(vote ~ agegrp + gender + educ + region + marketlib,
+  design = ces19_svy_r, trace = FALSE)
+svyMER(VOTE, varname = "region", weightvar = "pesweight",
+  seed = 2019, design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + marketlib")
+svyMER(VOTE, varname = "marketlib", weightvar = "pesweight",
+  seed = 2019, design = ces19_svy_r,
+  modform = "vote ~ agegrp + gender + educ + region + marketlib")
+
+}
 \references{
 Hanmer, M.J. and K.O. Kalkan. 2013. \sQuote{Behind the Curve:
 Clarifying the Best Approach to Calculating Predicted Probabilities and

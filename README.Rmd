@@ -173,7 +173,7 @@ Expression   : Pr(votecon), predict()
 VOTECON_educ_ame$diffs
 ```
 
-These differences also compare favourably to the same results from `Stata`. The difference between the difference calculated by `svyAME` and `Stata` are <0.001.
+These differences also compare favourably to the same results from `Stata`. The `svyEffects` and `Stata` results differ by <0.001.
 
 
 ```
@@ -265,7 +265,7 @@ VOTECON_marketlib_ame <- svyAME(VOTECON,
 VOTECON_marketlib_ame$preds
 ```
 
-`svyAME` also produces very similar results to `Stata` for the effect of market liberalism. The probabilities differ a bit more at the ends of the range (up to 0.006), but at the median of the variable, the results are within 0.001.
+`svyAME` also produces very similar results to `Stata` for the effect of market liberalism. The probabilities differ a bit more at the ends of the range (up to 0.006), but at the median of the predictor, the results are within 0.001.
 
 
 ```
@@ -351,7 +351,7 @@ summary(CONLDR)
 
 Here's the effect of education on feelings towards the Conservative Party leader. 
 
-For brevity, only the visualizations of the predicted probabilities/differences are presented (along with comparisons versus Stata).
+For brevity, only the visualizations of the predicted probabilities/differences are presented (along with comparisons versus `Stata`).
 
 ```{r}
 CONLDR_region_ame <- svyAME(CONLDR,
@@ -547,7 +547,7 @@ ggplot(VOTE_marketlib_ame$preds) +
   theme_bw()
 ```
 
-Hhere are the results from `Stata`:
+Here are the results from `Stata`:
 
 ![](images/vote_marketlib.png)
 

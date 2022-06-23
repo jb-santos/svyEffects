@@ -22,6 +22,28 @@
 #'
 #' @export
 #'
+#'
+#' @examples
+#' data(ces19)
+#' library(survey)
+#' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+#'   data = ces19, digits = 3)
+#' VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
+#'   design = ces19_svy, family = binomial)
+#' ame_educ <- svyAME(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
+#' plot(ame_educ)   # plots predicted probabilities
+#' plot(ame_educ, "diffs")   # plots differences for pairwise comparisons
+#'
+#' # Plots can be customized using ggplot's conventions, e.g.:
+#' plot(ame_educ) +
+#'   geom_hline(yintercept = 0, linetype = "dotted")
+#'   labs(title = "mytitle",
+#'        x = "x axis label",
+#'        y = "y axis label",
+#'        caption = "my caption") +
+#'  theme_classic() +
+#'  theme(axis.text.x = element_text(angle=45, hjust=1))
+#'
 plot.svyEffects <- function(x,
                             what = c("preds", "diffs"),
                             ...) {

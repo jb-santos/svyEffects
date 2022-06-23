@@ -42,6 +42,18 @@
 #'
 #'
 #' @export
+#'
+#'
+#' @examples
+#' data(ces19)
+#' library(survey)
+#' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+#'   data = ces19, digits = 3)
+#' CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
+#'   design = ces19_svy)
+#' svyMER(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
+#' svyMER(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#'
 svyMER.svyolr <- function(obj,
                           varname,
                           weightvar,

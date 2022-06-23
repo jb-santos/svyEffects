@@ -62,6 +62,15 @@ for a predictor holding all other observations at observed values
 (i.e. a true average marginal effect). Uses simulations (the parametric
 bootstrap) to derive 95\% confidence intervals.
 }
+\examples{
+data(ces19)
+library(survey)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
+VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
+svyAME(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
+svyAME(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+
+}
 \author{
 John Santos & Dave Armstrong
 }
