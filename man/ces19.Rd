@@ -8,7 +8,7 @@
 An object of class \code{data.frame}
 }
 \usage{
-data(ces19w)
+data(ces19)
 }
 \description{
 Data from the 2019 Canadian Election Study Online Survey.

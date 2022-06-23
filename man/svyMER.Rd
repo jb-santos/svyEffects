@@ -13,7 +13,7 @@ svyMER(
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
   bynvals = 3,
-  sims = 1500,
+  sims = 2500,
   seed = NULL,
   ...
 )
@@ -42,7 +42,7 @@ the moderator variable.}
 denoting the sequence length  spanning the range of the moderator variable
 for which effects are to be calculated (default: 3).}
 
-\item{sims}{Scalar denoting how many simulations to conduct (default: 1500).}
+\item{sims}{Scalar denoting how many simulations to conduct (default: 2500).}
 
 \item{seed}{Seed value for random number generator. By default, the function
 picks a random integer between 1 and 1,000,000. If you save the output of

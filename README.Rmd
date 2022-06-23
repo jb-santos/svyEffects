@@ -367,7 +367,7 @@ For ordinal and multinomial probabilities, the plot method follows the conventio
 ```{r}
 ggplot(CONLDR_region_ame$preds) + 
   aes(x = region, y = predicted, ymin = conf.low, ymax = conf.high, colour = y) +
-  geom_pointrange(position = position_dodge2(.2)) +
+  geom_pointrange(position = position_dodge2(.35)) +
   scale_y_continuous(limits = c(.05,.62)) +
   scale_colour_viridis_d() +
   labs(title = "Effect of region on Conservative leader rating (svyEffects)",

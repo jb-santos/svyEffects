@@ -4,7 +4,7 @@
 #'
 #' @docType data
 #'
-#' @usage data(ces19w)
+#' @usage data(ces19)
 #'
 #' @format An object of class \code{data.frame}
 #'
