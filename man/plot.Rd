@@ -3,7 +3,7 @@
 \name{plot}
 \alias{plot}
 \alias{plot.svyEffects}
-\title{Generic plot method for \pkg{svyEffects} objects}
+\title{Plot method for \pkg{svyEffects} objects}
 \usage{
 \method{plot}{svyEffects}(x, what = c("preds", "diffs"), ...)
 }

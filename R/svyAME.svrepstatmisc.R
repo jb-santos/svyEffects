@@ -238,7 +238,9 @@ svyAME.svrepstatmisc <- function(obj,
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
         preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs))
+        diffs = dplyr::as_tibble(diffs),
+        seed = seed,
+        sims = sims)
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
@@ -333,8 +335,10 @@ svyAME.svrepstatmisc <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = as_tibble(preds),
-        diffs = as_tibble(diffs))
+        preds = dplyr::as_tibble(preds),
+        diffs = dplyr::as_tibble(diffs),
+        seed = seed,
+        sims = sims)
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
@@ -659,8 +663,9 @@ svyAME.svrepstatmisc <- function(obj,
     # OUTPUT ===================================================================
 
     output <- list(
-      preds = preds,
-      seed = seed)
+      preds = dplyr::as_tibble(preds),
+      seed = seed,
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar

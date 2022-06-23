@@ -68,7 +68,7 @@ svyAME.svyolr <- function(obj,
   # Get data
   data <- model.frame(obj)
   data <- data %>% dplyr::rename(!!sym(weightvar) := `(weights)`)
-  svydata <- survey::svydesign(ids=~1, strata=NULL, weights=data[weightvar], data=data)
+  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[weightvar], data=data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
 
   # Set random number generator
@@ -96,7 +96,7 @@ svyAME.svyolr <- function(obj,
 
       for(n in seq_along(varname_seq)){
         new <- dplyr::mutate(data, !!sym(varname) := varname_seq[n])
-        Xmat <- model.matrix(formula(obj), data=new)[,-1]
+        Xmat <- model.matrix(formula(obj), data = new)[,-1]
         B <- MASS::mvrnorm(sims, coef(obj), vcov(obj))
         tau_ind <- grep("\\|", names(coef(obj)))
         Tau <- B[,tau_ind]
@@ -105,19 +105,19 @@ svyAME.svyolr <- function(obj,
         CP <- NULL
         for (i in 1:ncol(Tau)) {
           CP[[i]] <- plogis(matrix(Tau[,i],
-                                   ncol=nrow(Tau),
-                                   nrow=nrow(new),
-                                   byrow=TRUE) - Xmat %*% t(B))
+                                   ncol = nrow(Tau),
+                                   nrow = nrow(new),
+                                   byrow = TRUE) - Xmat %*% t(B))
         }
 
         P <- NULL
         for (i in 1:ncol(Tau)) {
-          if(i==1) {P[[i]] <- CP[[i]]}
-          else{P[[i]] <- CP[[i]]- CP[[(i-1)]]}}
-        P[[(ncol(Tau)+1)]] <- 1-CP[[ncol(Tau)]]
+          if(i == 1) {P[[i]] <- CP[[i]]}
+          else{P[[i]] <- CP[[i]] - CP[[(i - 1)]]}}
+        P[[(ncol(Tau)+1)]] <- 1 - CP[[ncol(Tau)]]
 
         WgtP <- lapply(1:length(P), function(i){
-          apply(P[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
+          apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
         })
 
         tmp <- data.frame(
@@ -140,14 +140,14 @@ svyAME.svyolr <- function(obj,
                      range = min(data[varname]),
                      unit = survey::svymean(data[varname], svydata) - .5,
                      sd = survey::svymean(data[varname], svydata) -
-                       (sqrt(survey::svyvar(data[varname], svydata))/2)
+                       (sqrt(survey::svyvar(data[varname], svydata)) / 2)
                      )
       tmp1 <- switch(diffchange,
                      NULL = max(data[varname]),
                      range = max(data[varname]),
                      unit = survey::svymean(data[varname], svydata) + .5,
                      sd = survey::svymean(data[varname], svydata) +
-                       (sqrt(survey::svyvar(data[varname], svydata))/2)
+                       (sqrt(survey::svyvar(data[varname], svydata)) / 2)
                      )
 
       delta <- c(tmp0, tmp1)
@@ -155,7 +155,7 @@ svyAME.svyolr <- function(obj,
 
       for(n in seq_along(delta)) {
         new <- dplyr::mutate(data, !!sym(varname) := delta[n])
-        Xmat <- model.matrix(formula(obj), data=new)[,-1]
+        Xmat <- model.matrix(formula(obj), data = new)[,-1]
         B <- MASS::mvrnorm(sims, coef(obj), vcov(obj))
         tau_ind <- grep("\\|", names(coef(obj)))
         Tau <- B[,tau_ind]
@@ -163,14 +163,14 @@ svyAME.svyolr <- function(obj,
 
         CP <- NULL
         for (i in 1:ncol(Tau)) {
-          CP[[i]] <- plogis(matrix(Tau[,i], ncol=nrow(Tau),
-                                   nrow=nrow(new), byrow=TRUE) - Xmat %*% t(B))
+          CP[[i]] <- plogis(matrix(Tau[,i], ncol = nrow(Tau),
+                                   nrow = nrow(new), byrow = TRUE) - Xmat %*% t(B))
         }
         P <- NULL
         for (i in 1:ncol(Tau)) {
-          if(i==1) {P[[i]] <- CP[[i]]}
-          else{P[[i]] <- CP[[i]]- CP[[(i-1)]]}}
-        P[[(ncol(Tau)+1)]] <- 1-CP[[ncol(Tau)]]
+          if(i == 1) {P[[i]] <- CP[[i]]}
+          else{P[[i]] <- CP[[i]]- CP[[(i - 1)]]}}
+        P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
 
         WgtP <- lapply(1:length(P), function(i){
           apply(P[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
@@ -201,7 +201,8 @@ svyAME.svyolr <- function(obj,
       output <- list(
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
-        seed = seed)
+        seed = seed,
+        sims = sims)
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
@@ -215,7 +216,7 @@ svyAME.svyolr <- function(obj,
 
       nlev <- as.numeric(nlevels(data[[varname]]))
       levs <- levels(data[[varname]])
-      nlevC2 <- (factorial(nlev) / (2 * factorial(nlev-2)))
+      nlevC2 <- (factorial(nlev) / (2 * factorial(nlev - 2)))
 
       # Create dataframes for simulations
       DFs <- lapply(1:nlev, function(x) x <- data)
@@ -303,7 +304,8 @@ svyAME.svyolr <- function(obj,
       output <- list(
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
-        seed = seed)
+        seed = seed,
+        sims = sims)
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
@@ -401,7 +403,7 @@ svyAME.svyolr <- function(obj,
       WgtByPr_list <- NULL
       for(j in 1:length(ByPr_list)) {
         Pr_list_ul <- NULL
-        Pr_list_ul <- unlist(ByPr_list[[j]], recursive=FALSE)
+        Pr_list_ul <- unlist(ByPr_list[[j]], recursive = FALSE)
         WgtPr_list <- NULL
         for (i in 1:length(Pr_list_ul)) {
           WgtPr_list[[i]] <- apply(Pr_list_ul[[i]], 2, function(x)
@@ -456,35 +458,39 @@ svyAME.svyolr <- function(obj,
       # res_list <- lapply(1:length(by_list), function(j) { ... })
       for(j in 1:length(by_list)) {
         res <- NULL
-        for(i in seq_along(varname_seq)) {
-          new <- by_list[[j]] %>% dplyr::mutate(!!sym(varname) := varname_seq[i])
+        for(k in seq_along(varname_seq)) {
+          new <- by_list[[j]] %>% dplyr::mutate(!!sym(varname) := varname_seq[k])
           Xmat <- model.matrix(formula(obj), data = new)[,-1]
           B <- MASS::mvrnorm(sims, coef(obj), vcov(obj))
           tau_ind <- grep("\\|", names(coef(obj)))
           Tau <- B[,tau_ind]
           B <- B[,-tau_ind]
 
-          CP1_1 <- plogis(matrix(Tau[,1],
-                                 ncol = nrow(Tau),
-                                 nrow = nrow(new),
-                                 byrow = TRUE) - Xmat %*% t(B))
-          CP1_2 <- plogis(matrix(Tau[,2],
-                                 ncol = nrow(Tau),
-                                 nrow = nrow(new), byrow = TRUE) - Xmat %*% t(B))
-          P1_1 <- CP1_1
-          P1_2 <- CP1_2-CP1_1
-          P1_3 <- 1-CP1_2
+          CP <- NULL
+          for (i in 1:ncol(Tau)) {
+            CP[[i]] <- plogis(matrix(Tau[,i],
+                                     ncol = nrow(Tau),
+                                     nrow = nrow(new),
+                                     byrow = TRUE) - Xmat %*% t(B))
+          }
 
-          wm1 <- apply(P1_1, 2, weighted.mean, w = data[[weightvar]])
-          wm2 <- apply(P1_2, 2, weighted.mean, w = data[[weightvar]])
-          wm3 <- apply(P1_3, 2, weighted.mean, w = data[[weightvar]])
+          P <- NULL
+          for (i in 1:ncol(Tau)) {
+            if(i == 1) {P[[i]] <- CP[[i]]}
+            else{P[[i]] <- CP[[i]] - CP[[(i - 1)]]}}
+          P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
+
+          WgtP <- lapply(1:length(P), function(i){
+            apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+          })
 
           tmp <- data.frame(
-            y = factor(obj$lev),
-            x = varname_seq[i],
-            predicted = c(mean(wm1), mean(wm2), mean(wm3)),
-            conf.low = c(low(wm1), low(wm2), low(wm3)),
-            conf.high = c(high(wm1), high(wm2), high(wm3)))
+            y = obj$lev,
+            x = varname_seq[k],
+            predicted = sapply(WgtP, mean),
+            conf.low = sapply(WgtP, low),
+            conf.high = sapply(WgtP, high),
+            type = "Probability")
 
           res <- rbind(res, tmp)
         }
@@ -635,39 +641,43 @@ svyAME.svyolr <- function(obj,
       # res_list <- lapply(1:length(by_list), function(j) { ... })
       for(j in 1:length(by_list)) {
         res <- NULL
-        for(i in seq_along(varname_seq)) {
-          new <- by_list[[j]] %>% dplyr::mutate(!!sym(varname) := varname_seq[i])
+        for(k in seq_along(varname_seq)) {
+          new <- by_list[[j]] %>% dplyr::mutate(!!sym(varname) := varname_seq[k])
           Xmat <- model.matrix(formula(obj), data = new)[,-1]
           B <- MASS::mvrnorm(sims, coef(obj), vcov(obj))
           tau_ind <- grep("\\|", names(coef(obj)))
           Tau <- B[,tau_ind]
           B <- B[,-tau_ind]
 
-          CP1_1 <- plogis(matrix(Tau[,1],
-                                 ncol = nrow(Tau),
-                                 nrow = nrow(new),
-                                 byrow = TRUE) - Xmat %*% t(B))
-          CP1_2 <- plogis(matrix(Tau[,2],
-                                 ncol = nrow(Tau),
-                                 nrow = nrow(new), byrow = TRUE) - Xmat %*% t(B))
-          P1_1 <- CP1_1
-          P1_2 <- CP1_2-CP1_1
-          P1_3 <- 1-CP1_2
+          CP <- NULL
+          for (i in 1:ncol(Tau)) {
+            CP[[i]] <- plogis(matrix(Tau[,i],
+                                     ncol = nrow(Tau),
+                                     nrow = nrow(new),
+                                     byrow = TRUE) - Xmat %*% t(B))
+          }
 
-          wm1 <- apply(P1_1, 2, weighted.mean, w = data[[weightvar]])
-          wm2 <- apply(P1_2, 2, weighted.mean, w = data[[weightvar]])
-          wm3 <- apply(P1_3, 2, weighted.mean, w = data[[weightvar]])
+          P <- NULL
+          for (i in 1:ncol(Tau)) {
+            if(i == 1) {P[[i]] <- CP[[i]]}
+            else{P[[i]] <- CP[[i]] - CP[[(i - 1)]]}}
+          P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
+
+          WgtP <- lapply(1:length(P), function(i){
+            apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+          })
 
           tmp <- data.frame(
-            y = factor(obj$lev),
-            x = varname_seq[i],
-            predicted = c(mean(wm1), mean(wm2), mean(wm3)),
-            conf.low = c(low(wm1), low(wm2), low(wm3)),
-            conf.high = c(high(wm1), high(wm2), high(wm3)))
+            y = obj$lev,
+            x = varname_seq[k],
+            predicted = sapply(WgtP, mean),
+            conf.low = sapply(WgtP, low),
+            conf.high = sapply(WgtP, high),
+            type = "Probability")
 
           res <- rbind(res, tmp)
         }
-        res$z <- as_factor(round(bylevs, 3))[[j]]
+        res$z <- factor(round(bylevs, 3))[[j]]
         res_list[[j]] <- res
       }
 
@@ -684,8 +694,9 @@ svyAME.svyolr <- function(obj,
     # OUTPUT ===================================================================
 
     output <- list(
-      preds = preds,
-      seed = seed)
+      preds = dplyr::as_tibble(preds),
+      seed = seed,
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar

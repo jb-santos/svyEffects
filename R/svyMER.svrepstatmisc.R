@@ -294,7 +294,9 @@ svyMER.svrepstatmisc <- function(obj,
     output <- list(
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
-      typical = dplyr::as_tibble(fake)
+      typical = dplyr::as_tibble(fake),
+      seed = seed,
+      sims = sims
     )
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
@@ -424,9 +426,11 @@ svyMER.svrepstatmisc <- function(obj,
     output <- list(
       preds = as_tibble(preds),
       typical = as_tibble(fake),
-      seed = seed)
+      seed = seed,
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
+    attributes(output)$byvar <- byvar
     attributes(output)$depvar <- Yname
     return(output)
 

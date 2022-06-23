@@ -1,4 +1,4 @@
-#' @title Generic plot method for \pkg{svyEffects} objects
+#' @title Plot method for \pkg{svyEffects} objects
 #' @name plot
 #'
 #' @description Uses the \pkg{ggplot2} engine to visualize the predicted

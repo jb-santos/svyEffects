@@ -287,8 +287,9 @@ svyMER.svyolr <- function(obj,
     output <- list(
       preds = dplyr::as_tibble(preds),
       diffs = dplyr::as_tibble(diffs),
+      typical = dplyr::as_tibble(fake),
       seed = seed,
-      typical = dplyr::as_tibble(fake))
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$depvar <- colnames(model.frame(obj))[1]
@@ -406,9 +407,10 @@ svyMER.svyolr <- function(obj,
 
     # Assemble combined output table
     output <- list(
-      preds = as_tibble(preds),
-      typical = as_tibble(fake),
-      seed = seed)
+      preds = dplyr::as_tibble(preds),
+      typical = dplyr::as_tibble(fake),
+      seed = seed,
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar

@@ -222,10 +222,11 @@ svyMER.glm <- function(obj,
     preds <- dplyr::rename(preds, !!sym(varname) := x)
     diffs <- dplyr::rename(diffs, !!sym(varname) := x)
     output <- list(
-      preds = preds,
-      diffs = diffs,
+      preds = dplyr::as_tibble(preds),
+      diffs = dplyr::as_tibble(diffs),
+      typical = dplyr::as_tibble(fake),
       seed = seed,
-      typical = dplyr::as_tibble(fake))
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$depvar <- colnames(obj$model)[1]
@@ -321,9 +322,10 @@ svyMER.glm <- function(obj,
     byvar_pos <- grep(byvar, names(model.frame(obj)))
 
     output <- list(
-      preds = as_tibble(preds),
-      typical = as_tibble(fake),
-      seed = seed)
+      preds = dplyr::as_tibble(preds),
+      typical = dplyr::as_tibble(fake),
+      seed = seed,
+      sims = sims)
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
