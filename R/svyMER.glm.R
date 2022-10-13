@@ -1,4 +1,4 @@
-#' @title Marginal effects at reasonable values for binary logit models of survey-weighted data
+#' Marginal Effects At Reasonable Values For Binary Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities and differences in probabilities
@@ -11,8 +11,6 @@
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar Character string denoting the name of the sampling weight
-#' variable.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -50,12 +48,11 @@
 #' library(survey)
 #' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
 #' VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
-#' svyMER(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
-#' svyMER(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#' svyMER(VOTECON, varname = "educ", seed = 2019)
+#' svyMER(VOTECON, varname = "marketlib", seed = 2019)
 #'
 svyMER.glm <- function(obj,
                        varname,
-                       weightvar,
                        nvals = 11,
                        diffchange = c("range", "unit", "sd"),
                        byvar = NULL,
@@ -68,8 +65,22 @@ svyMER.glm <- function(obj,
 
   # Get data
   data <- model.frame(obj)
-  data <- data %>% dplyr::rename(!!sym(weightvar) := `(weights)`)
-  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[weightvar], data = data)
+
+  # Check arguments up-front to stop execution before running simulations
+  if(isFALSE(varname %in% names(data))) {
+    stop(print(paste0(
+      "varname ", varname, " not found in survey design object. Maybe check your spelling?")))}
+  if(!is.null(nvals) & isFALSE(is.numeric(nvals))) {
+    stop(print(paste0(
+      "Non-numeric value entered for nvals. Please enter a numeric value.")))}
+  if(!is.null(sims) & isFALSE(is.numeric(sims))) {
+    stop(print(paste0(
+      "Non-numeric value entered for sims. Please enter a numeric value.")))}
+  if(!is.null(seed) & isFALSE(is.numeric(seed))) {
+    stop(print(paste0(
+      "Non-numeric value entered for seed. Please enter a numeric value.")))}
+
+  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data$`(weights)`, data = data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
 
   # Set random number generator
@@ -87,7 +98,9 @@ svyMER.glm <- function(obj,
     # Define variables to vary
     varylist <- as.list(varname)
     varylist <- lapply(1:length(varylist), function(i) {
-      if(class(data[[varylist[[i]]]]) == "numeric") {
+      # if(class(data[[varylist[[i]]]]) == "numeric") {
+      # if(isTRUE(inherits(class(data[[varylist[[i]]]]), "numeric"))) {
+      if(is.numeric(data[[varylist[[i]]]])) {
         varylist[[i]] <- seq(min(data[[varylist[[i]]]]), max(data[[varylist[[i]]]]), length = nvals)
       } else {
         varylist[[i]] <- levels(data[[varylist[[i]]]])
@@ -131,7 +144,8 @@ svyMER.glm <- function(obj,
     preds$ind <- as.numeric(preds$ind)
     preds <- dplyr::arrange(preds, ind)
     preds <- dplyr::select(preds, -ind)
-    if(class(data[[varname]]) == "factor") {
+    # if(class(data[[varname]]) == "factor") {
+    if(is.factor(data[[varname]])) {
       preds$x <- factor(levels(data[[varname]]), levels = levels(data[[varname]]))}
     else{preds$x <- seq(min(data[[varname]]), max(data[[varname]]), length = nvals)}
     preds <- preds %>%
@@ -142,7 +156,8 @@ svyMER.glm <- function(obj,
 
     ## Differences for categorical variables -----------------------------------
 
-    if(class(data[[varname]]) == "factor") {
+    # if(class(data[[varname]]) == "factor") {
+    if(is.factor(data[[varname]])) {
       levs <- levels(data[[varname]])
       nlev <- length(levs)
 
@@ -240,6 +255,14 @@ svyMER.glm <- function(obj,
   # (b/c interactive models should use second differences--this is on to-do list)
 
   if(!is.null(byvar)) {
+
+    # Check arguments up front to stop executionn before running simulations
+    if(isFALSE(byvar %in% names(data))) {
+      stop(print(paste0(
+        "byvar ", byvar, " not found in survey design object. Maybe check your spelling?")))}
+    if(!is.null(nvals) & isFALSE(is.numeric(nvals))) {
+      stop(print(paste0(
+        "Non-numeric value entered for nvals. Please enter a numeric value.")))}
 
     # Define variables to vary
     xvarylist <- as.list(varname)

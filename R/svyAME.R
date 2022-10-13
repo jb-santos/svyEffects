@@ -1,5 +1,4 @@
-#' @title Average marginal effects for survey-weighted binary, ordinal, and
-#' multinomial logit models
+#' Average Marginal Effects For Binary, Ordered, And Multinomial Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities for a predictor holding all
@@ -19,8 +18,6 @@
 #' class \code{svrepstatmisc} from the \pkg{svrepmisc} package (see note below).
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar Character string denoting the name of the sampling weight
-#' variable.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -80,8 +77,8 @@
 #'   data = ces19, digits = 3)
 #' VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
 #'   design = ces19_svy, family = binomial)
-#' svyAME(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
-#' svyAME(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#' svyAME(VOTECON, varname = "educ", seed = 2019)
+#' svyAME(VOTECON, varname = "marketlib", seed = 2019)
 #'
 #' @examples
 #' # Ordinal models:
@@ -91,8 +88,8 @@
 #'   data = ces19, digits = 3)
 #' CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
 #'   design = ces19_svy)
-#' svyAME(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
-#' svyAME(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#' svyAME(CONLDR, varname = "region", seed = 2019)
+#' svyAME(CONLDR, varname = "marketlib", seed = 2019)
 #'
 #'
 #' @examples
@@ -115,7 +112,6 @@
 #'
 svyAME <- function(obj,
                    varname,
-                   weightvar,
                    nvals = 11,
                    diffchange = c("range", "unit", "sd"),
                    byvar = NULL,

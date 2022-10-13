@@ -1,4 +1,4 @@
-#' @title Marginal effects at reasonable values for multinomial logit models of survey-weighted data
+#' Marginal Effects At Reasonable Values For Multinomial Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities and differences in probabilities
@@ -26,7 +26,6 @@
 #' @param obj Model object of class \code{svrepmisc::svrepstatmisc}.
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar A survey design object of class \code{survey::svydesign}.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -46,6 +45,8 @@
 #' @param modform Character string denoting the model formula used of the model.
 #' Must be in the format of class \code{modform = "y ~ x"} and match the model's
 #' formula exactly.
+#' @param weightvar Character string denoting the name of the sampling weight
+#' variable.
 #' @param ... Other arguments (currently not implemented).
 #'
 #'
@@ -83,7 +84,6 @@
 #'
 svyMER.svrepstatmisc <- function(obj,
                                  varname,
-                                 weightvar,
                                  nvals = 11,
                                  diffchange = c("range", "unit", "sd"),
                                  byvar = NULL,
@@ -92,6 +92,7 @@ svyMER.svrepstatmisc <- function(obj,
                                  seed = NULL,
                                  design,
                                  modform,
+                                 weightvar,
                                  ...) {
 
   #========== SETUP ============================================================
@@ -109,9 +110,13 @@ svyMER.svrepstatmisc <- function(obj,
   Ylevs <- levels(Yvar)
   Ynlev <- as.numeric(nlevels(Yvar))
 
-  if(class(data[[varname]]) == "factor") {
+  # if(class(data[[varname]]) == "factor") {
+  # if(isTRUE(inherits(class(data[[varname]]), "factor"))) {
+  if(is.factor(data[[varname]])) {
     Xlevs <- levels(data[[varname]])}
-  if(class(data[[varname]]) == "numeric") {
+  # if(class(data[[varname]]) == "numeric") {
+  # if(isTRUE(inherits(class(data[[varname]]), "numeric"))) {
+  if(is.numeric(data[[varname]])) {
     Xlevs <- seq(min(data[[varname]]), max(data[[varname]]), length=nvals)}
 
   # Set random number generator
@@ -131,7 +136,9 @@ svyMER.svrepstatmisc <- function(obj,
     # Define variables to vary
     varylist <- as.list(varname)
     varylist <- lapply(1:length(varylist), function(i) {
-      if(class(data[[varylist[[i]]]])=="numeric") {
+      # if(class(data[[varylist[[i]]]])=="numeric") {
+      # if(isTRUE(inherits(class(data[[varylist[[i]]]]), "numeric"))) {
+      if(is.numeric(data[[varylist[[i]]]])) {
         varylist[[i]] <- seq(min(data[[varylist[[i]]]]), max(data[[varylist[[i]]]]), length = nvals)
       } else {
         varylist[[i]] <- levels(data[[varylist[[i]]]])
@@ -172,7 +179,7 @@ svyMER.svrepstatmisc <- function(obj,
 
     # Assemble table of predictions
     preds <- data.frame(x = Xlevs)
-    if(class(data[[varname]])=="factor") {preds$x <- factor(preds$x, levels = Xlevs)}
+    if(is.factor(data[[varname]])) {preds$x <- factor(preds$x, levels = Xlevs)}
     res_m <- as.data.frame(apply(res, c(1,2), mean))
     names(res_m) <- paste0("predicted_", Ylevs)
     res_l <- as.data.frame(apply(res, c(1,2), low))

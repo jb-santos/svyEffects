@@ -2,12 +2,11 @@
 % Please edit documentation in R/svyAME.glm.R
 \name{svyAME.glm}
 \alias{svyAME.glm}
-\title{Average marginal effects for binary logit models of survey-weighted data}
+\title{Average Marginal Effects For Binary Logit Models Of Survey-Weighted Data}
 \usage{
 \method{svyAME}{glm}(
   obj,
   varname,
-  weightvar,
   nvals = 11,
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
@@ -22,9 +21,6 @@
 
 \item{varname}{Character string denoting the name of the predictor variable
 for which effects are to be calculated.}
-
-\item{weightvar}{Character string denoting the name of the sampling weight
-variable.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 11).}
@@ -67,8 +63,8 @@ data(ces19)
 library(survey)
 ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
 VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
-svyAME(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
-svyAME(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+svyAME(VOTECON, varname = "educ", seed = 2019)
+svyAME(VOTECON, varname = "marketlib", seed = 2019)
 
 }
 \author{

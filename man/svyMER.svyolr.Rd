@@ -2,12 +2,11 @@
 % Please edit documentation in R/svyMER.svyolr.R
 \name{svyMER.svyolr}
 \alias{svyMER.svyolr}
-\title{Marginal effects at reasonable values for ordered logit models of survey-weighted data}
+\title{Marginal Effects At Reasonable Values For Ordered Logit Models Of Survey-Weighted Data}
 \usage{
 \method{svyMER}{svyolr}(
   obj,
   varname,
-  weightvar,
   nvals = 11,
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
@@ -22,8 +21,6 @@
 
 \item{varname}{Character string denoting the name of the predictor variable
 for which effects are to be calculated.}
-
-\item{weightvar}{Character string denoting the name of the sampling weight  variable.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 10).}
@@ -70,8 +67,8 @@ ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
   data = ces19, digits = 3)
 CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy)
-svyMER(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
-svyMER(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+svyMER(CONLDR, varname = "region", seed = 2019)
+svyMER(CONLDR, varname = "marketlib", seed = 2019)
 
 }
 \author{

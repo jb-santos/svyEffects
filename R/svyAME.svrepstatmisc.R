@@ -1,5 +1,4 @@
-#' @title Average marginal effects for multinomial logit models of
-#' survey-weighted data
+#' Average Marginal Effects For Multinomial Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities and differences in probabilities
@@ -26,7 +25,6 @@
 #' @param obj Model object of class \code{svrepmisc::svrepstatmisc}.
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar A survey design object of class \code{survey::svydesign}.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -46,6 +44,7 @@
 #' @param modform Character string denoting the model formula used of the model.
 #' Must be in the format of class \code{modform = "y ~ x"} and match the model's
 #' formula exactly.
+#' @param weightvar A survey design object of class \code{survey::svydesign}.
 #' @param ... Other arguments (currently not implemented).
 #'
 #'
@@ -82,7 +81,6 @@
 #'
 svyAME.svrepstatmisc <- function(obj,
                                  varname,
-                                 weightvar,
                                  nvals = 11,
                                  diffchange = c("range", "unit", "sd"),
                                  byvar = NULL,
@@ -91,6 +89,7 @@ svyAME.svrepstatmisc <- function(obj,
                                  seed = NULL,
                                  design,
                                  modform,
+                                 weightvar,
                                  ...) {
 
   # SETUP ======================================================================

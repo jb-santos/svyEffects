@@ -28,6 +28,7 @@ probabilities or differences in predicted probabilities calculated by
 \examples{
 data(ces19)
 library(survey)
+library(ggplot2)
 ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
   data = ces19, digits = 3)
 VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,

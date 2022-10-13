@@ -2,13 +2,11 @@
 % Please edit documentation in R/svyAME.svrepstatmisc.R
 \name{svyAME.svrepstatmisc}
 \alias{svyAME.svrepstatmisc}
-\title{Average marginal effects for multinomial logit models of
-survey-weighted data}
+\title{Average Marginal Effects For Multinomial Logit Models Of Survey-Weighted Data}
 \usage{
 \method{svyAME}{svrepstatmisc}(
   obj,
   varname,
-  weightvar,
   nvals = 11,
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
@@ -17,6 +15,7 @@ survey-weighted data}
   seed = NULL,
   design,
   modform,
+  weightvar,
   ...
 )
 }
@@ -25,8 +24,6 @@ survey-weighted data}
 
 \item{varname}{Character string denoting the name of the predictor variable
 for which effects are to be calculated.}
-
-\item{weightvar}{A survey design object of class \code{survey::svydesign}.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 11).}
@@ -54,6 +51,8 @@ this function, it will save the seed value used for simulations in the slot
 \item{modform}{Character string denoting the model formula used of the model.
 Must be in the format of class \code{modform = "y ~ x"} and match the model's
 formula exactly.}
+
+\item{weightvar}{A survey design object of class \code{survey::svydesign}.}
 
 \item{...}{Other arguments (currently not implemented).}
 }

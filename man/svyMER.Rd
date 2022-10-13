@@ -2,13 +2,11 @@
 % Please edit documentation in R/svyMER.R
 \name{svyMER}
 \alias{svyMER}
-\title{Marginal effects at reasonable values for survey-weighted binary,
-ordinal, and multinomial logit models}
+\title{Marginal Effects At Reasonable Values For Binary, Ordered, And Multinomial Logit Models Of Survey-Weighted Data}
 \usage{
 svyMER(
   obj,
   varname,
-  weightvar,
   nvals = 11,
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
@@ -25,9 +23,6 @@ class \code{svrepstatmisc} from the \pkg{svrepmisc} package (see note below).}
 
 \item{varname}{Character string denoting the name of the predictor variable
 for which effects are to be calculated.}
-
-\item{weightvar}{Character string denoting the name of the sampling weight
-variable.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 11).}
@@ -85,8 +80,8 @@ ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
   data = ces19, digits = 3)
 VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy, family = binomial)
-svyMER(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
-svyMER(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+svyMER(VOTECON, varname = "educ", seed = 2019)
+svyMER(VOTECON, varname = "marketlib", seed = 2019)
 
 # Ordinal models:
 data(ces19)
@@ -95,8 +90,8 @@ ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
   data = ces19, digits = 3)
 CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy)
-svyMER(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
-svyMER(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+svyMER(CONLDR, varname = "region", seed = 2019)
+svyMER(CONLDR, varname = "marketlib", seed = 2019)
 
 
 # Multinomial models:

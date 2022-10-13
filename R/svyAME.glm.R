@@ -1,4 +1,4 @@
-#' @title Average marginal effects for binary logit models of survey-weighted data
+#' Average Marginal Effects For Binary Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities and differences in probabilities
@@ -10,8 +10,6 @@
 #' @param obj Model object of class \code{survey::svyglm} or \code{glm}.
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar Character string denoting the name of the sampling weight
-#' variable.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -47,12 +45,11 @@
 #' library(survey)
 #' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
 #' VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
-#' svyAME(VOTECON, varname = "educ", weightvar = "pesweight", seed = 2019)
-#' svyAME(VOTECON, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#' svyAME(VOTECON, varname = "educ", seed = 2019)
+#' svyAME(VOTECON, varname = "marketlib", seed = 2019)
 #'
 svyAME.glm <- function(obj,
                        varname,
-                       weightvar,
                        nvals = 11,
                        diffchange = c("range", "unit", "sd"),
                        byvar = NULL,
@@ -65,8 +62,22 @@ svyAME.glm <- function(obj,
 
   # Get data
   data <- model.frame(obj)
-  data <- data %>% rename(!!sym(weightvar) := `(weights)`)
-  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[weightvar], data = data)
+
+  # Check arguments up-front to stop execution before running simulations
+  if(isFALSE(varname %in% names(data))) {
+    stop(print(paste0(
+      "varname ", varname, " not found in survey design object. Maybe check your spelling?")))}
+  if(!is.null(nvals) & isFALSE(is.numeric(nvals))) {
+    stop(print(paste0(
+      "Non-numeric value entered for nvals. Please enter a numeric value.")))}
+  if(!is.null(sims) & isFALSE(is.numeric(sims))) {
+    stop(print(paste0(
+      "Non-numeric value entered for sims. Please enter a numeric value.")))}
+  if(!is.null(seed) & isFALSE(is.numeric(seed))) {
+    stop(print(paste0(
+      "Non-numeric value entered for seed. Please enter a numeric value.")))}
+
+  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data$`(weights)`, data = data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
 
   # Set random number generator
@@ -97,7 +108,7 @@ svyAME.glm <- function(obj,
         X <- model.matrix(formula(obj), tmp_d)
         Xb <- X %*% t(B)
         p <- plogis(Xb)
-        m <- apply(p, 2, weighted.mean, w = data[[weightvar]])
+        m <- apply(p, 2, weighted.mean, w = data$`(weights)`)
         m
       })
 
@@ -135,7 +146,7 @@ svyAME.glm <- function(obj,
       p0 <- as.data.frame(plogis(Xb0))
       p1 <- as.data.frame(plogis(Xb1))
       diff <- p1 - p0
-      mean_diff <- apply(diff, 2, weighted.mean, w = data[[weightvar]])
+      mean_diff <- apply(diff, 2, weighted.mean, w = data$`(weights)`)
 
       diffs <- tibble(
         x = paste0("Delta (",
@@ -181,7 +192,7 @@ svyAME.glm <- function(obj,
       XB <- lapply(1:nlev, function(i) X[[i]] %*% t(B))
       Pr <- lapply(1:nlev, function(i) plogis(XB[[i]]))
       WgtPr <- lapply(1:nlev, function(i)
-        apply(Pr[[i]], 2, function(x) weighted.mean(x, data[[weightvar]])))
+        apply(Pr[[i]], 2, function(x) weighted.mean(x, data$`(weights)`)))
 
       preds <- tibble(
         x = factor(levs, levels = levs),
@@ -199,7 +210,7 @@ svyAME.glm <- function(obj,
       WgtPr_D <- NULL  # create list of weighted first differences
       for (i in 1:nlevC2) {
         WgtPr_D[[i]] <-
-          apply(Pr_diffs[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
+          apply(Pr_diffs[[i]], 2, function(x)weighted.mean(x, data$`(weights)`))
         }
 
       diffs <- tibble(
@@ -236,6 +247,14 @@ svyAME.glm <- function(obj,
   # (b/c interactive models should use second differences--this is on to-do list)
 
   if(!is.null(byvar)) {
+
+    # Check arguments up front to stop executionn before running simulations
+    if(isFALSE(byvar %in% names(data))) {
+      stop(print(paste0(
+        "byvar ", byvar, " not found in survey design object. Maybe check your spelling?")))}
+    if(!is.null(bynvals) & isFALSE(is.numeric(bynvals))) {
+      stop(print(paste0(
+        "Non-numeric value entered for bynvals. Please enter a numeric value.")))}
 
     ## CATEGORICAL * CATEGORICAL -----------------------------------------------
 
@@ -301,7 +320,7 @@ svyAME.glm <- function(obj,
       # Weight probabilities
       wgtpr_list <- lapply(1:length(pr_list), function(i)
         apply(pr_list[[i]], 2, function(x)
-          weighted.mean(x, data[[weightvar]])
+          weighted.mean(x, data$`(weights)`)
         )
       )
 
@@ -341,7 +360,7 @@ svyAME.glm <- function(obj,
           X <- model.matrix(formula(obj), tmp_d)
           Xb <- X %*% t(B)
           p <- plogis(Xb)
-          m <- apply(p, 2, weighted.mean, w = data[[weightvar]])
+          m <- apply(p, 2, weighted.mean, w = data$`(weights)`)
           res <- rbind(res, data.frame(
             z = bylevs[[j]],
             x = varname_seq[i],
@@ -417,7 +436,7 @@ svyAME.glm <- function(obj,
 
       # Weight probabilities
       wgtpr_list <- lapply(1:length(pr_list), function(i)
-        apply(pr_list[[i]], 2, function(x) weighted.mean(x, data[[weightvar]])))
+        apply(pr_list[[i]], 2, function(x) weighted.mean(x, data$`(weights)`)))
 
       # Assemble table of probabilities
       preds <-  expand.grid(
@@ -455,7 +474,7 @@ svyAME.glm <- function(obj,
           X <- model.matrix(formula(obj), tmp_d)
           Xb <- X %*% t(B)
           p <- plogis(Xb)
-          m <- apply(p, 2, weighted.mean, w = data[[weightvar]])
+          m <- apply(p, 2, weighted.mean, w = data$`(weights)`)
           res <- rbind(res, data.frame(
             z = bylevs[[j]],
             x = varname_seq[i],

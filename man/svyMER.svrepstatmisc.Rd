@@ -2,12 +2,11 @@
 % Please edit documentation in R/svyMER.svrepstatmisc.R
 \name{svyMER.svrepstatmisc}
 \alias{svyMER.svrepstatmisc}
-\title{Marginal effects at reasonable values for multinomial logit models of survey-weighted data}
+\title{Marginal Effects At Reasonable Values For Multinomial Logit Models Of Survey-Weighted Data}
 \usage{
 \method{svyMER}{svrepstatmisc}(
   obj,
   varname,
-  weightvar,
   nvals = 11,
   diffchange = c("range", "unit", "sd"),
   byvar = NULL,
@@ -16,6 +15,7 @@
   seed = NULL,
   design,
   modform,
+  weightvar,
   ...
 )
 }
@@ -24,8 +24,6 @@
 
 \item{varname}{Character string denoting the name of the predictor variable
 for which effects are to be calculated.}
-
-\item{weightvar}{A survey design object of class \code{survey::svydesign}.}
 
 \item{nvals}{Scalar denoting the sequence length spanning the range of a
 continuous variable for which effects are to be calculated (default: 11).}
@@ -53,6 +51,9 @@ this function, it will save the seed value used for simulations in the slot
 \item{modform}{Character string denoting the model formula used of the model.
 Must be in the format of class \code{modform = "y ~ x"} and match the model's
 formula exactly.}
+
+\item{weightvar}{Character string denoting the name of the sampling weight
+variable.}
 
 \item{...}{Other arguments (currently not implemented).}
 }

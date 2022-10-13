@@ -1,4 +1,4 @@
-#' @title Average marginal effects for ordered logit models of survey-weighted data
+#' Average Marginal Effects For Ordered Logit Models Of Survey-Weighted Data
 #'
 #'
 #' @description Calculates predicted probabilities and differences in probabilities
@@ -10,7 +10,6 @@
 #' @param obj Model object of class \code{survey::svyolr}.
 #' @param varname Character string denoting the name of the predictor variable
 #' for which effects are to be calculated.
-#' @param weightvar Character string denoting the name of the sampling weight variable.
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
@@ -49,12 +48,11 @@
 #'   data = ces19, digits = 3)
 #' CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
 #'   design = ces19_svy)
-#' svyAME(CONLDR, varname = "region", weightvar = "pesweight", seed = 2019)
-#' svyAME(CONLDR, varname = "marketlib", weightvar = "pesweight", seed = 2019)
+#' svyAME(CONLDR, varname = "region", seed = 2019)
+#' svyAME(CONLDR, varname = "marketlib", seed = 2019)
 #'
 svyAME.svyolr <- function(obj,
                           varname,
-                          weightvar,
                           nvals = 11,
                           diffchange = c("range", "unit", "sd"),
                           byvar = NULL,
@@ -67,8 +65,22 @@ svyAME.svyolr <- function(obj,
 
   # Get data
   data <- model.frame(obj)
-  data <- data %>% dplyr::rename(!!sym(weightvar) := `(weights)`)
-  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[weightvar], data=data)
+
+  # Check arguments up-front to stop execution before running simulations
+  if(isFALSE(varname %in% names(data))) {
+    stop(print(paste0(
+      "varname ", varname, " not found in survey design object. Maybe check your spelling?")))}
+  if(!is.null(nvals) & isFALSE(is.numeric(nvals))) {
+    stop(print(paste0(
+      "Non-numeric value entered for nvals. Please enter a numeric value.")))}
+  if(!is.null(sims) & isFALSE(is.numeric(sims))) {
+    stop(print(paste0(
+      "Non-numeric value entered for sims. Please enter a numeric value.")))}
+  if(!is.null(seed) & isFALSE(is.numeric(seed))) {
+    stop(print(paste0(
+      "Non-numeric value entered for seed. Please enter a numeric value.")))}
+
+  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data$`(weights)`, data=data)
   if(is.character(data[[varname]])) {data[[varname]] <- as.factor(data[[varname]])}
 
   # Set random number generator
@@ -117,7 +129,7 @@ svyAME.svyolr <- function(obj,
         P[[(ncol(Tau)+1)]] <- 1 - CP[[ncol(Tau)]]
 
         WgtP <- lapply(1:length(P), function(i){
-          apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+          apply(P[[i]], 2, function(x) weighted.mean(x, data$`(weights)`))
         })
 
         tmp <- data.frame(
@@ -173,7 +185,7 @@ svyAME.svyolr <- function(obj,
         P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
 
         WgtP <- lapply(1:length(P), function(i){
-          apply(P[[i]], 2, function(x)weighted.mean(x, data[[weightvar]]))
+          apply(P[[i]], 2, function(x)weighted.mean(x, data$`(weights)`))
         })
 
         D_WgtP[[n]] <- WgtP
@@ -255,7 +267,7 @@ svyAME.svyolr <- function(obj,
       # Apply weights
       Pr_ul <- unlist(Pr, recursive=FALSE)
       WgtPr <- lapply(1:length(Pr_ul), function(i)
-        apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data[[weightvar]])))
+        apply(Pr_ul[[i]], 2, function(x)weighted.mean(x, data$`(weights)`)))
 
       # Assemble table of predicted probabilities
       preds <- expand.grid(y = obj$lev, x = levs)
@@ -320,6 +332,14 @@ svyAME.svyolr <- function(obj,
   # (b/c interactive models should use second differences--this is on to-do list)
 
   if(!is.null(byvar)) {
+
+    # Check arguments up front to stop executionn before running simulations
+    if(isFALSE(byvar %in% names(data))) {
+      stop(print(paste0(
+        "byvar ", byvar, " not found in survey design object. Maybe check your spelling?")))}
+    if(!is.null(bynvals) & isFALSE(is.numeric(bynvals))) {
+      stop(print(paste0(
+        "Non-numeric value entered for bynvals. Please enter a numeric value.")))}
 
     # CATEGORICAL * CATEGORICAL ================================================
     # (creates as many simulation dataframes as there are combinations of varname and byvar)
@@ -407,7 +427,7 @@ svyAME.svyolr <- function(obj,
         WgtPr_list <- NULL
         for (i in 1:length(Pr_list_ul)) {
           WgtPr_list[[i]] <- apply(Pr_list_ul[[i]], 2, function(x)
-            weighted.mean(x, data[[weightvar]]))
+            weighted.mean(x, data$`(weights)`))
         }
         WgtByPr_list[[j]] <- WgtPr_list
       }
@@ -481,7 +501,7 @@ svyAME.svyolr <- function(obj,
           P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
 
           WgtP <- lapply(1:length(P), function(i){
-            apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+            apply(P[[i]], 2, function(x) weighted.mean(x, data$`(weights)`))
           })
 
           tmp <- data.frame(
@@ -590,7 +610,7 @@ svyAME.svyolr <- function(obj,
         Pr_list_ul <- unlist(ByPr_list[[j]], recursive = FALSE)
         WgtPr_list <- NULL
         for (i in 1:length(Pr_list_ul)) {
-          WgtPr_list[[i]] <- apply(Pr_list_ul[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+          WgtPr_list[[i]] <- apply(Pr_list_ul[[i]], 2, function(x) weighted.mean(x, data$`(weights)`))
         }
         WgtByPr_list[[j]] <- WgtPr_list
       }
@@ -664,7 +684,7 @@ svyAME.svyolr <- function(obj,
           P[[(ncol(Tau) + 1)]] <- 1 - CP[[ncol(Tau)]]
 
           WgtP <- lapply(1:length(P), function(i){
-            apply(P[[i]], 2, function(x) weighted.mean(x, data[[weightvar]]))
+            apply(P[[i]], 2, function(x) weighted.mean(x, data$`(weights)`))
           })
 
           tmp <- data.frame(
