@@ -20,6 +20,16 @@ library(ggplot2)
 ```
 
 
+## How to install `svyEffects`
+
+Run the code below in an `R` or `RStudio` session, and it will install `{svyEffects}`. You'll need the `{remotes}` package, if you don't already have it (which is why it's included in the code). If you already have it, then just skip the first line. 
+
+```
+install.packages("remotes")
+library(remotes)
+remotes::install_github("jb-santos/svyEffects")
+```
+
 ## Introduction
 
 An oft-cited reason why `R` is not more widely used in social science research is its disjointed and incomplete set of tools to deal with weights. `{svyEffects}` helps address this problem by providing a suite of post-estimation tools for working with limited dependent variable models (binary, ordinal, and multinomial logit) estimated on survey-weighted data.

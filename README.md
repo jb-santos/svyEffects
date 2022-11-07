@@ -1,6 +1,17 @@
 svyEffects
 ================
 
+## How to install `svyEffects`
+
+Run the code below in an `R` or `RStudio` session, and it will install
+`{svyEffects}`. You’ll need the `{remotes}` package, if you don’t
+already have it (which is why it’s included in the code). If you already
+have it, then just skip the first line.
+
+    install.packages("remotes")
+    library(remotes)
+    remotes::install_github("jb-santos/svyEffects")
+
 ## Introduction
 
 An oft-cited reason why `R` is not more widely used in social science
@@ -205,7 +216,7 @@ VOTECON_educ_ame <- svyEffects::svyAME(VOTECON,
                                        weightvar = "pesweight",
                                        seed = 2019)
 VOTECON_educ_ame$preds
-#> # A tibble: 3 x 5
+#> # A tibble: 3 × 5
 #>   educ       predicted conf.low conf.high type       
 #>   <fct>          <dbl>    <dbl>     <dbl> <chr>      
 #> 1 HS or less     0.404    0.340     0.468 Probability
@@ -240,7 +251,7 @@ all pairwise comparisons between levels of our predictor variable.
 
 ``` r
 VOTECON_educ_ame$diffs
-#> # A tibble: 3 x 5
+#> # A tibble: 3 × 5
 #>   educ                    predicted conf.low conf.high type      
 #>   <chr>                       <dbl>    <dbl>     <dbl> <chr>     
 #> 1 Some PSE - HS or less     0.00397  -0.0704    0.0783 Difference
@@ -249,8 +260,7 @@ VOTECON_educ_ame$diffs
 ```
 
 These differences also compare favourably to the same results from
-`Stata`. The difference between the difference calculated by `svyAME`
-and `Stata` are \<0.001.
+`Stata`. The `svyEffects` and `Stata` results differ by \<0.001.
 
     . lincom _b[2.educ] - _b[1.educ]
 
@@ -357,7 +367,7 @@ VOTECON_marketlib_ame <- svyAME(VOTECON,
                                 weightvar = "pesweight",
                                 seed = 2019)
 VOTECON_marketlib_ame$preds
-#> # A tibble: 11 x 5
+#> # A tibble: 11 × 5
 #>    marketlib predicted conf.low conf.high type       
 #>        <dbl>     <dbl>    <dbl>     <dbl> <chr>      
 #>  1    -1         0.123   0.0749     0.182 Probability
@@ -375,7 +385,7 @@ VOTECON_marketlib_ame$preds
 
 `svyAME` also produces very similar results to `Stata` for the effect of
 market liberalism. The probabilities differ a bit more at the ends of
-the range (up to 0.006), but at the median of the variable, the results
+the range (up to 0.006), but at the median of the predictor, the results
 are within 0.001.
 
     . margins, at(marketlib=(-1(.2)1)) post
@@ -427,7 +437,7 @@ are within 0.001.
 
 ``` r
 VOTECON_marketlib_ame$diffs
-#> # A tibble: 1 x 5
+#> # A tibble: 1 × 5
 #>   marketlib              predicted conf.low conf.high type      
 #>   <chr>                      <dbl>    <dbl>     <dbl> <chr>     
 #> 1 Delta (range) : -1 - 1     0.709    0.550     0.827 Difference
@@ -496,7 +506,7 @@ Party leader.
 
 For brevity, only the visualizations of the predicted
 probabilities/differences are presented (along with comparisons versus
-Stata).
+`Stata`).
 
 ``` r
 CONLDR_region_ame <- svyAME(CONLDR,
@@ -517,7 +527,7 @@ as shown below.
 ``` r
 ggplot(CONLDR_region_ame$preds) + 
   aes(x = region, y = predicted, ymin = conf.low, ymax = conf.high, colour = y) +
-  geom_pointrange(position = position_dodge2(.2)) +
+  geom_pointrange(position = position_dodge2(.35)) +
   scale_y_continuous(limits = c(.05,.62)) +
   scale_colour_viridis_d() +
   labs(title = "Effect of region on Conservative leader rating (svyEffects)",
@@ -675,7 +685,7 @@ VOTE_region_ame <- svyAME(
   design = ces19_svy_r,
   modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
 VOTE_region_ame$preds
-#> # A tibble: 9 x 6
+#> # A tibble: 9 × 6
 #>   y            region   predicted conf.low conf.high type       
 #>   <fct>        <fct>        <dbl>    <dbl>     <dbl> <chr>      
 #> 1 Liberal      Ontario      0.445    0.397     0.492 Probability
@@ -735,7 +745,7 @@ VOTE_marketlib_ame <- svyAME(
   design = ces19_svy_r,
   modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
 VOTE_marketlib_ame$preds
-#> # A tibble: 33 x 6
+#> # A tibble: 33 × 6
 #>    y            marketlib predicted conf.low conf.high type       
 #>    <fct>            <dbl>     <dbl>    <dbl>     <dbl> <chr>      
 #>  1 Liberal           -1       0.499   0.406      0.598 Probability
@@ -748,7 +758,7 @@ VOTE_marketlib_ame$preds
 #>  8 Conservative      -0.6     0.229   0.179      0.284 Probability
 #>  9 NDP               -0.6     0.300   0.249      0.353 Probability
 #> 10 Liberal           -0.4     0.443   0.403      0.487 Probability
-#> # ... with 23 more rows
+#> # … with 23 more rows
 plot(VOTE_marketlib_ame)
 ```
 
@@ -775,7 +785,7 @@ ggplot(VOTE_marketlib_ame$preds) +
 
 ![](man/figures/unnamed-chunk-28-1.png)<!-- -->
 
-Hhere are the results from `Stata`:
+Here are the results from `Stata`:
 
 ![](images/vote_marketlib.png)
 
