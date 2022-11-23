@@ -214,7 +214,8 @@ svyAME.svyolr <- function(obj,
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
-        sims = sims)
+        sims = sims,
+        formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
@@ -317,7 +318,8 @@ svyAME.svyolr <- function(obj,
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
-        sims = sims)
+        sims = sims,
+        formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
@@ -716,7 +718,8 @@ svyAME.svyolr <- function(obj,
     output <- list(
       preds = dplyr::as_tibble(preds),
       seed = seed,
-      sims = sims)
+      sims = sims,
+      formula = formula(obj))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar

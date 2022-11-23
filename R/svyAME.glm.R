@@ -168,7 +168,8 @@ svyAME.glm <- function(obj,
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
-        sims = sims)
+        sims = sims,
+        formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(obj$model)[1]
@@ -232,7 +233,8 @@ svyAME.glm <- function(obj,
         preds = dplyr::as_tibble(preds),
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
-        sims = sims)
+        sims = sims,
+        formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(obj$model)[1]
@@ -498,7 +500,8 @@ svyAME.glm <- function(obj,
     output <- list(
       preds = dplyr::as_tibble(preds),
       seed = seed,
-      sims = sims)
+      sims = sims,
+      formula = formula(obj))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
