@@ -304,7 +304,7 @@ svyMER.svrepstatmisc <- function(obj,
       typical = dplyr::as_tibble(fake),
       seed = seed,
       sims = sims,
-      formula = formula(obj))
+      formula = as.formula(modform))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$depvar <- Yname
@@ -435,7 +435,7 @@ svyMER.svrepstatmisc <- function(obj,
       typical = as_tibble(fake),
       seed = seed,
       sims = sims,
-      formula = formula(obj))
+      formula = as.formula(modform))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar

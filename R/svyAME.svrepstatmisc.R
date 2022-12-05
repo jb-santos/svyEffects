@@ -240,7 +240,7 @@ svyAME.svrepstatmisc <- function(obj,
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
         sims = sims,
-        formula = formula(obj))
+        formula = as.formula(modform))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
@@ -339,7 +339,7 @@ svyAME.svrepstatmisc <- function(obj,
         diffs = dplyr::as_tibble(diffs),
         seed = seed,
         sims = sims,
-        formula = formula(obj))
+        formula = as.formula(modform))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
@@ -667,7 +667,7 @@ svyAME.svrepstatmisc <- function(obj,
       preds = dplyr::as_tibble(preds),
       seed = seed,
       sims = sims,
-      formula = formula(obj))
+      formula = as.formula(modform))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
