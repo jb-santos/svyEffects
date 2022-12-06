@@ -17,7 +17,7 @@ Description: Calculates marginal effects for limited dependent variable models
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 Imports: 
     dplyr,
     ggplot2,

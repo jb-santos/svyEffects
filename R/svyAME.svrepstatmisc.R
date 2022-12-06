@@ -96,7 +96,7 @@ svyAME.svrepstatmisc <- function(obj,
 
   modform <- as.formula(modform)
   data <- design$variables
-  varlist <- unlist(stringr::str_extract_all(modform, boundary("word")))
+  varlist <- unlist(stringr::str_extract_all(as.character(modform), boundary("word")))
   varlist <- append(varlist, weightvar)
   data <- dplyr::select(data, all_of(varlist)) %>% na.omit()
   svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[[weightvar]], data = data)
