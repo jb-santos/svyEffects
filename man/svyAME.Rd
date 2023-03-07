@@ -70,6 +70,7 @@ documentation for the method \code{svyAME.svrepstatmisc} for more details
 (accessible by running the command \code{?svyAME.svrepstatmisc}).
 }
 \examples{
+\dontrun{
 # Binary models:
 data(ces19)
 library(survey)
@@ -79,7 +80,9 @@ VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy, family = binomial)
 svyAME(VOTECON, varname = "educ", seed = 2019)
 svyAME(VOTECON, varname = "marketlib", seed = 2019)
+}
 
+\dontrun{
 # Ordinal models:
 data(ces19)
 library(survey)
@@ -89,8 +92,10 @@ CONLDR <- svyolr(ftconldr ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy)
 svyAME(CONLDR, varname = "region", seed = 2019)
 svyAME(CONLDR, varname = "marketlib", seed = 2019)
+}
 
 
+\dontrun{
 # Multinomial models:
 data(ces19)
 library(survey)
@@ -107,6 +112,7 @@ svyAME(VOTE, varname = "region", weightvar = "pesweight",
 svyAME(VOTE, varname = "marketlib", weightvar = "pesweight",
   seed = 2019, design = ces19_svy_r,
   modform = "vote ~ agegrp + gender + educ + region + marketlib")
+}
 
 }
 \references{

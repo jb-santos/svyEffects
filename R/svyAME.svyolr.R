@@ -42,6 +42,7 @@
 #'
 #'
 #' @examples
+#' \dontrun{
 #' data(ces19)
 #' library(survey)
 #' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
@@ -50,6 +51,7 @@
 #'   design = ces19_svy)
 #' svyAME(CONLDR, varname = "region", seed = 2019)
 #' svyAME(CONLDR, varname = "marketlib", seed = 2019)
+#' }
 #'
 svyAME.svyolr <- function(obj,
                           varname,

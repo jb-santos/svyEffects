@@ -20,6 +20,7 @@ flagging significant coefficients with an asterisk or only printing
 significant coefficients, leaving insignificant ones blank.
 }
 \examples{
+\dontrun{
 data(ces19)
 library(survey)
 ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
@@ -30,6 +31,9 @@ library(svrepmisc)
 VOTE <- svymultinom(vote ~ agegrp + gender + educ + region + marketlib,
   design = ces19_svy_r, trace = FALSE)
 mnlSig(VOTE)
+}
+
+
 }
 \author{
 Dave Armstrong

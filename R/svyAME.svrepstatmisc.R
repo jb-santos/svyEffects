@@ -63,6 +63,7 @@
 #'
 #'
 #' @examples
+#' \dontrun{
 #' data(ces19)
 #' library(survey)
 #' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
@@ -78,6 +79,7 @@
 #' svyAME(VOTE, varname = "marketlib", weightvar = "pesweight", seed = 2019,
 #'   design = ces19_svy_r,
 #'   modform = "vote ~ agegrp + gender + educ + region + marketlib")
+#' }
 #'
 svyAME.svrepstatmisc <- function(obj,
                                  varname,

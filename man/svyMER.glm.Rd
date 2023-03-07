@@ -63,8 +63,10 @@ simulations (the parametric bootstrap) to derive 95\% confidence intervals.
 \examples{
 data(ces19)
 library(survey)
-ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, digits = 3)
-VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib, design = ces19_svy, family = binomial)
+ces19_svy <- svydesign(ids = ~1, strata = NULL,
+  weights = ~pesweight, data = ces19, digits = 3)
+VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + marketlib,
+  design = ces19_svy, family = binomial)
 svyMER(VOTECON, varname = "educ", seed = 2019)
 svyMER(VOTECON, varname = "marketlib", seed = 2019)
 

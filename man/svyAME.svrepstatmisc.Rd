@@ -88,6 +88,7 @@ To use this function...
 }
 }
 \examples{
+\dontrun{
 data(ces19)
 library(survey)
 ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
@@ -103,6 +104,7 @@ svyAME(VOTE, varname = "region", weightvar = "pesweight", seed = 2019,
 svyAME(VOTE, varname = "marketlib", weightvar = "pesweight", seed = 2019,
   design = ces19_svy_r,
   modform = "vote ~ agegrp + gender + educ + region + marketlib")
+}
 
 }
 \author{
