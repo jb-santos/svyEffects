@@ -98,7 +98,7 @@ svyAME.svrepstatmisc <- function(obj,
 
   modform <- as.formula(modform)
   data <- design$variables
-  varlist <- unlist(stringr::str_extract_all(as.character(modform), boundary("word")))
+  varlist <- unformulate(modform)$vars
   varlist <- append(varlist, weightvar)
   data <- dplyr::select(data, all_of(varlist)) %>% na.omit()
   svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[[weightvar]], data = data)
@@ -112,6 +112,21 @@ svyAME.svrepstatmisc <- function(obj,
   if(is.character(data[[varname]])) {
     data[[varname]] <- as.factor(data[[varname]])
   }
+
+
+  # Check arguments up-front to stop execution before running simulations
+  if(isFALSE(varname %in% names(data))) {
+    stop(print(paste0(
+      "varname ", varname, " not found in survey design object. Maybe check your spelling?")))}
+  if(!is.null(nvals) & isFALSE(is.numeric(nvals))) {
+    stop(print(paste0(
+      "Non-numeric value entered for nvals. Please enter a numeric value.")))}
+  if(!is.null(sims) & isFALSE(is.numeric(sims))) {
+    stop(print(paste0(
+      "Non-numeric value entered for sims. Please enter a numeric value.")))}
+  if(!is.null(seed) & isFALSE(is.numeric(seed))) {
+    stop(print(paste0(
+      "Non-numeric value entered for seed. Please enter a numeric value.")))}
 
 
   # Set random number generator
@@ -238,14 +253,15 @@ svyAME.svrepstatmisc <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = as.formula(modform))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
+      attributes(output)$method <- "AME"
       return(output)
 
     } else {
@@ -337,14 +353,15 @@ svyAME.svrepstatmisc <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = as.formula(modform))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
+      attributes(output)$method <- "AME"
       return(output)
 
     }
@@ -357,6 +374,16 @@ svyAME.svrepstatmisc <- function(obj,
   # (b/c interactive models should use second differences--this is on to-do list)
 
   if(!is.null(byvar)) {
+
+
+    # Check arguments up front to stop executionn before running simulations
+    if(isFALSE(byvar %in% names(data))) {
+      stop(print(paste0(
+        "byvar ", byvar, " not found in survey design object. Maybe check your spelling?")))}
+    if(!is.null(bynvals) & isFALSE(is.numeric(bynvals))) {
+      stop(print(paste0(
+        "Non-numeric value entered for bynvals. Please enter a numeric value.")))}
+
 
     # CATEGORICAL * CATEGORICAL ================================================
     # (creates as many simulation dataframes as there are combinations of varname and byvar)
@@ -666,7 +693,7 @@ svyAME.svrepstatmisc <- function(obj,
     # OUTPUT ===================================================================
 
     output <- list(
-      preds = dplyr::as_tibble(preds),
+      preds = tibble::as_tibble(preds),
       seed = seed,
       sims = sims,
       formula = as.formula(modform))
@@ -674,6 +701,7 @@ svyAME.svrepstatmisc <- function(obj,
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
     attributes(output)$depvar <- Yname
+    attributes(output)$method <- "AME"
     return(output)
 
   }

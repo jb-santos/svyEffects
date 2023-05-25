@@ -10,7 +10,7 @@ Description: Calculates marginal effects for limited dependent variable models
   estimated on survey-weighted data using both the "average marginal effects" 
   approach (a.k.a. marginal effects at observed values) and the "marginal effects
   at reasonable/representative/typical values"" approach (a.k.a. the effect for
-  the "average case"). Uses simulation-based methods (the parametric bootstrap) 
+  the "average case"). Uses simulation-based methods (parametric bootstrapping) 
   to derive confidence intervals. It is compatible with survey-weighted models 
   of the classes \code{survey::svyglm}, \code{survey::svyolr}, and 
   \code{svrepmisc::svymultinom}. 
@@ -26,8 +26,10 @@ Imports:
     MASS,
     rlang,
     scales,
+    stats,
     stringr,
     survey,
+    tibble,
     tidyr
 Suggests: 
     nnet,

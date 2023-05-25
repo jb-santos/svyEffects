@@ -213,14 +213,15 @@ svyAME.svyolr <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
+      attributes(output)$method <- "AME"
       return(output)
 
     } else {
@@ -317,14 +318,15 @@ svyAME.svyolr <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(model.frame(obj))[1]
+      attributes(output)$method <- "AME"
       return(output)
 
     }
@@ -718,7 +720,7 @@ svyAME.svyolr <- function(obj,
     # OUTPUT ===================================================================
 
     output <- list(
-      preds = dplyr::as_tibble(preds),
+      preds = tibble::as_tibble(preds),
       seed = seed,
       sims = sims,
       formula = formula(obj))
@@ -726,6 +728,7 @@ svyAME.svyolr <- function(obj,
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
     attributes(output)$depvar <- colnames(obj$model)[1]
+    attributes(output)$method <- "AME"
     return(output)
 
   }

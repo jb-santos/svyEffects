@@ -30,6 +30,11 @@ library(remotes)
 remotes::install_github("jb-santos/svyEffects")
 ```
 
+*Note: if you have installed a previous version of this package and want to update,
+ensure you include the argument `force = TRUE` in the function call because all 
+versions of a GitHub packages are v0.0.0.9000.*
+
+
 ## Introduction
 
 An oft-cited reason why `R` is not more widely used in social science research is its disjointed and incomplete set of tools to deal with weights. `{svyEffects}` helps address this problem by providing a suite of post-estimation tools for working with limited dependent variable models (binary, ordinal, and multinomial logit) estimated on survey-weighted data.

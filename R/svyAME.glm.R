@@ -64,6 +64,11 @@ svyAME.glm <- function(obj,
 
   # SETUP ======================================================================
 
+  # Check if model is binary logit
+  if(!(family(obj)$link %in% c("logit"))) {
+    stop("Model should be of binomial family with logit link.\n")
+  }
+
   # Get data
   data <- model.frame(obj)
 
@@ -116,7 +121,7 @@ svyAME.glm <- function(obj,
         m
       })
 
-      preds <- tibble(
+      preds <- tibble::tibble(
         x = varname_seq,
         predicted = colMeans(res),
         conf.low = apply(res, 2, low),
@@ -152,7 +157,7 @@ svyAME.glm <- function(obj,
       diff <- p1 - p0
       mean_diff <- apply(diff, 2, weighted.mean, w = data$`(weights)`)
 
-      diffs <- tibble(
+      diffs <- tibble::tibble(
         x = paste0("Delta (",
                    diffchange,
                    ") : ",
@@ -169,14 +174,15 @@ svyAME.glm <- function(obj,
       preds <- dplyr::rename(preds, !!sym(varname) := x)
       diffs <- dplyr::rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(obj$model)[1]
+      attributes(output)$method <- "AME"
       return(output)
 
     } else {
@@ -199,7 +205,7 @@ svyAME.glm <- function(obj,
       WgtPr <- lapply(1:nlev, function(i)
         apply(Pr[[i]], 2, function(x) weighted.mean(x, data$`(weights)`)))
 
-      preds <- tibble(
+      preds <- tibble::tibble(
         x = factor(levs, levels = levs),
         predicted = sapply(WgtPr, mean),
         conf.low = sapply(WgtPr, low),
@@ -218,7 +224,7 @@ svyAME.glm <- function(obj,
           apply(Pr_diffs[[i]], 2, function(x)weighted.mean(x, data$`(weights)`))
         }
 
-      diffs <- tibble(
+      diffs <- tibble::tibble(
         varname1 = combn(levs, 2)[1,] ,
         varname2 = combn(levs, 2)[2,] ,
         predicted = sapply(WgtPr_D, mean),
@@ -234,14 +240,15 @@ svyAME.glm <- function(obj,
       preds <- rename(preds, !!sym(varname) := x)
       diffs <- rename(diffs, !!sym(varname) := x)
       output <- list(
-        preds = dplyr::as_tibble(preds),
-        diffs = dplyr::as_tibble(diffs),
+        preds = tibble::as_tibble(preds),
+        diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
         formula = formula(obj))
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- colnames(obj$model)[1]
+      attributes(output)$method <- "AME"
       return(output)
     }
 
@@ -502,7 +509,7 @@ svyAME.glm <- function(obj,
     ## OUTPUT ==================================================================
 
     output <- list(
-      preds = dplyr::as_tibble(preds),
+      preds = tibble::as_tibble(preds),
       seed = seed,
       sims = sims,
       formula = formula(obj))
@@ -510,6 +517,7 @@ svyAME.glm <- function(obj,
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
     attributes(output)$depvar <- colnames(obj$model)[1]
+    attributes(output)$method <- "AME"
     return(output)
 
   }

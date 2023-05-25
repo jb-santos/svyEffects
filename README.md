@@ -12,6 +12,11 @@ have it, then just skip the first line.
     library(remotes)
     remotes::install_github("jb-santos/svyEffects")
 
+*Note: if you have installed a previous version of this package and want
+to update, ensure you include the argument `force = TRUE` in the
+function call because all versions of a GitHub packages are
+v0.0.0.9000.*
+
 ## Introduction
 
 An oft-cited reason why `R` is not more widely used in social science
@@ -24,10 +29,10 @@ survey-weighted data.
 Its main set of functions calculate predicted probabilities using
 either:
 
--   the *average marginal effects* approach (also known as *marginal
-    effects at observed values*, or *adjusted predictions*); or
--   the *marginal effects at reasonable/representative/typical values*
-    approach (also known as *marginal effects for the average case*).
+- the *average marginal effects* approach (also known as *marginal
+  effects at observed values*, or *adjusted predictions*); or
+- the *marginal effects at reasonable/representative/typical values*
+  approach (also known as *marginal effects for the average case*).
 
 These approaches are analogous to Stata’s commands `margins x` and
 `margins x, at`, respectively.
@@ -37,10 +42,10 @@ differences in probabilities (also known as *contrasts*/*pairwise
 comparisons* for categorical predictors or *first differences* for
 continuous predictors) using:
 
--   for continuous predictors, the change across the entire range of the
-    variable (by default), or a one-unit or one-standard-deviation
-    change centred on the mean; or
--   for categorical predictors, all pairwise differences.
+- for continuous predictors, the change across the entire range of the
+  variable (by default), or a one-unit or one-standard-deviation change
+  centred on the mean; or
+- for categorical predictors, all pairwise differences.
 
 For both predictions and differences, it uses simulation methods (the
 parametric bootstrap) to derive 95% confidence intervals.
@@ -55,18 +60,16 @@ estimated with the `weight` option) will be added for `glm`,
 
 Also included in the package are:
 
--   A snippet of the 2019 Canadian Election Study online survey for
-    testing and demonstration purposes. This can be loaded with the
-    command `data(ces19)`.
--   A `plot()` method that creates a `ggplot` object of predicted
-    probabilities or differences in predicted probabilities. This plot
-    can be modified by adding further `ggplot` commands, which is shown
-    below.
--   A function `mnlSig` that displays a concise summary of multinomial
-    logit coefficients with statistical significance stars. This has
-    been adapted for use on `svymultinom` objects from Dave Armstrong’s
-    original function from `{DAMisc}`, which works for `multinom`
-    objects.
+- A snippet of the 2019 Canadian Election Study online survey for
+  testing and demonstration purposes. This can be loaded with the
+  command `data(ces19)`.
+- A `plot()` method that creates a `ggplot` object of predicted
+  probabilities or differences in predicted probabilities. This plot can
+  be modified by adding further `ggplot` commands, which is shown below.
+- A function `mnlSig` that displays a concise summary of multinomial
+  logit coefficients with statistical significance stars. This has been
+  adapted for use on `svymultinom` objects from Dave Armstrong’s
+  original function from `{DAMisc}`, which works for `multinom` objects.
 
 ------------------------------------------------------------------------
 
@@ -205,9 +208,9 @@ reproducibility purposes.
 
 The function’s output is a list that contains three data frames:
 
--   `$preds`: predicted probabilities
--   `$diffs`: differences in predicted probabilities
--   `$seed`: the seed value used for the simulations
+- `$preds`: predicted probabilities
+- `$diffs`: differences in predicted probabilities
+- `$seed`: the seed value used for the simulations
 
 ``` r
 library(svyEffects)
@@ -670,9 +673,9 @@ For our post-estimation command, we’ll need to specify a few more
 options because `svymultinom` does not store them in its output. These
 are:
 
--   `design`: the survey design object used to estimate the model; and
--   `modform`: the model formula used in the `svymultinom` call (in the
-    form `modform = "y ~ x1 + x2 + x3"`).
+- `design`: the survey design object used to estimate the model; and
+- `modform`: the model formula used in the `svymultinom` call (in the
+  form `modform = "y ~ x1 + x2 + x3"`).
 
 Here’s the effect of education.
 

@@ -65,6 +65,11 @@ svyMER.glm <- function(obj,
 
   #========== SETUP ============================================================
 
+  # Check if model is binary logit
+  if(!(family(obj)$link %in% c("logit"))) {
+    stop("Model should be of binomial family with logit link.\n")
+  }
+
   # Get data
   data <- model.frame(obj)
 
@@ -170,7 +175,7 @@ svyMER.glm <- function(obj,
                   function(x, y) unlist(x) - unlist(y))
       D <- as.data.frame(D)
 
-      diffs <- dplyr::tibble(
+      diffs <- tibble::tibble(
         varname1 = combn(levs, 2)[1,],
         varname2 = combn(levs, 2)[2,],
         predicted = sapply(D, mean),
@@ -223,7 +228,7 @@ svyMER.glm <- function(obj,
       fakeX <- model.matrix(formula(obj), data=fake)
       probs <- t(plogis(fakeX %*% t(B)))
       diff_res <- apply(probs, 1, diff)
-      diffs <- dplyr::tibble(
+      diffs <- tibble::tibble(
         x = paste0("Delta (", diffchange, ") : ",
                    round(diffrange[[1]], 3),
                    " - ",
@@ -239,15 +244,16 @@ svyMER.glm <- function(obj,
     preds <- dplyr::rename(preds, !!sym(varname) := x)
     diffs <- dplyr::rename(diffs, !!sym(varname) := x)
     output <- list(
-      preds = dplyr::as_tibble(preds),
-      diffs = dplyr::as_tibble(diffs),
-      typical = dplyr::as_tibble(fake),
+      preds = tibble::as_tibble(preds),
+      diffs = tibble::as_tibble(diffs),
+      typical = tibble::as_tibble(fake),
       seed = seed,
       sims = sims,
       formula = formula(obj))
     class(output) <- "svyEffects"
     attributes(output)$predvar <- varname
     attributes(output)$depvar <- colnames(obj$model)[1]
+    attributes(output)$method <- "MER"
     return(output)
 
   }
@@ -348,8 +354,8 @@ svyMER.glm <- function(obj,
     byvar_pos <- grep(byvar, names(model.frame(obj)))
 
     output <- list(
-      preds = dplyr::as_tibble(preds),
-      typical = dplyr::as_tibble(fake),
+      preds = tibble::as_tibble(preds),
+      typical = tibble::as_tibble(fake),
       seed = seed,
       sims = sims,
       formula = formula(obj))
@@ -357,6 +363,7 @@ svyMER.glm <- function(obj,
     attributes(output)$predvar <- varname
     attributes(output)$byvar <- byvar
     attributes(output)$depvar <- colnames(obj$model)[1]
+    attributes(output)$method <- "MER"
     return(output)
 
   }

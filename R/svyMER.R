@@ -57,13 +57,14 @@
 #' Marginal Effects from Limited Dependent Variable Models}. American Journal
 #' of Political Science. 57(1): 263-277.
 #'
-#' @importFrom dplyr arrange as_tibble filter group_by mutate rename relocate select summarize tibble
+#' @importFrom dplyr arrange as_tibble filter group_by mutate rename relocate select summarize
 #' @importFrom magrittr %>%
 #' @importFrom MASS mvrnorm
 #' @importFrom rlang sym
-#' @importFrom stats as.formula coef formula model.frame model.matrix na.omit plogis pnorm quantile reformulate runif terms vcov weighted.mean
+#' @importFrom stats as.formula coef family fitted.values formula model.frame model.matrix na.omit plogis pnorm predict quantile reformulate runif terms vcov weighted.mean
 #' @importFrom stringr boundary str_extract_all str_split
 #' @importFrom survey svydesign svymean svyquantile svytable
+#' @importFrom tibble as_tibble tibble
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom utils combn relist
 #'
