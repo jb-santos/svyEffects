@@ -936,11 +936,11 @@ This package is under active development, and updates will include:
 
 # References
 
-Armstrong, Dave. 2022. *DAMisc: Dave Armstrong’s Miscellaneous
+Armstrong, Dave. 2023. *DAMisc: Dave Armstrong’s Miscellaneous
 Functions*. R package version 1.7.2.
 <https://github.com/davidaarmstrong/damisc>.
 
-Ganz, Carl. 2022. *svrepmisc: Miscellaneous Functions for Replicate
+Ganz, Carl. 2019. *svrepmisc: Miscellaneous Functions for Replicate
 Weights*. R package version 0.2.2.
 <https://github.com/carlganz/svrepmisc>.
 
@@ -952,7 +952,10 @@ Political Science*. 57(1): 263-277.
 
 Ludecke, D. 2022. *ggeffects - Estimated Marginal Means and Adjusted
 Predictions from Regression Models*. R package version 1.2.2.13.
-<https://doi.org/10.21105/joss.00772>.
+<https://strengejacke.github.io/ggeffects/>.
+
+Lumley, Thoomas. 2023. *survey: Analysis of Complex Survey Samples*. R
+package version 4.2-1. <http://r-survey.r-forge.r-project.org/survey/>.
 
 Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction
 Effects and Standard Errors in Logit and Probit Models. *The Stata

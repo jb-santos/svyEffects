@@ -607,10 +607,10 @@ interaction.
 
 # References
 
-Armstrong, Dave. 2022. _DAMisc: Dave Armstrong's Miscellaneous Functions_. 
+Armstrong, Dave. 2023. _DAMisc: Dave Armstrong's Miscellaneous Functions_. 
 R package version 1.7.2. https://github.com/davidaarmstrong/damisc.
 
-Ganz, Carl. 2022. _svrepmisc: Miscellaneous Functions for Replicate Weights_. 
+Ganz, Carl. 2019. _svrepmisc: Miscellaneous Functions for Replicate Weights_. 
 R package version 0.2.2. https://github.com/carlganz/svrepmisc. 
 
 Hanmer, M.J. and K.O. Kalkan.  2013. "Behind the Curve: Clarifying the Best 
@@ -619,7 +619,10 @@ Dependent Variable Models." _American Journal of Political Science_. 57(1): 263-
 https://doi.org/10.1111/j.1540-5907.2012.00602.x. 
 
 Ludecke, D. 2022. _ggeffects - Estimated Marginal Means and Adjusted Predictions from Regression Models_. 
-R package version 1.2.2.13. https://doi.org/10.21105/joss.00772.
+R package version 1.2.2.13. https://strengejacke.github.io/ggeffects/.
+
+Lumley, Thoomas. 2023. _survey: Analysis of Complex Survey Samples_. R package version 4.2-1. 
+http://r-survey.r-forge.r-project.org/survey/. 
 
 Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction Effects 
 and Standard Errors in Logit and Probit Models. _The Stata Journal_ 4(2): 154-167. 
