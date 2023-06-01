@@ -347,14 +347,8 @@ You can also plot the differences in predicted probabilities between
 levels of education by including the option `what = "diffs"` (or simply
 `"diffs"`) in the `plot` function call.
 
-Note, to do this in `Stata`, you would have to calculate each pairwise
-difference with a separate command. While it is not difficult to write a
-loop to do that, you would still need to output the results to a
-separate matrix and then generate the plot. The functions in
-`svyEffects` do that for you.
-
 ``` r
-plot(VOTECON_educ_ame, "diffs") +
+plot(VOTECON_educ_ame, "diffs") + 
   geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
@@ -407,7 +401,8 @@ continuous predictors, the graph is not any more illuminating than the
 summary statistic.
 
 ``` r
-plot(VOTECON_marketlib_ame, "diffs")
+plot(VOTECON_marketlib_ame, "diffs") + 
+  geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
 ![](man/figures/unnamed-chunk-12-1.png)<!-- -->
@@ -523,7 +518,8 @@ plot(CONLDR_marketlib_ame)
 ![](man/figures/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
-plot(CONLDR_marketlib_ame, "diffs")
+plot(CONLDR_marketlib_ame, "diffs") + 
+  geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
 ![](man/figures/unnamed-chunk-18-1.png)<!-- -->
@@ -687,7 +683,7 @@ And here are the results from `Stata`:
 ![](images/vote_region.png)
 
 ``` r
-plot(VOTE_region_ame, "diffs") +
+plot(VOTE_region_ame, "diffs") + 
   geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
@@ -754,7 +750,8 @@ Here are the results from `Stata`:
 Finally, here are the differences:
 
 ``` r
-plot(VOTE_marketlib_ame, "diffs")
+plot(VOTE_marketlib_ame, "diffs") + 
+  geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
 ![](man/figures/unnamed-chunk-29-1.png)<!-- -->
@@ -916,45 +913,49 @@ svyPRE(CONLDR)
 
 This package is under active development, and updates will include:
 
-1.  Support for (non-survey) weighted models and non-weighted models.
-    While there are other packages that do this, some do not return
-    confidence intervals for predictions for some model types. And, to
-    my knowledge, none use simulation methods to derive confidence
+1.  Support for “vanilla” `glm`, `polr`, and `multinom` models. While
+    there are other packages that do this, some do not return confidence
+    intervals for predictions for some model types. And, to my
+    knowledge, none use simulation methods to derive confidence
     intervals. *Note: You can actually already do this with
     `{svyEffects}` by creating a survey design object with a weight of
     “1”, but it would be good to avoid having to use that workaround.*
 2.  Expand functionality with `svyrepstatmisc` model objects to reduce
     the number of arguments needed to run the functions.
-3.  Support for using an alternative variance-covariance matrix using
-    `{sandwich}`. This would only be for binary logit models because
-    `{sandwich}` does not play nice with ordinal or multinomial models.
-    That said, survey-weighted models do adjust the variance-covariance
-    matrix (the documentation for `{survey}` does not specify the
-    correction method it uses, but it appears to be HC0, based on what
-    I’ve seen).
-4.  A second differences function to test for the significance of a
+3.  A second differences function to test for the significance of a
     two-way interaction.
-5.  Explore ways to speed up computational time for calculating AMEs.
+4.  Explore ways to speed up computational time for calculating AMEs.
 
 ------------------------------------------------------------------------
 
 # References
 
 Armstrong, Dave. 2022. *DAMisc: Dave Armstrong’s Miscellaneous
-Functions.* R package version 1.7.2.
+Functions*. R package version 1.7.2.
+<https://github.com/davidaarmstrong/damisc>.
+
+Ganz, Carl. 2022. *svrepmisc: Miscellaneous Functions for Replicate
+Weights*. R package version 0.2.2.
+<https://github.com/carlganz/svrepmisc>.
 
 Hanmer, M.J. and K.O. Kalkan. 2013. “Behind the Curve: Clarifying the
 Best Approach to Calculating Predicted Probabilities and Marginal
 Effects from Limited Dependent Variable Models.” *American Journal of
 Political Science*. 57(1): 263-277.
+<https://doi.org/10.1111/j.1540-5907.2012.00602.x>.
+
+Ludecke, D. 2022. *ggeffects - Estimated Marginal Means and Adjusted
+Predictions from Regression Models*. R package version 1.2.2.13.
+<https://doi.org/10.21105/joss.00772>.
 
 Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction
 Effects and Standard Errors in Logit and Probit Models. *The Stata
-Journal* 4(2): 154-167.
+Journal* 4(2): 154-167. <https://doi.org/10.1177/1536867X0400400206>.
 
 Rainey, Carlisle. 2016. “Compression and Conditional Effects: A Product
 Term Is Essential When Using Logistic Regression to Test for
 Interaction.” *Political Science Research and Methods* 4(3): 621-639.
+<https://doi.org/10.1017/psrm.2015.59>.
 
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter
 John, 2020, “2019 Canadian Election Study - Online Survey,”
