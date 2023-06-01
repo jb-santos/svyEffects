@@ -39,6 +39,7 @@
 #' picks a random integer between 1 and 1,000,000. If you save the output of
 #' this function, it will save the seed value used for simulations in the slot
 #' \code{$seed}.
+#' @param ci Scalar indicating confidence level to be used (default: .95).
 #' @param design A survey design object with replicate weights of class
 #' \code{survey::svyrep.design}.
 #' @param modform Character string denoting the model formula used of the model.
@@ -89,6 +90,7 @@ svyAME.svrepstatmisc <- function(obj,
                                  bynvals = 3,
                                  sims = 2500,
                                  seed = NULL,
+                                 ci = .95,
                                  design,
                                  modform,
                                  weightvar,
@@ -113,7 +115,6 @@ svyAME.svrepstatmisc <- function(obj,
     data[[varname]] <- as.factor(data[[varname]])
   }
 
-
   # Check arguments up-front to stop execution before running simulations
   if(isFALSE(varname %in% names(data))) {
     stop(print(paste0(
@@ -128,7 +129,6 @@ svyAME.svrepstatmisc <- function(obj,
     stop(print(paste0(
       "Non-numeric value entered for seed. Please enter a numeric value.")))}
 
-
   # Set random number generator
   if(is.null(seed)){
     seed <- round(runif(1, min = 0, max = 1000000))
@@ -136,6 +136,11 @@ svyAME.svrepstatmisc <- function(obj,
     seed <- seed
   }
   set.seed(seed)
+
+  # high / low helper functions
+  tail <- (1 - ci) / 2
+  low <- function(x) {unname(quantile(x, tail))}
+  high <- function(x) {unname(quantile(x, 1-tail))}
 
 
 

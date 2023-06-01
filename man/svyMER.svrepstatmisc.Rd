@@ -13,6 +13,7 @@
   bynvals = 3,
   sims = 2500,
   seed = NULL,
+  ci = 0.95,
   design,
   modform,
   weightvar,
@@ -44,6 +45,8 @@ for which effects are to be calculated (default: 3).}
 picks a random integer between 1 and 1,000,000. If you save the output of
 this function, it will save the seed value used for simulations in the slot
 \code{$seed}.}
+
+\item{ci}{Scalar indicating confidence level to be used (default: .95).}
 
 \item{design}{A survey design object with replicate weights of class
 \code{survey::svyrep.design}.}

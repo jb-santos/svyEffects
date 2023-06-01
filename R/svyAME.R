@@ -32,6 +32,7 @@
 #' picks a random integer between 1 and 1,000,000. If you save the output of
 #' this function, it will save the seed value used for simulations in the slot
 #' \code{$seed}.
+#' @param ci Scalar indicating confidence level to be used (default: .95).
 #' @param ... Other arguments, depending on the type of model with which you're
 #' working. For example, for survey-weight multinomial logit models of class
 #' \code{svrepstatmisc}, you will need to specify the survey design object and
@@ -125,4 +126,5 @@ svyAME <- function(obj,
                    bynvals = 3,
                    sims = 2500,
                    seed = NULL,
+                   ci = .95,
                    ...) {UseMethod("svyAME")}

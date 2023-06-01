@@ -1,6 +1,58 @@
 svyEffects
 ================
 
+- <a href="#how-to-install-svyeffects"
+  id="toc-how-to-install-svyeffects">How to install
+  <code>svyEffects</code></a>
+- <a href="#introduction" id="toc-introduction">Introduction</a>
+- <a href="#development-history-and-differences-from-other-packages"
+  id="toc-development-history-and-differences-from-other-packages">Development
+  history and differences from other packages</a>
+- <a href="#binary-dependent-variable-models"
+  id="toc-binary-dependent-variable-models">Binary dependent variable
+  models</a>
+  - <a href="#predictions-on-a-categorical-variable"
+    id="toc-predictions-on-a-categorical-variable">Predictions on a
+    categorical variable</a>
+  - <a href="#plotting" id="toc-plotting">Plotting</a>
+  - <a href="#predictions-on-a-continuous-variable"
+    id="toc-predictions-on-a-continuous-variable">Predictions on a
+    continuous variable</a>
+- <a href="#ordinal-dependent-variable-models"
+  id="toc-ordinal-dependent-variable-models">Ordinal dependent variable
+  models</a>
+  - <a href="#predictions-on-a-categorical-variable-1"
+    id="toc-predictions-on-a-categorical-variable-1">Predictions on a
+    categorical variable</a>
+  - <a href="#predictions-on-a-continuous-variable-1"
+    id="toc-predictions-on-a-continuous-variable-1">Predictions on a
+    continuous variable</a>
+- <a href="#multinomial-dependent-variable-models"
+  id="toc-multinomial-dependent-variable-models">Multinomial dependent
+  variable models</a>
+  - <a href="#predictions-on-a-categorical-variable-2"
+    id="toc-predictions-on-a-categorical-variable-2">Predictions on a
+    categorical variable</a>
+  - <a href="#predictions-on-a-continuous-variable-2"
+    id="toc-predictions-on-a-continuous-variable-2">Predictions on a
+    continuous variable</a>
+- <a href="#marginal-effects-at-reasonable-values"
+  id="toc-marginal-effects-at-reasonable-values">Marginal effects at
+  reasonable values</a>
+- <a href="#interaction-effects" id="toc-interaction-effects">Interaction
+  effects</a>
+- <a href="#measures-of-model-fit" id="toc-measures-of-model-fit">Measures
+  of model fit</a>
+- <a href="#planned-updates" id="toc-planned-updates">Planned updates</a>
+- <a href="#references" id="toc-references">References</a>
+- <a href="#appendix-detailed-comparisons-with-stata-results"
+  id="toc-appendix-detailed-comparisons-with-stata-results">Appendix:
+  Detailed comparisons with <code>Stata</code> results</a>
+  - <a href="#binary-logit" id="toc-binary-logit">Binary logit</a>
+  - <a href="#ordered-logit" id="toc-ordered-logit">Ordered logit</a>
+  - <a href="#mulitnomial-logit" id="toc-mulitnomial-logit">Mulitnomial
+    logit</a>
+
 ## How to install `svyEffects`
 
 Run the code below in an `R` or `RStudio` session, and it will install
@@ -10,7 +62,7 @@ have it, then just skip the first line.
 
     install.packages("remotes")
     library(remotes)
-    remotes::install_github("jb-santos/svyEffects")
+    remotes::install_github("jb-santos/svyEffects, force = TRUE")
 
 *Note: if you have installed a previous version of this package and want
 to update, ensure you include the argument `force = TRUE` in the
@@ -30,21 +82,21 @@ Its main set of functions calculate predicted probabilities using
 either:
 
 - the *average marginal effects* approach (also known as *marginal
-  effects at observed values*, or *adjusted predictions*); or
+  effects at observed values*); or
 - the *marginal effects at reasonable/representative/typical values*
   approach (also known as *marginal effects for the average case*).
 
-These approaches are analogous to Stata’s commands `margins x` and
+These approaches are analogous to `Stata`’s commands `margins x` and
 `margins x, at`, respectively.
 
 After calculating predicted probabilities, it will then calculate
 differences in probabilities (also known as *contrasts*/*pairwise
-comparisons* for categorical predictors or *first differences* for
+comparisons* for categorical predictors and *first differences* for
 continuous predictors) using:
 
 - for continuous predictors, the change across the entire range of the
-  variable (by default), or a one-unit or one-standard-deviation change
-  centred on the mean; or
+  variable (by default), or a one-unit change centred on the mean or a
+  one-standard-deviation change centred on the mean; or
 - for categorical predictors, all pairwise differences.
 
 For both predictions and differences, it uses simulation methods (the
@@ -52,7 +104,7 @@ parametric bootstrap) to derive 95% confidence intervals.
 
 It works with the following survey-weighted model objects:
 `survey::svyglm` (binary logit), `survey::svyolr` (ordered logit),
-`svrepmisc::svymultinom` (multinomial logit)
+`svrepmisc::svymultinom` (multinomial logit).
 
 Eventually, support for (non-survey) weighted model objects (i.e. models
 estimated with the `weight` option) will be added for `glm`,
@@ -60,16 +112,19 @@ estimated with the `weight` option) will be added for `glm`,
 
 Also included in the package are:
 
-- A snippet of the 2019 Canadian Election Study online survey for
-  testing and demonstration purposes. This can be loaded with the
-  command `data(ces19)`.
-- A `plot()` method that creates a `ggplot` object of predicted
+- A `plot` method that creates a `ggplot` object of predicted
   probabilities or differences in predicted probabilities. This plot can
   be modified by adding further `ggplot` commands, which is shown below.
+- A function `svyPRE` that calculates the proportional reductions in
+  error for `svyglm` and `svyolr` models (functionality for
+  `svymultinom` models in development).
 - A function `mnlSig` that displays a concise summary of multinomial
   logit coefficients with statistical significance stars. This has been
   adapted for use on `svymultinom` objects from Dave Armstrong’s
   original function from `{DAMisc}`, which works for `multinom` objects.
+- A snippet of the 2019 Canadian Election Study Online Survey for
+  testing and demonstration purposes. This can be loaded with the
+  command `data(ces19)`.
 
 ------------------------------------------------------------------------
 
@@ -110,14 +165,15 @@ we’ll model voting for the Conservative Party of Canada versus voting
 for any other party.
 
 ``` r
+library(svyEffects)
 data(ces19)
 
 library(survey)
-ces19_svy <- survey::svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
-                                data = ces19, digits = 3)
+ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
+                       data = ces19, digits = 3)
 
-VOTECON <- survey::svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad, 
-                          design = ces19_svy, family = binomial)
+VOTECON <- svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad, 
+                  design = ces19_svy, family = binomial)
 summary(VOTECON)
 #> 
 #> Call:
@@ -125,8 +181,8 @@ summary(VOTECON)
 #>     relig + marketlib + culturetrad, design = ces19_svy, family = binomial)
 #> 
 #> Survey design:
-#> survey::svydesign(ids = ~1, strata = NULL, weights = ~pesweight, 
-#>     data = ces19, digits = 3)
+#> svydesign(ids = ~1, strata = NULL, weights = ~pesweight, data = ces19, 
+#>     digits = 3)
 #> 
 #> Coefficients:
 #>                             Estimate Std. Error t value Pr(>|t|)    
@@ -152,49 +208,10 @@ summary(VOTECON)
 ```
 
 The estimates from `survey::svyglm` closely resemble the ones from
-`Stata`’s `ologit` command with `[pweight=]` specified.
+`Stata`’s `logit` command with `[pweight=]` specified (see the
+comparison tables in the Appendix).
 
-    . logit votecon i.agegrp i.gender i.educ i.region i.relig marketlib culturetrad [pweight=pesweight]
-
-    Iteration 0:   log pseudolikelihood = -748.14844  
-    Iteration 1:   log pseudolikelihood = -527.72183  
-    Iteration 2:   log pseudolikelihood = -521.12786  
-    Iteration 3:   log pseudolikelihood =  -521.0995  
-    Iteration 4:   log pseudolikelihood =  -521.0995  
-
-    Logistic regression                             Number of obs     =      1,284
-                                                    Wald chi2(12)     =     233.71
-                                                    Prob > chi2       =     0.0000
-    Log pseudolikelihood =  -521.0995               Pseudo R2         =     0.3035
-
-    -----------------------------------------------------------------------------------------
-                            |               Robust
-                    votecon |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
-    ------------------------+----------------------------------------------------------------
-                     agegrp |
-                     35-54  |    .189691   .3066531     0.62   0.536    -.4113379      .79072
-                       55+  |   .3757134   .3022457     1.24   0.214    -.2166774    .9681042
-                            |
-                     gender |
-               Woman/Other  |  -.3595359    .187009    -1.92   0.055    -.7260668    .0069949
-                            |
-                       educ |
-                  Some PSE  |   .0288547   .2444425     0.12   0.906    -.4502439    .5079532
-                Uni degree  |   .0815175   .2696145     0.30   0.762    -.4469172    .6099521
-                            |
-                     region |
-                      West  |   .6462519   .1960296     3.30   0.001     .2620408    1.030463
-                  Atlantic  |    .328965   .3562407     0.92   0.356    -.3692538    1.027184
-                            |
-                      relig |
-                  Catholic  |   .4525211   .2619628     1.73   0.084    -.0609167    .9659588
-    Non-Catholic Christian  |     .65283   .2296122     2.84   0.004     .2027984    1.102862
-                     Other  |   .7505504   .3960992     1.89   0.058    -.0257897    1.526891
-                            |
-                  marketlib |   2.285789   .3026759     7.55   0.000     1.692555    2.879023
-                culturetrad |   1.961341   .2384488     8.23   0.000      1.49399    2.428692
-                      _cons |  -.7241952   .4295126    -1.69   0.092    -1.566024    .1176339
-    -----------------------------------------------------------------------------------------
+## Predictions on a categorical variable
 
 Let’s look at the effect of educational attainment (`educ`), a
 categorical predictor with three levels: high school or less, some
@@ -216,7 +233,6 @@ The function’s output is a list that contains three data frames:
 library(svyEffects)
 VOTECON_educ_ame <- svyEffects::svyAME(VOTECON,
                                        varname = "educ",
-                                       weightvar = "pesweight",
                                        seed = 2019)
 VOTECON_educ_ame$preds
 #> # A tibble: 3 × 5
@@ -227,27 +243,10 @@ VOTECON_educ_ame$preds
 #> 3 Uni degree     0.416    0.374     0.458 Probability
 ```
 
-The results from the equivalent `Stata` command are below. We can see
-the results produced by `sveAME` are within 0.001 for the mean predicted
-probability and within 0.002 for the upper and lower 95% confidence
-bounds.
-
-    . margins educ, post
-
-    Predictive margins                              Number of obs     =      1,284
-    Model VCE    : Robust
-
-    Expression   : Pr(votecon), predict()
-
-    ------------------------------------------------------------------------------
-                 |            Delta-method
-                 |     Margin   Std. Err.      z    P>|z|     [95% Conf. Interval]
-    -------------+----------------------------------------------------------------
-            educ |
-     HS or less  |   .4028122    .032937    12.23   0.000      .338257    .4673675
-       Some PSE  |   .4072815   .0198093    20.56   0.000     .3684559     .446107
-     Uni degree  |   .4154583   .0218131    19.05   0.000     .3727054    .4582112
-    ------------------------------------------------------------------------------
+Again, the results from `svyAME` match the `Stata` equivalent of
+`margins` within 0.001 for the mean predicted probability and within
+0.002 for the upper and lower 95% confidence bounds (see the relevant
+table in the Appendix).
 
 `svyAME` also calculates the differences in predicted probabilities for
 all pairwise comparisons between levels of our predictor variable.
@@ -262,7 +261,7 @@ VOTECON_educ_ame$diffs
 #> 3 Uni degree - Some PSE     0.00849  -0.0510    0.0682 Difference
 ```
 
-These differences also compare favourably to the same results from
+The differences also compare favourably to the same results from
 `Stata`. The `svyEffects` and `Stata` results differ by \<0.001.
 
     . lincom _b[2.educ] - _b[1.educ]
@@ -295,6 +294,8 @@ These differences also compare favourably to the same results from
              (1) |   .0081769   .0302207     0.27   0.787    -.0510547    .0674084
     ------------------------------------------------------------------------------
 
+## Plotting
+
 The outputs of this function lend themselves well to plotting using
 `{ggplot2}`. As an example, let’s plot the predicted probabilities of
 voting Conservative across levels of education.
@@ -314,7 +315,7 @@ ggplot(VOTECON_educ_ame$preds) +
 
 ![](man/figures/unnamed-chunk-6-1.png)<!-- -->
 
-For convenience, `{svyEffects}` also includes a `plot()` method, which
+For convenience, `{svyEffects}` also includes a `plot` method, which
 uses the `{ggplot2}` engine to visualize either predicted probabilities
 or differences in predicted probabilities.
 
@@ -344,7 +345,7 @@ plot(VOTECON_educ_ame) +
 
 You can also plot the differences in predicted probabilities between
 levels of education by including the option `what = "diffs"` (or simply
-`"diffs"`) in the `plot()` function call.
+`"diffs"`) in the `plot` function call.
 
 Note, to do this in `Stata`, you would have to calculate each pairwise
 difference with a separate command. While it is not difficult to write a
@@ -359,6 +360,8 @@ plot(VOTECON_educ_ame, "diffs") +
 
 ![](man/figures/unnamed-chunk-9-1.png)<!-- -->
 
+## Predictions on a continuous variable
+
 Now, let’s look at the effect of market liberalism, a continuous
 predictor that ranges from -1 (minimal market liberalism, or the most
 left-wing position) to +1 (maximal market liberalism, or the most
@@ -367,7 +370,6 @@ right-wing position).
 ``` r
 VOTECON_marketlib_ame <- svyAME(VOTECON,
                                 varname = "marketlib",
-                                weightvar = "pesweight",
                                 seed = 2019)
 VOTECON_marketlib_ame$preds
 #> # A tibble: 11 × 5
@@ -387,56 +389,7 @@ VOTECON_marketlib_ame$preds
 ```
 
 `svyAME` also produces very similar results to `Stata` for the effect of
-market liberalism. The probabilities differ a bit more at the ends of
-the range (up to 0.006), but at the median of the predictor, the results
-are within 0.001.
-
-    . margins, at(marketlib=(-1(.2)1)) post
-
-    Predictive margins                              Number of obs     =      1,284
-    Model VCE    : Robust
-
-    Expression   : Pr(votecon), predict()
-
-    1._at        : marketlib       =          -1
-
-    2._at        : marketlib       =         -.8
-
-    3._at        : marketlib       =         -.6
-
-    4._at        : marketlib       =         -.4
-
-    5._at        : marketlib       =         -.2
-
-    6._at        : marketlib       =           0
-
-    7._at        : marketlib       =          .2
-
-    8._at        : marketlib       =          .4
-
-    9._at        : marketlib       =          .6
-
-    10._at       : marketlib       =          .8
-
-    11._at       : marketlib       =           1
-
-    ------------------------------------------------------------------------------
-                 |            Delta-method
-                 |     Margin   Std. Err.      z    P>|z|     [95% Conf. Interval]
-    -------------+----------------------------------------------------------------
-             _at |
-              1  |   .1181695   .0276963     4.27   0.000     .0638859    .1724532
-              2  |   .1662161   .0284543     5.84   0.000     .1104467    .2219855
-              3  |   .2264479   .0262596     8.62   0.000     .1749801    .2779157
-              4  |   .2980519   .0215145    13.85   0.000     .2558844    .3402195
-              5  |   .3786382   .0172419    21.96   0.000     .3448446    .4124317
-              6  |    .464545   .0192988    24.07   0.000     .4267201      .50237
-              7  |   .5514882   .0272903    20.21   0.000     .4980002    .6049763
-              8  |    .635286   .0359907    17.65   0.000     .5647454    .7058265
-              9  |    .712409   .0424183    16.79   0.000     .6292706    .7955475
-             10  |   .7802779   .0453287    17.21   0.000     .6914353    .8691204
-             11  |   .8373832   .0445384    18.80   0.000     .7500895     .924677
-    ------------------------------------------------------------------------------
+market liberalism (see Appendix).
 
 ``` r
 VOTECON_marketlib_ame$diffs
@@ -504,17 +457,18 @@ summary(CONLDR)
 #> Lukewarm|Hot   0.1141  0.3704     0.3079
 ```
 
-Here’s the effect of education on feelings towards the Conservative
-Party leader.
+## Predictions on a categorical variable
+
+Here’s the effect of region on feelings towards the Conservative Party
+leader.
 
 For brevity, only the visualizations of the predicted
-probabilities/differences are presented (along with comparisons versus
-`Stata`).
+probabilities/differences are presented, along with comparisons versus
+`Stata`. Detailed comparison tables can be seen in the Appendix.
 
 ``` r
 CONLDR_region_ame <- svyAME(CONLDR,
                             varname = "region",
-                            weightvar = "pesweight",
                             seed = 2019)
 plot(CONLDR_region_ame)
 ```
@@ -542,7 +496,7 @@ ggplot(CONLDR_region_ame$preds) +
 
 ![](man/figures/unnamed-chunk-15-1.png)<!-- -->
 
-The predicted probabilities for region are very similar to the Stata
+The predicted probabilities for region are very similar to the `Stata`
 results.
 
 ![](images/conldr_region.png)
@@ -554,12 +508,13 @@ plot(CONLDR_region_ame, "diffs") +
 
 ![](man/figures/unnamed-chunk-16-1.png)<!-- -->
 
-Here’s the effect of market liberalism.
+## Predictions on a continuous variable
+
+Here’s the effect of market liberalism:
 
 ``` r
 CONLDR_marketlib_ame <- svyAME(CONLDR,
                             varname = "marketlib",
-                            weightvar = "pesweight",
                             diffchange = "range",
                             seed = 2019)
 plot(CONLDR_marketlib_ame)
@@ -609,7 +564,7 @@ Conservatives, and New Democrats) and exclude the province of Quebec
 (which has a different party system and patterns of vote choice).
 
 There is no way to directly estimate a multinomial model with the
-`{survey}` package in R. The package `{svyrepmisc}` generates an
+`{survey}` package in `R`. The package `{svyrepmisc}` generates an
 approximation by turning the weighting scheme into replicate weights and
 estimating the model with those. It uses the jackknife to calculate
 variances.
@@ -637,8 +592,8 @@ After our survey design object with replicate weights and jackknife
 variances is created, we can use the function `svymultinom` from
 `{svyrepmisc}` to run our vote choice model.
 
-Note: use the option `trace = FALSE` in the `svymultinom()` function
-call to suppress the reporting of each replication (similar to using the
+Note: use the option `trace = FALSE` in the `svymultinom` function call
+to suppress the reporting of each replication (similar to using the
 option `quietly` in Stata).
 
 Included with `{svyEffects}` the function `mnlSig`, which displays
@@ -669,6 +624,8 @@ mnlSig(VOTE)
 #> culturetrad                       1.990*  0.076
 ```
 
+## Predictions on a categorical variable
+
 For our post-estimation command, we’ll need to specify a few more
 options because `svymultinom` does not store them in its output. These
 are:
@@ -677,7 +634,7 @@ are:
 - `modform`: the model formula used in the `svymultinom` call (in the
   form `modform = "y ~ x1 + x2 + x3"`).
 
-Here’s the effect of education.
+Here’s the effect of education:
 
 ``` r
 VOTE_region_ame <- svyAME(
@@ -736,7 +693,9 @@ plot(VOTE_region_ame, "diffs") +
 
 ![](man/figures/unnamed-chunk-26-1.png)<!-- -->
 
-Here’s the effect of market liberalism.
+## Predictions on a continuous variable
+
+Here’s the effect of market liberalism:
 
 ``` r
 VOTE_marketlib_ame <- svyAME(
@@ -792,7 +751,7 @@ Here are the results from `Stata`:
 
 ![](images/vote_marketlib.png)
 
-Finally, are the differences:
+Finally, here are the differences:
 
 ``` r
 plot(VOTE_marketlib_ame, "diffs")
@@ -806,17 +765,18 @@ plot(VOTE_marketlib_ame, "diffs")
 
 *(documentation in progress)*
 
-You can choose to calculate marginal effects at reasonable values (MER)
-probabilities and differences by using the `svyMER` function, which
-follows the same arguments as `svyAME`. This command would give you the
-estimated effect of a variable “for the ‘typical’ case” (which may or
-may not be typical, plausible, or even possible in the real world) as
-opposed to the effect of a variable across the population (see Hanmer
-and Kalkan 2013 for an in-depth discussion).
+You can choose to calculate predicted probabilities and differences
+using the “marginal effects at reasonable/representative values” (MER)
+approach by using the `svyMER` function, which uses the same arguments
+as `svyAME`. This command would give you the estimated effect of a
+variable “for the ‘typical’ case” (which may or may not be typical,
+plausible, or even possible in the real world) as opposed to the effect
+of a variable across the population (see Hanmer and Kalkan 2013 for an
+in-depth discussion).
 
 MER probabilities are *usually* very similar to AME probabilities, but
 not always. However, they are *much* faster to calculate using
-simulation methods.
+simulation methods because they do not use all cases in the data set.
 
 ------------------------------------------------------------------------
 
@@ -826,18 +786,129 @@ simulation methods.
 
 Both `svyAME` and `svyMER` support calculating predicted probabilities
 of combinations of two predictor variables. This can be done by using
-the argument `byvar = "x"` in the function call.
+the argument `byvar = "x"` in the function call. This works with or
+without a product term.
 
 This will not return differences in predicted probabilities. For
 limited-dependent variable models, one would need to calculate a second
-difference would be needed to test for the significance of an
-interaction between two variables, either from the inclusion of a
-product term or through the compression inherent in these types of
-models (see Norton, Wang, and Ai 2004).
+difference to test for the significance of an interaction between two
+variables, either from the inclusion of a product term or through the
+compression inherent in these types of models (see Norton, Wang, and Ai
+2004).
 
-Dave Armstrong’s `{DAMisc}` package has an `R` port for Norton, Wang,
-and Ai’s original `Stata` function, and this will eventually be ported
-to `{svyEffects}` for use in survey-weighted models.
+Dave Armstrong’s `{DAMisc}` package
+(<https://github.com/davidaarmstrong/damisc/>) has an `R` port for
+Norton, Wang, and Ai’s original `Stata` function, and this will
+eventually be ported to `{svyEffects}` and adapted for use in
+survey-weighted models.
+
+``` r
+VOTECON_educ_region <- svyAME(VOTECON,
+                              varname = "educ",
+                              byvar = "region",
+                              seed = 2019)
+VOTECON_educ_region$preds
+#> # A tibble: 9 × 6
+#>   educ       region   predicted conf.low conf.high type       
+#>   <fct>      <fct>        <dbl>    <dbl>     <dbl> <chr>      
+#> 1 HS or less Ontario      0.359    0.289     0.429 Probability
+#> 2 Some PSE   Ontario      0.363    0.314     0.411 Probability
+#> 3 Uni degree Ontario      0.371    0.322     0.422 Probability
+#> 4 HS or less West         0.458    0.388     0.527 Probability
+#> 5 Some PSE   West         0.463    0.414     0.515 Probability
+#> 6 Uni degree West         0.471    0.417     0.525 Probability
+#> 7 HS or less Atlantic     0.408    0.286     0.532 Probability
+#> 8 Some PSE   Atlantic     0.411    0.308     0.511 Probability
+#> 9 Uni degree Atlantic     0.420    0.315     0.526 Probability
+plot(VOTECON_educ_region)
+```
+
+![](man/figures/unnamed-chunk-30-1.png)<!-- -->
+
+``` r
+VOTECON_marketlib_educ <- svyAME(VOTECON,
+                                 varname = "marketlib",
+                                 byvar = "educ",
+                                 seed = 2019)
+VOTECON_marketlib_educ$preds
+#> # A tibble: 33 × 5
+#>    educ       marketlib predicted conf.low conf.high
+#>    <fct>          <dbl>     <dbl>    <dbl>     <dbl>
+#>  1 HS or less    -1         0.120   0.0705     0.185
+#>  2 HS or less    -0.8       0.167   0.110      0.240
+#>  3 HS or less    -0.6       0.226   0.163      0.298
+#>  4 HS or less    -0.4       0.297   0.227      0.366
+#>  5 HS or less    -0.2       0.375   0.301      0.450
+#>  6 HS or less     0         0.458   0.378      0.548
+#>  7 HS or less     0.200     0.545   0.454      0.643
+#>  8 HS or less     0.4       0.627   0.524      0.727
+#>  9 HS or less     0.6       0.702   0.587      0.808
+#> 10 HS or less     0.8       0.771   0.653      0.874
+#> # … with 23 more rows
+plot(VOTECON_marketlib_educ)
+```
+
+![](man/figures/unnamed-chunk-31-1.png)<!-- -->
+
+``` r
+VOTECON2 <- svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad +
+                     marketlib:educ, 
+                   design = ces19_svy, family = binomial)
+VOTECON2_marketlib_educ <- svyAME(VOTECON2,
+                                  varname = "marketlib",
+                                  byvar = "educ",
+                                  seed = 2019)
+VOTECON2_marketlib_educ$preds
+#> # A tibble: 33 × 5
+#>    educ       marketlib predicted conf.low conf.high
+#>    <fct>          <dbl>     <dbl>    <dbl>     <dbl>
+#>  1 HS or less    -1         0.145   0.0492     0.295
+#>  2 HS or less    -0.8       0.185   0.0868     0.314
+#>  3 HS or less    -0.6       0.240   0.146      0.352
+#>  4 HS or less    -0.4       0.304   0.226      0.394
+#>  5 HS or less    -0.2       0.377   0.307      0.449
+#>  6 HS or less     0         0.456   0.365      0.548
+#>  7 HS or less     0.200     0.532   0.406      0.659
+#>  8 HS or less     0.4       0.608   0.442      0.764
+#>  9 HS or less     0.6       0.676   0.473      0.848
+#> 10 HS or less     0.8       0.738   0.501      0.910
+#> # … with 23 more rows
+plot(VOTECON2_marketlib_educ)
+```
+
+![](man/figures/unnamed-chunk-32-1.png)<!-- -->
+
+------------------------------------------------------------------------
+
+# Measures of model fit
+
+*(documentation in progress)*
+
+The `svyPRE` function calculates the proportional reduction in error for
+binary (`svyglm`) and ordered (`svyolr`) logit models.
+
+Functionality for multinomial (`svyrepstatmisc`) models is currently
+under development.
+
+``` r
+svyPRE(VOTECON)
+#> # A tibble: 3 × 2
+#>   Measure                      Value
+#>   <chr>                        <dbl>
+#> 1 Percent in modal category    0.592
+#> 2 Percent correctly classified 0.747
+#> 3 Percent reduction in error   0.380
+```
+
+``` r
+svyPRE(CONLDR)
+#> # A tibble: 3 × 2
+#>   Measure                      Value
+#>   <chr>                        <dbl>
+#> 1 Percent in modal category    0.477
+#> 2 Percent correctly classified 0.698
+#> 3 Percent reduction in error   0.422
+```
 
 ------------------------------------------------------------------------
 
@@ -845,28 +916,25 @@ to `{svyEffects}` for use in survey-weighted models.
 
 This package is under active development, and updates will include:
 
-1.  More user-friendly error-checking and reporting (e.g. checking at
-    the beginning of the function that the variables in the function
-    don’t have typos).
-2.  Support for (non-survey) weighted models and weighted models. While
-    there are other packages that do this, some do not return confidence
-    intervals for predictions for some model types. And, to my
-    knowledge, none use simulation methods to derive confidence
+1.  Support for (non-survey) weighted models and non-weighted models.
+    While there are other packages that do this, some do not return
+    confidence intervals for predictions for some model types. And, to
+    my knowledge, none use simulation methods to derive confidence
     intervals. *Note: You can actually already do this with
     `{svyEffects}` by creating a survey design object with a weight of
     “1”, but it would be good to avoid having to use that workaround.*
-3.  In-depth comparisons with Stata results.
-4.  Functions for calculating weighted model fit measures.
-5.  Support for using an alternative variance-covariance matrix using
+2.  Expand functionality with `svyrepstatmisc` model objects to reduce
+    the number of arguments needed to run the functions.
+3.  Support for using an alternative variance-covariance matrix using
     `{sandwich}`. This would only be for binary logit models because
     `{sandwich}` does not play nice with ordinal or multinomial models.
     That said, survey-weighted models do adjust the variance-covariance
     matrix (the documentation for `{survey}` does not specify the
     correction method it uses, but it appears to be HC0, based on what
     I’ve seen).
-6.  A second differences function to test for the significance of a
+4.  A second differences function to test for the significance of a
     two-way interaction.
-7.  (Eventually) Use of the delta method to calculate confidence
+5.  (Eventually) Use of the delta method to calculate confidence
     intervals for AMEs probabilities to speed up computational time.
 
 ------------------------------------------------------------------------
@@ -892,3 +960,177 @@ Interaction.” *Political Science Research and Methods* 4(3): 621-639.
 Stephenson, Laura B; Harell, Allison; Rubenson, Daniel; Loewen, Peter
 John, 2020, “2019 Canadian Election Study - Online Survey,”
 <https://doi.org/10.7910/DVN/DUS88V>, Harvard Dataverse, V1.
+
+------------------------------------------------------------------------
+
+# Appendix: Detailed comparisons with `Stata` results
+
+## Binary logit
+
+Parameter estimates and standard errors
+
+<div style="font-size:9pt">
+
+
+``` r
+logit_b
+#> # A tibble: 13 × 5
+#>    term                            R_b Stata_b  R_se Stata_se
+#>    <chr>                         <dbl>   <dbl> <dbl>    <dbl>
+#>  1 (Intercept)                 -0.724  -0.724  0.430    0.430
+#>  2 agegrp35-54                  0.190   0.190  0.307    0.307
+#>  3 agegrp55+                    0.376   0.376  0.302    0.302
+#>  4 genderWoman/Other           -0.360  -0.360  0.187    0.187
+#>  5 educSome PSE                 0.0288  0.0289 0.244    0.244
+#>  6 educUni degree               0.0815  0.0815 0.270    0.270
+#>  7 regionWest                   0.646   0.646  0.196    0.196
+#>  8 regionAtlantic               0.329   0.329  0.356    0.356
+#>  9 religCatholic                0.453   0.453  0.262    0.262
+#> 10 religNon-Catholic Christian  0.653   0.653  0.230    0.230
+#> 11 religOther                   0.751   0.751  0.396    0.396
+#> 12 marketlib                    2.29    2.29   0.303    0.303
+#> 13 culturetrad                  1.96    1.96   0.238    0.238
+```
+
+/div\>
+
+Predicted probabilities (AMEs)
+
+<div style="font-size:9pt">
+
+``` r
+logit_ame
+#> # A tibble: 14 × 8
+#>    term      y            R_b Stata_b  R_lwr Stata_lwr R_upr Stata_upr
+#>    <chr>     <chr>      <dbl>   <dbl>  <dbl>     <dbl> <dbl>     <dbl>
+#>  1 educ      HS or less 0.404   0.403 0.340     0.338  0.468     0.467
+#>  2 educ      Some PSE   0.408   0.407 0.369     0.368  0.446     0.446
+#>  3 educ      Uni degree 0.416   0.415 0.374     0.373  0.458     0.458
+#>  4 marketlib -1         0.123   0.118 0.0639    0.0749 0.182     0.172
+#>  5 marketlib -0.8       0.170   0.166 0.110     0.118  0.232     0.222
+#>  6 marketlib -0.6       0.230   0.226 0.175     0.180  0.281     0.278
+#>  7 marketlib -0.4       0.300   0.298 0.256     0.260  0.341     0.340
+#>  8 marketlib -0.2       0.379   0.379 0.345     0.345  0.412     0.412
+#>  9 marketlib 0          0.465   0.465 0.427     0.428  0.505     0.502
+#> 10 marketlib 0.2        0.551   0.551 0.498     0.501  0.605     0.605
+#> 11 marketlib 0.4        0.633   0.635 0.565     0.564  0.701     0.706
+#> 12 marketlib 0.6        0.709   0.712 0.629     0.625  0.791     0.796
+#> 13 marketlib 0.8        0.778   0.780 0.691     0.685  0.858     0.869
+#> 14 marketlib 1          0.831   0.837 0.750     0.731  0.909     0.925
+```
+
+</div>
+
+## Ordered logit
+
+Parameter estimates and standard errors
+
+<div style="font-size:9pt">
+
+
+``` r
+ologit_b
+#> # A tibble: 14 × 5
+#>    term                            R_b Stata_b  R_se Stata_se
+#>    <chr>                         <dbl>   <dbl> <dbl>    <dbl>
+#>  1 agegrp35-54                  0.178   0.178  0.267    0.267
+#>  2 agegrp55+                    0.0460  0.0460 0.269    0.269
+#>  3 genderWoman/Other           -0.499  -0.499  0.171    0.171
+#>  4 educSome PSE                -0.208  -0.208  0.223    0.223
+#>  5 educUni degree              -0.102  -0.102  0.243    0.243
+#>  6 regionWest                   0.416   0.416  0.179    0.179
+#>  7 regionAtlantic              -0.0955 -0.0955 0.288    0.288
+#>  8 religCatholic                0.465   0.465  0.225    0.225
+#>  9 religNon-Catholic Christian  0.608   0.608  0.220    0.220
+#> 10 religOther                   0.800   0.800  0.346    0.346
+#> 11 marketlib                    1.96    1.96   0.257    0.257
+#> 12 culturetrad                  1.96    1.96   0.226    0.226
+#> 13 Cold|Lukewarm               -0.472  -0.472  0.382    0.382
+#> 14 Lukewarm|Hot                 0.114   0.114  0.370    0.370
+```
+
+/div\>
+
+Predicted probabilities (AMEs)
+
+<div style="font-size:9pt">
+
+``` r
+ologit_ame
+#> # A tibble: 42 × 9
+#>    term      y        x           R_b Stata_b  R_lwr Stata_lwr R_upr Stata_upr
+#>    <chr>     <chr>    <chr>     <dbl>   <dbl>  <dbl>     <dbl> <dbl>     <dbl>
+#>  1 region    Cold     Ontario  0.502   0.501  0.461     0.460  0.544     0.542
+#>  2 region    Cold     West     0.434   0.0956 0.393     0.0748 0.475     0.116
+#>  3 region    Cold     Atlantic 0.517   0.403  0.433     0.365  0.603     0.442
+#>  4 region    Hot      Ontario  0.403   0.517  0.364     0.431  0.440     0.602
+#>  5 region    Hot      West     0.471   0.0954 0.429     0.0748 0.512     0.116
+#>  6 region    Hot      Atlantic 0.389   0.388  0.303     0.302  0.474     0.473
+#>  7 region    Lukewarm Ontario  0.0950  0.434  0.0741    0.393  0.116     0.475
+#>  8 region    Lukewarm West     0.0945  0.0950 0.0737    0.0743 0.115     0.116
+#>  9 region    Lukewarm Atlantic 0.0943  0.471  0.0740    0.429  0.115     0.513
+#> 10 marketlib Cold     -1       0.758   0.761  0.681     0.689  0.829     0.834
+#> # … with 32 more rows
+```
+
+</div>
+
+## Mulitnomial logit
+
+For this section, there are three comparisons:
+
+1)  `R`
+2)  `Stata` using `svy jackknife`
+3)  `Stata` using `pweight`
+
+Parameter estimates and standard errors
+
+<div style="font-size:9pt">
+
+
+``` r
+mlogit_b
+#> # A tibble: 26 × 8
+#>    term                      y         R_b Stata…¹ Stata…²  R_se Stata…³ Stata…⁴
+#>    <chr>                     <chr>   <dbl>   <dbl>   <dbl> <dbl>   <dbl>   <dbl>
+#>  1 (Intercept)               CPC   -0.281  -0.281  -0.281  0.529   0.529   0.493
+#>  2 agegrp35-54               CPC    0.0752  0.0752  0.0752 0.358   0.358   0.340
+#>  3 agegrp55+                 CPC    0.0517  0.0517  0.0517 0.364   0.364   0.343
+#>  4 genderWoman/Other         CPC   -0.267  -0.267  -0.267  0.209   0.209   0.200
+#>  5 educSome PSE              CPC    0.195   0.195   0.195  0.277   0.277   0.262
+#>  6 educUni degree            CPC    0.0319  0.0319  0.0319 0.307   0.307   0.290
+#>  7 regionWest                CPC    0.898   0.898   0.898  0.222   0.222   0.213
+#>  8 regionAtlantic            CPC    0.334   0.334   0.334  0.422   0.422   0.384
+#>  9 religCatholic             CPC    0.418   0.418   0.418  0.298   0.298   0.283
+#> 10 religNon-Catholic Christ… CPC    0.581   0.581   0.581  0.255   0.255   0.245
+#> # … with 16 more rows, and abbreviated variable names ¹​Statasvyjk_b,
+#> #   ²​Statapweight_b, ³​Statasvyjk_se, ⁴​Statapweight_se
+```
+
+/div\>
+
+Predicted probabilities (AMEs)
+
+<div style="font-size:9pt">
+
+``` r
+mlogit_ame
+#> # A tibble: 42 × 12
+#>    term   y     x     R_pred svyjk…¹ pweig…² R_lwr svyjk…³ pweig…⁴ R_upr svyjk…⁵
+#>    <chr>  <chr> <chr>  <dbl>   <dbl>   <dbl> <dbl>   <dbl>   <dbl> <dbl>   <dbl>
+#>  1 marke… Libe… -1     0.499   0.505   0.505 0.406  0.409   0.413  0.598   0.602
+#>  2 marke… Libe… -0.8   0.490   0.496   0.496 0.421  0.422   0.425  0.568   0.570
+#>  3 marke… Libe… -0.6   0.472   0.477   0.477 0.420  0.421   0.424  0.530   0.532
+#>  4 marke… Libe… -0.4   0.443   0.447   0.447 0.403  0.404   0.406  0.487   0.490
+#>  5 marke… Libe… -0.2   0.406   0.408   0.408 0.368  0.370   0.372  0.444   0.447
+#>  6 marke… Libe… 0      0.362   0.363   0.363 0.318  0.319   0.322  0.406   0.406
+#>  7 marke… Libe… 0.2    0.313   0.313   0.313 0.259  0.259   0.262  0.370   0.368
+#>  8 marke… Libe… 0.4    0.264   0.262   0.262 0.201  0.196   0.200  0.333   0.329
+#>  9 marke… Libe… 0.6    0.216   0.213   0.213 0.147  0.138   0.142  0.294   0.288
+#> 10 marke… Libe… 0.8    0.173   0.168   0.168 0.103  0.0879  0.0924 0.257   0.247
+#> # … with 32 more rows, 1 more variable: pweight_upr <dbl>, and abbreviated
+#> #   variable names ¹​svyjk_pred, ²​pweight_pred, ³​svyjk_lwr, ⁴​pweight_lwr,
+#> #   ⁵​svyjk_upr
+```
+
+</div>

@@ -25,6 +25,7 @@
 #' picks a random integer between 1 and 1,000,000. If you save the output of
 #' this function, it will save the seed value used for simulations in the slot
 #' \code{$seed}.
+#' @param ci Scalar indicating confidence level to be used (default: 0.95).
 #' @param ... Other arguments (currently not implemented).
 #'
 #'
@@ -61,6 +62,7 @@ svyMER.glm <- function(obj,
                        bynvals = 3,
                        sims = 2500,
                        seed = NULL,
+                       ci = .95,
                        ...) {
 
   #========== SETUP ============================================================
@@ -97,6 +99,13 @@ svyMER.glm <- function(obj,
     seed <- seed
   }
   set.seed(seed)
+
+  # high / low helper functions
+  tail <- (1 - ci) / 2
+  low <- function(x) {unname(quantile(x, tail))}
+  high <- function(x) {unname(quantile(x, 1-tail))}
+
+
 
   #========== NO MODERATOR VARIABLE ============================================
 

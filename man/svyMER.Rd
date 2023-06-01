@@ -13,6 +13,7 @@ svyMER(
   bynvals = 3,
   sims = 2500,
   seed = NULL,
+  ci = 0.95,
   ...
 )
 }
@@ -43,6 +44,8 @@ for which effects are to be calculated (default: 3).}
 picks a random integer between 1 and 1,000,000. If you save the output of
 this function, it will save the seed value used for simulations in the slot
 \code{$seed}.}
+
+\item{ci}{Scalar indicating confidence level to be used (default: .95).}
 
 \item{...}{Other arguments, depending on the type of model with which you're
 working. For example, for survey-weight multinomial logit models of class
