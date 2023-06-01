@@ -73,6 +73,7 @@ svyAME.glm <- function(obj,
 
   # Get data
   data <- model.frame(obj)
+  data$`(weights)` <- weights(obj$survey.design)
 
   # Check arguments up-front to stop execution before running simulations
   if(isFALSE(varname %in% names(data))) {
