@@ -30,7 +30,7 @@ Run the code below in an `R` or `RStudio` session, and it will install `{svyEffe
 ```
 install.packages("remotes")
 library(remotes)
-remotes::install_github("jb-santos/svyEffects, force = TRUE")
+remotes::install_github("jb-santos/svyEffects", force = TRUE)
 ```
 
 *Note: if you have installed a previous version of this package and want to update,
@@ -389,8 +389,11 @@ mnlSig(VOTE)
 
 For our post-estimation command, we'll need to specify a few more options because `svymultinom` does not store them in its output. These are:
 
-- `design`: the survey design object used to estimate the model; and
-- `modform`: the model formula used in the `svymultinom` call (in the form `modform = "y ~ x1 + x2 + x3"`).
+- `design`: the survey design object used to estimate the model; 
+- `modform`: the model formula used in the `svymultinom` call (in the form `modform = "y ~ x1 + x2 + x3"`); and
+- `weightvar`: the name of the weight variable (in quotes).
+
+*Note: I've submitted a pull request to `{svrepmisc}` to make some changes that will remove the need to specify these options. These changes should be incorporated within a few weeks, so check for updates.*
 
 Here's the effect of education:
 
@@ -398,10 +401,10 @@ Here's the effect of education:
 VOTE_region_ame <- svyAME(
   VOTE,
   varname = "region",
-  weightvar = "pesweight",
   seed = 2019,
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_region_ame$preds
 ```
 
@@ -443,11 +446,11 @@ Here's the effect of market liberalism:
 VOTE_marketlib_ame <- svyAME(
   VOTE,
   varname = "marketlib",
-  weightvar = "pesweight",
   seed = 2019,
   diffchange = "range",
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_marketlib_ame$preds
 plot(VOTE_marketlib_ame)
 ```

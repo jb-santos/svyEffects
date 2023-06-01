@@ -62,7 +62,7 @@ have it, then just skip the first line.
 
     install.packages("remotes")
     library(remotes)
-    remotes::install_github("jb-santos/svyEffects, force = TRUE")
+    remotes::install_github("jb-santos/svyEffects", force = TRUE)
 
 *Note: if you have installed a previous version of this package and want
 to update, ensure you include the argument `force = TRUE` in the
@@ -238,9 +238,9 @@ VOTECON_educ_ame$preds
 #> # A tibble: 3 × 5
 #>   educ       predicted conf.low conf.high type       
 #>   <fct>          <dbl>    <dbl>     <dbl> <chr>      
-#> 1 HS or less     0.404    0.340     0.468 Probability
-#> 2 Some PSE       0.408    0.369     0.446 Probability
-#> 3 Uni degree     0.416    0.374     0.458 Probability
+#> 1 HS or less     0.403    0.340     0.469 Probability
+#> 2 Some PSE       0.408    0.368     0.446 Probability
+#> 3 Uni degree     0.416    0.373     0.458 Probability
 ```
 
 Again, the results from `svyAME` match the `Stata` equivalent of
@@ -256,9 +256,9 @@ VOTECON_educ_ame$diffs
 #> # A tibble: 3 × 5
 #>   educ                    predicted conf.low conf.high type      
 #>   <chr>                       <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Some PSE - HS or less     0.00397  -0.0704    0.0783 Difference
-#> 2 Uni degree - HS or less   0.0125   -0.0723    0.0933 Difference
-#> 3 Uni degree - Some PSE     0.00849  -0.0510    0.0682 Difference
+#> 1 Some PSE - HS or less     0.00424  -0.0682    0.0777 Difference
+#> 2 Uni degree - HS or less   0.0130   -0.0715    0.0923 Difference
+#> 3 Uni degree - Some PSE     0.00877  -0.0507    0.0676 Difference
 ```
 
 The differences also compare favourably to the same results from
@@ -369,17 +369,17 @@ VOTECON_marketlib_ame$preds
 #> # A tibble: 11 × 5
 #>    marketlib predicted conf.low conf.high type       
 #>        <dbl>     <dbl>    <dbl>     <dbl> <chr>      
-#>  1    -1         0.123   0.0749     0.182 Probability
-#>  2    -0.8       0.170   0.118      0.232 Probability
-#>  3    -0.6       0.230   0.180      0.281 Probability
+#>  1    -1         0.123   0.0744     0.181 Probability
+#>  2    -0.8       0.170   0.119      0.230 Probability
+#>  3    -0.6       0.230   0.181      0.283 Probability
 #>  4    -0.4       0.300   0.260      0.341 Probability
-#>  5    -0.2       0.379   0.345      0.412 Probability
-#>  6     0         0.465   0.428      0.505 Probability
-#>  7     0.200     0.551   0.501      0.605 Probability
-#>  8     0.4       0.633   0.564      0.701 Probability
-#>  9     0.6       0.709   0.625      0.791 Probability
-#> 10     0.8       0.778   0.685      0.858 Probability
-#> 11     1         0.831   0.731      0.909 Probability
+#>  5    -0.2       0.379   0.346      0.412 Probability
+#>  6     0         0.465   0.429      0.504 Probability
+#>  7     0.200     0.551   0.501      0.607 Probability
+#>  8     0.4       0.634   0.566      0.702 Probability
+#>  9     0.6       0.709   0.625      0.788 Probability
+#> 10     0.8       0.778   0.685      0.856 Probability
+#> 11     1         0.831   0.734      0.908 Probability
 ```
 
 `svyAME` also produces very similar results to `Stata` for the effect of
@@ -390,7 +390,7 @@ VOTECON_marketlib_ame$diffs
 #> # A tibble: 1 × 5
 #>   marketlib              predicted conf.low conf.high type      
 #>   <chr>                      <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Delta (range) : -1 - 1     0.709    0.550     0.827 Difference
+#> 1 Delta (range) : -1 - 1     0.709    0.548     0.829 Difference
 plot(VOTECON_marketlib_ame)
 ```
 
@@ -626,9 +626,15 @@ For our post-estimation command, we’ll need to specify a few more
 options because `svymultinom` does not store them in its output. These
 are:
 
-- `design`: the survey design object used to estimate the model; and
+- `design`: the survey design object used to estimate the model;
 - `modform`: the model formula used in the `svymultinom` call (in the
-  form `modform = "y ~ x1 + x2 + x3"`).
+  form `modform = "y ~ x1 + x2 + x3"`); and
+- `weightvar`: the name of the weight variable (in quotes).
+
+*Note: I’ve submitted a pull request to `{svrepmisc}` to make some
+changes that will remove the need to specify these options. These
+changes should be incorporated within a few weeks, so check for
+updates.*
 
 Here’s the effect of education:
 
@@ -636,23 +642,23 @@ Here’s the effect of education:
 VOTE_region_ame <- svyAME(
   VOTE,
   varname = "region",
-  weightvar = "pesweight",
   seed = 2019,
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_region_ame$preds
 #> # A tibble: 9 × 6
 #>   y            region   predicted conf.low conf.high type       
 #>   <fct>        <fct>        <dbl>    <dbl>     <dbl> <chr>      
-#> 1 Liberal      Ontario      0.445    0.397     0.492 Probability
-#> 2 Conservative Ontario      0.361    0.320     0.404 Probability
-#> 3 NDP          Ontario      0.194    0.156     0.234 Probability
-#> 4 Liberal      West         0.285    0.241     0.335 Probability
-#> 5 Conservative West         0.461    0.418     0.503 Probability
+#> 1 Liberal      Ontario      0.445    0.398     0.493 Probability
+#> 2 Conservative Ontario      0.361    0.321     0.403 Probability
+#> 3 NDP          Ontario      0.194    0.157     0.236 Probability
+#> 4 Liberal      West         0.285    0.240     0.333 Probability
+#> 5 Conservative West         0.461    0.418     0.504 Probability
 #> 6 NDP          West         0.254    0.213     0.298 Probability
-#> 7 Liberal      Atlantic     0.408    0.291     0.534 Probability
-#> 8 Conservative Atlantic     0.410    0.295     0.525 Probability
-#> 9 NDP          Atlantic     0.182    0.116     0.266 Probability
+#> 7 Liberal      Atlantic     0.408    0.294     0.535 Probability
+#> 8 Conservative Atlantic     0.409    0.297     0.524 Probability
+#> 9 NDP          Atlantic     0.182    0.117     0.261 Probability
 ```
 
 ``` r
@@ -697,25 +703,25 @@ Here’s the effect of market liberalism:
 VOTE_marketlib_ame <- svyAME(
   VOTE,
   varname = "marketlib",
-  weightvar = "pesweight",
   seed = 2019,
   diffchange = "range",
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_marketlib_ame$preds
 #> # A tibble: 33 × 6
 #>    y            marketlib predicted conf.low conf.high type       
 #>    <fct>            <dbl>     <dbl>    <dbl>     <dbl> <chr>      
-#>  1 Liberal           -1       0.499   0.406      0.598 Probability
-#>  2 Conservative      -1       0.121   0.0727     0.186 Probability
-#>  3 NDP               -1       0.380   0.283      0.483 Probability
-#>  4 Liberal           -0.8     0.490   0.421      0.568 Probability
-#>  5 Conservative      -0.8     0.169   0.117      0.232 Probability
-#>  6 NDP               -0.8     0.341   0.268      0.417 Probability
-#>  7 Liberal           -0.6     0.472   0.420      0.530 Probability
-#>  8 Conservative      -0.6     0.229   0.179      0.284 Probability
-#>  9 NDP               -0.6     0.300   0.249      0.353 Probability
-#> 10 Liberal           -0.4     0.443   0.403      0.487 Probability
+#>  1 Liberal           -1       0.499   0.406      0.597 Probability
+#>  2 Conservative      -1       0.121   0.0713     0.183 Probability
+#>  3 NDP               -1       0.380   0.282      0.481 Probability
+#>  4 Liberal           -0.8     0.490   0.421      0.566 Probability
+#>  5 Conservative      -0.8     0.169   0.116      0.229 Probability
+#>  6 NDP               -0.8     0.341   0.267      0.416 Probability
+#>  7 Liberal           -0.6     0.472   0.419      0.528 Probability
+#>  8 Conservative      -0.6     0.229   0.178      0.281 Probability
+#>  9 NDP               -0.6     0.300   0.250      0.352 Probability
+#> 10 Liberal           -0.4     0.443   0.404      0.485 Probability
 #> # … with 23 more rows
 plot(VOTE_marketlib_ame)
 ```
@@ -808,15 +814,15 @@ VOTECON_educ_region$preds
 #> # A tibble: 9 × 6
 #>   educ       region   predicted conf.low conf.high type       
 #>   <fct>      <fct>        <dbl>    <dbl>     <dbl> <chr>      
-#> 1 HS or less Ontario      0.359    0.289     0.429 Probability
-#> 2 Some PSE   Ontario      0.363    0.314     0.411 Probability
-#> 3 Uni degree Ontario      0.371    0.322     0.422 Probability
-#> 4 HS or less West         0.458    0.388     0.527 Probability
-#> 5 Some PSE   West         0.463    0.414     0.515 Probability
-#> 6 Uni degree West         0.471    0.417     0.525 Probability
-#> 7 HS or less Atlantic     0.408    0.286     0.532 Probability
-#> 8 Some PSE   Atlantic     0.411    0.308     0.511 Probability
-#> 9 Uni degree Atlantic     0.420    0.315     0.526 Probability
+#> 1 HS or less Ontario      0.358    0.289     0.429 Probability
+#> 2 Some PSE   Ontario      0.362    0.313     0.411 Probability
+#> 3 Uni degree Ontario      0.371    0.322     0.421 Probability
+#> 4 HS or less West         0.458    0.389     0.527 Probability
+#> 5 Some PSE   West         0.462    0.412     0.514 Probability
+#> 6 Uni degree West         0.471    0.418     0.524 Probability
+#> 7 HS or less Atlantic     0.407    0.287     0.535 Probability
+#> 8 Some PSE   Atlantic     0.411    0.308     0.514 Probability
+#> 9 Uni degree Atlantic     0.420    0.315     0.527 Probability
 plot(VOTECON_educ_region)
 ```
 
@@ -831,16 +837,16 @@ VOTECON_marketlib_educ$preds
 #> # A tibble: 33 × 5
 #>    educ       marketlib predicted conf.low conf.high
 #>    <fct>          <dbl>     <dbl>    <dbl>     <dbl>
-#>  1 HS or less    -1         0.120   0.0705     0.185
-#>  2 HS or less    -0.8       0.167   0.110      0.240
+#>  1 HS or less    -1         0.120   0.0701     0.185
+#>  2 HS or less    -0.8       0.167   0.111      0.238
 #>  3 HS or less    -0.6       0.226   0.163      0.298
-#>  4 HS or less    -0.4       0.297   0.227      0.366
-#>  5 HS or less    -0.2       0.375   0.301      0.450
-#>  6 HS or less     0         0.458   0.378      0.548
-#>  7 HS or less     0.200     0.545   0.454      0.643
-#>  8 HS or less     0.4       0.627   0.524      0.727
-#>  9 HS or less     0.6       0.702   0.587      0.808
-#> 10 HS or less     0.8       0.771   0.653      0.874
+#>  4 HS or less    -0.4       0.297   0.226      0.369
+#>  5 HS or less    -0.2       0.374   0.300      0.450
+#>  6 HS or less     0         0.458   0.379      0.546
+#>  7 HS or less     0.200     0.545   0.451      0.642
+#>  8 HS or less     0.4       0.629   0.526      0.727
+#>  9 HS or less     0.6       0.703   0.589      0.807
+#> 10 HS or less     0.8       0.772   0.652      0.873
 #> # … with 23 more rows
 plot(VOTECON_marketlib_educ)
 ```
@@ -859,15 +865,15 @@ VOTECON2_marketlib_educ$preds
 #> # A tibble: 33 × 5
 #>    educ       marketlib predicted conf.low conf.high
 #>    <fct>          <dbl>     <dbl>    <dbl>     <dbl>
-#>  1 HS or less    -1         0.145   0.0492     0.295
-#>  2 HS or less    -0.8       0.185   0.0868     0.314
+#>  1 HS or less    -1         0.145   0.0488     0.294
+#>  2 HS or less    -0.8       0.185   0.0868     0.315
 #>  3 HS or less    -0.6       0.240   0.146      0.352
-#>  4 HS or less    -0.4       0.304   0.226      0.394
-#>  5 HS or less    -0.2       0.377   0.307      0.449
-#>  6 HS or less     0         0.456   0.365      0.548
-#>  7 HS or less     0.200     0.532   0.406      0.659
-#>  8 HS or less     0.4       0.608   0.442      0.764
-#>  9 HS or less     0.6       0.676   0.473      0.848
+#>  4 HS or less    -0.4       0.304   0.224      0.392
+#>  5 HS or less    -0.2       0.377   0.308      0.451
+#>  6 HS or less     0         0.456   0.367      0.549
+#>  7 HS or less     0.200     0.532   0.407      0.660
+#>  8 HS or less     0.4       0.608   0.444      0.764
+#>  9 HS or less     0.6       0.676   0.467      0.850
 #> 10 HS or less     0.8       0.738   0.501      0.910
 #> # … with 23 more rows
 plot(VOTECON2_marketlib_educ)
