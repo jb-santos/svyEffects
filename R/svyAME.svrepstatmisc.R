@@ -188,6 +188,8 @@ svyAME.svrepstatmisc <- function(obj,
       preds$y <- factor(preds$y, levels=Ylevs)
       preds <- preds %>% relocate(y, .before = 1)
 
+      # res_pp <- res   # save for building feature to include yhats in output
+
       ## Differences in predicted probabilities ----------------------------------
 
       diffchange <- match.arg(diffchange)
@@ -227,12 +229,21 @@ svyAME.svrepstatmisc <- function(obj,
         res <- rbind(res, res_temp)
       }
 
-      P <- NULL
-      P <- lapply(1:2, function(i)
-        P[[i]] <- res[, i:(i + Ynlev-1)])
+      Pr <- as.list(as.data.frame(res))
 
-      P_combs <- combn(P, 2)
-      Pr_diffs <- as.data.frame(P_combs[2,]) - as.data.frame(P_combs[1,])
+      Pr_diffs <- NULL
+      i <- Ynlev
+      j <- 1
+      while(i < Ynlev * 2) {
+        Pr_diffs[[j]] <- Pr[[i+1]] - Pr[[j]]
+        i <- i + 1
+        j <- j + 1
+      }
+
+      Pr_diffs <- do.call("rbind", Pr_diffs) %>%
+        t() %>%
+        as.data.frame()
+      names(Pr_diffs) <- Ylevs
 
       diffs <- expand.grid(
         y = levels(droplevels(Yvar)),
@@ -240,9 +251,9 @@ svyAME.svrepstatmisc <- function(obj,
         x2 = 1:2) %>%
         dplyr::filter(x1 < x2) %>%
         dplyr::mutate(x = paste0("Delta (", diffchange, ") : ",
-                          round(diff_seq[x1], 3),
-                          " - ",
-                          round(diff_seq[x2], 3))) %>%
+                                 round(diff_seq[x1], 3),
+                                 " - ",
+                                 round(diff_seq[x2], 3))) %>%
         dplyr::select(-c("x1", "x2"))
       diffs <- diffs %>%
         dplyr::mutate(
@@ -253,6 +264,7 @@ svyAME.svrepstatmisc <- function(obj,
       diffs$y <- factor(diffs$y, levels = Ylevs)
       diffs <- diffs %>% relocate(y, .before = 1)
 
+
       ## Output ------------------------------------------------------------------
 
       preds <- rename(preds, !!sym(varname) := x)
@@ -262,7 +274,11 @@ svyAME.svrepstatmisc <- function(obj,
         diffs = tibble::as_tibble(diffs),
         seed = seed,
         sims = sims,
-        formula = as.formula(modform))
+        formula = as.formula(modform)
+        # res_pp = res_pp,   # outputs array of PPs
+        # res_diffs = res,   # outputs data frame of PPs used to calculate diffs
+        # diffs_sims = Pc_diffs   # calculated first differences
+        )
       class(output) <- "svyEffects"
       attributes(output)$predvar <- varname
       attributes(output)$depvar <- Yname
