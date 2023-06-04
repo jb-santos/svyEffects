@@ -30,7 +30,7 @@ Run the code below in an `R` or `RStudio` session, and it will install `{svyEffe
 ```
 install.packages("remotes")
 library(remotes)
-remotes::install_github("jb-santos/svyEffects, force = TRUE")
+remotes::install_github("jb-santos/svyEffects", force = TRUE)
 ```
 
 *Note: if you have installed a previous version of this package and want to update,
@@ -389,8 +389,11 @@ mnlSig(VOTE)
 
 For our post-estimation command, we'll need to specify a few more options because `svymultinom` does not store them in its output. These are:
 
-- `design`: the survey design object used to estimate the model; and
-- `modform`: the model formula used in the `svymultinom` call (in the form `modform = "y ~ x1 + x2 + x3"`).
+- `design`: the survey design object used to estimate the model; 
+- `modform`: the model formula used in the `svymultinom` call (in the form `modform = "y ~ x1 + x2 + x3"`); and
+- `weightvar`: the name of the weight variable (in quotes).
+
+*Note: I've submitted a pull request to `{svrepmisc}` to make some changes that will remove the need to specify these options. These changes should be incorporated within a few weeks, so check for updates.*
 
 Here's the effect of education:
 
@@ -398,10 +401,10 @@ Here's the effect of education:
 VOTE_region_ame <- svyAME(
   VOTE,
   varname = "region",
-  weightvar = "pesweight",
   seed = 2019,
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_region_ame$preds
 ```
 
@@ -443,11 +446,11 @@ Here's the effect of market liberalism:
 VOTE_marketlib_ame <- svyAME(
   VOTE,
   varname = "marketlib",
-  weightvar = "pesweight",
   seed = 2019,
   diffchange = "range",
   design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad")
+  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
+  weightvar = "pesweight")
 VOTE_marketlib_ame$preds
 plot(VOTE_marketlib_ame)
 ```
@@ -604,10 +607,10 @@ interaction.
 
 # References
 
-Armstrong, Dave. 2022. _DAMisc: Dave Armstrong's Miscellaneous Functions_. 
+Armstrong, Dave. 2023. _DAMisc: Dave Armstrong's Miscellaneous Functions_. 
 R package version 1.7.2. https://github.com/davidaarmstrong/damisc.
 
-Ganz, Carl. 2022. _svrepmisc: Miscellaneous Functions for Replicate Weights_. 
+Ganz, Carl. 2019. _svrepmisc: Miscellaneous Functions for Replicate Weights_. 
 R package version 0.2.2. https://github.com/carlganz/svrepmisc. 
 
 Hanmer, M.J. and K.O. Kalkan.  2013. "Behind the Curve: Clarifying the Best 
@@ -616,7 +619,10 @@ Dependent Variable Models." _American Journal of Political Science_. 57(1): 263-
 https://doi.org/10.1111/j.1540-5907.2012.00602.x. 
 
 Ludecke, D. 2022. _ggeffects - Estimated Marginal Means and Adjusted Predictions from Regression Models_. 
-R package version 1.2.2.13. https://doi.org/10.21105/joss.00772.
+R package version 1.2.2.13. https://strengejacke.github.io/ggeffects/.
+
+Lumley, Thoomas. 2023. _survey: Analysis of Complex Survey Samples_. R package version 4.2-1. 
+http://r-survey.r-forge.r-project.org/survey/. 
 
 Norton, Edward C., Hua Wang and Chunrong Ai. 2004. Computing Interaction Effects 
 and Standard Errors in Logit and Probit Models. _The Stata Journal_ 4(2): 154-167. 
@@ -680,20 +686,20 @@ Predicted probabilities (AMEs)
 |           |            | Mean prediction |        | 95% CI lower |        | 95%CI upper |        |
 |-----------|------------|-----------------|--------|--------------|--------|-------------|--------|
 | Predictor | X          | R               | Stata  | R            | Stata  | R           | Stata  |
-| educ      | HS or less | 0.4037          | 0.4028 | 0.3403       | 0.3383 | 0.4681      | 0.4674 |
-| educ      | Some PSE   | 0.4077          | 0.4073 | 0.3693       | 0.3685 | 0.4463      | 0.4461 |
-| educ      | Uni degree | 0.4161          | 0.4155 | 0.3737       | 0.3727 | 0.4579      | 0.4582 |
-| marketlib | -1         | 0.1228          | 0.1182 | 0.0639       | 0.0749 | 0.1816      | 0.1725 |
-| marketlib | -0.8       | 0.1703          | 0.1662 | 0.1104       | 0.1176 | 0.2320      | 0.2220 |
-| marketlib | -0.6       | 0.2300          | 0.2264 | 0.1750       | 0.1802 | 0.2812      | 0.2779 |
-| marketlib | -0.4       | 0.3005          | 0.2981 | 0.2559       | 0.2600 | 0.3412      | 0.3402 |
-| marketlib | -0.2       | 0.3794          | 0.3786 | 0.3448       | 0.3452 | 0.4121      | 0.4124 |
-| marketlib | 0          | 0.4647          | 0.4645 | 0.4267       | 0.4285 | 0.5045      | 0.5024 |
-| marketlib | 0.2        | 0.5512          | 0.5515 | 0.4980       | 0.5008 | 0.6055      | 0.6050 |
-| marketlib | 0.4        | 0.6329          | 0.6353 | 0.5647       | 0.5638 | 0.7009      | 0.7058 |
-| marketlib | 0.6        | 0.7086          | 0.7124 | 0.6293       | 0.6247 | 0.7908      | 0.7955 |
-| marketlib | 0.8        | 0.7778          | 0.7803 | 0.6914       | 0.6849 | 0.8582      | 0.8691 |
-| marketlib | 1          | 0.8310          | 0.8374 | 0.7501       | 0.7307 | 0.9094      | 0.9247 |
+| educ      | HS or less | 0.4033          | 0.4028 | 0.3399       | 0.3383 | 0.4689      | 0.4674 |
+| educ      | Some PSE   | 0.4075          | 0.4073 | 0.3678       | 0.3685 | 0.4463      | 0.4461 |
+| educ      | Uni degree | 0.4163          | 0.4155 | 0.3732       | 0.3727 | 0.4576      | 0.4582 |
+| marketlib | -1         | 0.1231          | 0.1182 | 0.0744       | 0.0749 | 0.1808      | 0.1725 |
+| marketlib | -0.8       | 0.1703          | 0.1662 | 0.1188       | 0.1176 | 0.2301      | 0.2220 |
+| marketlib | -0.6       | 0.2300          | 0.2264 | 0.1806       | 0.1802 | 0.2827      | 0.2779 |
+| marketlib | -0.4       | 0.3005          | 0.2981 | 0.2601       | 0.2600 | 0.3413      | 0.3402 |
+| marketlib | -0.2       | 0.3794          | 0.3786 | 0.3457       | 0.3452 | 0.4122      | 0.4124 |
+| marketlib | 0          | 0.4648          | 0.4645 | 0.4288       | 0.4285 | 0.5039      | 0.5024 |
+| marketlib | 0.2        | 0.5510          | 0.5515 | 0.5009       | 0.5008 | 0.6068      | 0.6050 |
+| marketlib | 0.4        | 0.6340          | 0.6353 | 0.5657       | 0.5638 | 0.7025      | 0.7058 |
+| marketlib | 0.6        | 0.7088          | 0.7124 | 0.6250       | 0.6247 | 0.7883      | 0.7955 |
+| marketlib | 0.8        | 0.7782          | 0.7803 | 0.6847       | 0.6849 | 0.8559      | 0.8691 |
+| marketlib | 1          | 0.8310          | 0.8374 | 0.7343       | 0.7307 | 0.9080      | 0.9247 |
 
 </div>
 
