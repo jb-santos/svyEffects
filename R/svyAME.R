@@ -21,11 +21,14 @@
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
-#' difference is to be calculated for a continuous predictor (default: range).
+#' difference is to be calculated for a continuous predictor (default: "sd").
 #' @param byvar For interaction effects, a character string denoting the name of
 #' the moderator variable.
+#' @param bychange For interaction effects with a numerical moderator, a
+#' character string denoting for what values above and below the mean
+#' predictions should be calculated (default: "sd").
 #' @param bynvals For interaction effects with a numerical moderator, a scalar
-#' denoting the sequence length  spanning the range of the moderator variable
+#' denoting the sequence length spanning the range of the moderator variable
 #' for which effects are to be calculated (default: 3).
 #' @param sims Scalar denoting how many simulations to conduct (default: 2500).
 #' @param seed Seed value for random number generator. By default, the function
@@ -121,8 +124,9 @@
 svyAME <- function(obj,
                    varname,
                    nvals = 11,
-                   diffchange = c("range", "unit", "sd"),
+                   diffchange = c("sd", "range", "unit"),
                    byvar = NULL,
+                   bychange = c("sd", "range"),
                    bynvals = 3,
                    sims = 2500,
                    seed = NULL,

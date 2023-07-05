@@ -14,9 +14,12 @@
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 10).
 #' @param diffchange Character string  denoting over what change in x a first
-#' difference is to be calculated for a continuous predictor (default: range).
+#' difference is to be calculated for a continuous predictor (default: "sd").
 #' @param byvar For interaction effects, a character string denoting the name of
 #' the moderator variable.
+#' @param bychange For interaction effects with a numerical moderator, a
+#' character string denoting for what values above and below the mean
+#' predictions should be calculated (default: "sd").
 #' @param bynvals For interaction effects with a numerical moderator, a scalar
 #' denoting the sequence length  spanning the range of the moderator variable
 #' for which effects are to be calculated (default: 3).
@@ -57,8 +60,9 @@
 svyMER.svyolr <- function(obj,
                           varname,
                           nvals = 11,
-                          diffchange = c("range", "unit", "sd"),
+                          diffchange = c("sd", "range", "unit"),
                           byvar = NULL,
+                          bychange = c("sd", "range"),
                           bynvals = 3,
                           sims = 2500,
                           seed = NULL,
@@ -230,18 +234,20 @@ svyMER.svyolr <- function(obj,
 
       diffchange <- match.arg(diffchange)
       tmp0 <- switch(diffchange,
-                     NULL = min(data[[varname]]),
-                     range = min(data[[varname]]),
-                     unit = survey::svymean(data[[varname]], svydata) - .5,
+                     NULL = survey::svymean(data[[varname]], svydata) -
+                       (sqrt(survey::svyvar(data[[varname]], svydata))/2),
                      sd = survey::svymean(data[[varname]], svydata) -
-                       (sqrt(survey::svyvar(data[[varname]], svydata))/2)
+                       (sqrt(survey::svyvar(data[[varname]], svydata))/2),
+                     range = min(data[[varname]]),
+                     unit = survey::svymean(data[[varname]], svydata) - .5
                      )
       tmp1 <- switch(diffchange,
-                     NULL = max(data[[varname]]),
-                     range = max(data[[varname]]),
-                     unit = survey::svymean(data[[varname]], svydata) + .5,
+                     NULL = survey::svymean(data[[varname]], svydata) +
+                       (sqrt(survey::svyvar(data[[varname]], svydata))/2),
                      sd = survey::svymean(data[[varname]], svydata) +
-                       (sqrt(survey::svyvar(data[[varname]], svydata))/2)
+                       (sqrt(survey::svyvar(data[[varname]], svydata))/2),
+                     range = max(data[[varname]]),
+                     unit = survey::svymean(data[[varname]], svydata) + .5
                      )
       delta <- c(tmp0, tmp1)
 
@@ -334,7 +340,7 @@ svyMER.svyolr <- function(obj,
 
   if(!is.null(byvar)) {
 
-    # Check arguments up front to stop executionn before running simulations
+    # Check arguments up front to stop execution before running simulations
     if(isFALSE(byvar %in% names(data))) {
       stop(print(paste0(
         "byvar ", byvar, " not found in survey design object. Maybe check your spelling?")))}
@@ -352,7 +358,21 @@ svyMER.svyolr <- function(obj,
       if(is.factor(data[[byvar]])) {
         bylevs <- levels(data[[byvar]])}
       if(is.numeric(data[[byvar]])) {
-        bylevs <- seq(min(data[[byvar]]), max(data[[byvar]]), length=bynvals)}
+        bychange <- match.arg(bychange)
+        byvar_min <- switch(bychange,
+                            NULL = as.numeric(survey::svymean(data[byvar], svydata)) -
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            sd = as.numeric(survey::svymean(data[byvar], svydata)) -
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            range = min(data[[byvar]]))
+        byvar_max <- switch(bychange,
+                            NULL = as.numeric(survey::svymean(data[byvar], svydata)) +
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            sd = as.numeric(survey::svymean(data[byvar], svydata)) +
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            range = max(data[[byvar]]))
+        bylevs <- seq(byvar_min, byvar_max, length = bynvals)
+      }
     }
 
     # Define variables to vary

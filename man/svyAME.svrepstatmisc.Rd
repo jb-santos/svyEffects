@@ -8,15 +8,13 @@
   obj,
   varname,
   nvals = 11,
-  diffchange = c("range", "unit", "sd"),
+  diffchange = c("sd", "range", "unit"),
   byvar = NULL,
+  bychange = c("sd", "range"),
   bynvals = 3,
   sims = 2500,
   seed = NULL,
   ci = 0.95,
-  design,
-  modform,
-  weightvar,
   ...
 )
 }
@@ -30,10 +28,14 @@ for which effects are to be calculated.}
 continuous variable for which effects are to be calculated (default: 11).}
 
 \item{diffchange}{Character string  denoting over what change in x a first
-difference is to be calculated for a continuous predictor (default: range).}
+difference is to be calculated for a continuous predictor (default: "sd").}
 
 \item{byvar}{For interaction effects, a character string denoting the name of
 the moderator variable.}
+
+\item{bychange}{For interaction effects with a numerical moderator, a
+character string denoting for what values above and below the mean
+predictions should be calculated (default: "sd").}
 
 \item{bynvals}{For interaction effects with a numerical moderator, a scalar
 denoting the sequence length  spanning the range of the moderator variable
@@ -47,15 +49,6 @@ this function, it will save the seed value used for simulations in the slot
 \code{$seed}.}
 
 \item{ci}{Scalar indicating confidence level to be used (default: .95).}
-
-\item{design}{A survey design object with replicate weights of class
-\code{survey::svyrep.design}.}
-
-\item{modform}{Character string denoting the model formula used of the model.
-Must be in the format of class \code{modform = "y ~ x"} and match the model's
-formula exactly.}
-
-\item{weightvar}{A survey design object of class \code{survey::svydesign}.}
 
 \item{...}{Other arguments (currently not implemented).}
 }

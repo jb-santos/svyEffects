@@ -28,9 +28,12 @@
 #' @param nvals Scalar denoting the sequence length spanning the range of a
 #' continuous variable for which effects are to be calculated (default: 11).
 #' @param diffchange Character string  denoting over what change in x a first
-#' difference is to be calculated for a continuous predictor (default: range).
+#' difference is to be calculated for a continuous predictor (default: "sd").
 #' @param byvar For interaction effects, a character string denoting the name of
 #' the moderator variable.
+#' @param bychange For interaction effects with a numerical moderator, a
+#' character string denoting for what values above and below the mean
+#' predictions should be calculated (default: "sd").
 #' @param bynvals For interaction effects with a numerical moderator, a scalar
 #' denoting the sequence length  spanning the range of the moderator variable
 #' for which effects are to be calculated (default: 3).
@@ -40,12 +43,6 @@
 #' this function, it will save the seed value used for simulations in the slot
 #' \code{$seed}.
 #' @param ci Scalar indicating confidence level to be used (default: .95).
-#' @param design A survey design object with replicate weights of class
-#' \code{survey::svyrep.design}.
-#' @param modform Character string denoting the model formula used of the model.
-#' Must be in the format of class \code{modform = "y ~ x"} and match the model's
-#' formula exactly.
-#' @param weightvar A survey design object of class \code{survey::svydesign}.
 #' @param ... Other arguments (currently not implemented).
 #'
 #'
@@ -85,25 +82,25 @@
 svyAME.svrepstatmisc <- function(obj,
                                  varname,
                                  nvals = 11,
-                                 diffchange = c("range", "unit", "sd"),
+                                 diffchange = c("sd", "range", "unit"),
                                  byvar = NULL,
+                                 bychange = c("sd", "range"),
                                  bynvals = 3,
                                  sims = 2500,
                                  seed = NULL,
                                  ci = .95,
-                                 design,
-                                 modform,
-                                 weightvar,
                                  ...) {
 
   # SETUP ======================================================================
 
-  modform <- as.formula(modform)
-  data <- design$variables
-  varlist <- unformulate(modform)$vars
-  varlist <- append(varlist, weightvar)
-  data <- dplyr::select(data, all_of(varlist)) %>% na.omit()
-  svydata <- survey::svydesign(ids = ~1, strata = NULL, weights = data[[weightvar]], data = data)
+  modform <- attr(obj, "formula")
+  data <- attr(obj, "svrep.design")$variables
+  data$`(weights)` <- as.vector(attr(obj, "svrep.design")$pweights)
+  data <- data %>% na.omit()
+  svydata <- survey::svydesign(ids = ~1,
+                               strata = NULL,
+                               weights = data$`(weights)`,
+                               data = data)
 
   Yname <- as.character(modform[[2]])
   Yvar <- dplyr::select(data, all_of(Yname))
@@ -168,7 +165,7 @@ svyAME.svrepstatmisc <- function(obj,
               1),
             2,
             weighted.mean,
-            w = data[[weightvar]])))
+            w = data$`(weights)`)))
       }
 
       preds <- data.frame(x = varname_seq)
@@ -195,16 +192,20 @@ svyAME.svrepstatmisc <- function(obj,
       diffchange <- match.arg(diffchange)
 
       tmp0 <- switch(diffchange,
-                     range = min(data[varname]),
-                     unit = survey::svymean(data[varname], svydata) - .5,
+                     NULL = survey::svymean(data[varname], svydata) -
+                       (sqrt(survey::svyvar(data[varname], svydata))/2),
                      sd = survey::svymean(data[varname], svydata) -
-                       (sqrt(survey::svyvar(data[varname], svydata))/2)
+                       (sqrt(survey::svyvar(data[varname], svydata))/2),
+                     range = min(data[varname]),
+                     unit = survey::svymean(data[varname], svydata) - .5
                      )
       tmp1 <- switch(diffchange,
-                     range = max(data[varname]),
-                     unit = survey::svymean(data[varname], svydata) + .5,
+                     NULL = survey::svymean(data[varname], svydata) +
+                       (sqrt(survey::svyvar(data[varname], svydata)) / 2),
                      sd = survey::svymean(data[varname], svydata) +
-                       (sqrt(survey::svyvar(data[varname], svydata)) / 2)
+                       (sqrt(survey::svyvar(data[varname], svydata)) / 2),
+                     range = max(data[varname]),
+                     unit = survey::svymean(data[varname], svydata) + .5
                      )
       diff_seq <- c(tmp0, tmp1)
 
@@ -223,7 +224,7 @@ svyAME.svrepstatmisc <- function(obj,
         tmpB <- cbind(0, matrix(B[i,], ncol=(Ynlev-1), byrow=TRUE))
         EXB <- lapply(1:2, function(x){exp(X[[x]] %*% tmpB)})
         P <- lapply(1:2, function(x){prop.table(EXB[[x]], 1)})
-        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data[[weightvar]])
+        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data$`(weights)`)
         res_temp <- t(as.data.frame(res_temp))
         rownames(res_temp) <- NULL
         res <- rbind(res, res_temp)
@@ -315,7 +316,7 @@ svyAME.svrepstatmisc <- function(obj,
                                 byrow = TRUE))
         EXB <- lapply(1:nlev, function(j) {exp(X[[j]] %*% tmpB)})
         P <- lapply(1:nlev, function(k) {prop.table(EXB[[k]], 1)})
-        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data[[weightvar]])
+        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data$`(weights)`)
         res_temp <- t(as.data.frame(res_temp))
         rownames(res_temp) <- NULL
         res[[i]] <- res_temp
@@ -467,7 +468,7 @@ svyAME.svrepstatmisc <- function(obj,
         tmpB <- cbind(0, matrix(B[i,], ncol = (Ynlev-1), byrow = TRUE))
         EXB <- lapply(1:(length(levs) * length(bylevs)), function(i) exp(X_list[[i]] %*% tmpB))
         P <- lapply(1:(length(levs) * length(bylevs)), function(i) prop.table(EXB[[i]], 1))
-        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data[[weightvar]])
+        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data$`(weights)`)
         res_temp <- t(as.data.frame(res_temp))
         rownames(res_temp) <- NULL
         res <- rbind(res, res_temp)
@@ -523,7 +524,7 @@ svyAME.svrepstatmisc <- function(obj,
                 1),
               2,
               weighted.mean,
-              w = data[[weightvar]])
+              w = data$`(weights)`)
           }))
         }
         res_list[[j]] <- res
@@ -567,7 +568,23 @@ svyAME.svrepstatmisc <- function(obj,
       # Define predictor (varname) and moderator (byvar) variables
       levs <- levels(data[[varname]])
       nlev <- length(levs)
-      bylevs <- seq(min(data[[byvar]]), max(data[[byvar]]), length = bynvals)
+
+      bychange <- match.arg(bychange)
+      byvar_min <- switch(bychange,
+                          NULL = as.numeric(survey::svymean(data[byvar], svydata)) -
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          sd = as.numeric(survey::svymean(data[byvar], svydata)) -
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          range = min(data[[byvar]])
+      )
+      byvar_max <- switch(bychange,
+                          NULL = as.numeric(survey::svymean(data[byvar], svydata)) +
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          sd = as.numeric(survey::svymean(data[byvar], svydata)) +
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          range = max(data[[byvar]])
+      )
+      bylevs <- seq(byvar_min, byvar_max, length = bynvals)
 
       # Create dataframes for simulations
       df_list <- lapply(1:(length(levs) * length(bylevs)), function(x) x <- data)
@@ -620,7 +637,7 @@ svyAME.svrepstatmisc <- function(obj,
         tmpB <- cbind(0, matrix(B[i,], ncol = (Ynlev-1), byrow = TRUE))
         EXB <- lapply(1:(length(levs) * length(bylevs)), function(i) exp(X_list[[i]] %*% tmpB))
         P <- lapply(1:(length(levs) * length(bylevs)), function(i) prop.table(EXB[[i]], 1))
-        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data[[weightvar]])
+        res_temp <- sapply(as.data.frame(P), weighted.mean, w = data$`(weights)`)
         res_temp <- t(as.data.frame(res_temp))
         rownames(res_temp) <- NULL
         res <- rbind(res, res_temp)
@@ -650,8 +667,24 @@ svyAME.svrepstatmisc <- function(obj,
     if(is.numeric(data[[varname]]) & is.numeric(data[[byvar]])) {
 
       # Define variables
-      varname_seq <- seq(min(data[[varname]]), max(data[[varname]]), length=nvals)
-      bylevs <- seq(min(data[[byvar]]), max(data[[byvar]]), length = bynvals)
+      varname_seq <- seq(min(data[[varname]]), max(data[[varname]]), length = nvals)
+
+      bychange <- match.arg(bychange)
+      byvar_min <- switch(bychange,
+                          NULL = as.numeric(survey::svymean(data[byvar], svydata)) -
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          sd = as.numeric(survey::svymean(data[byvar], svydata)) -
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          range = min(data[[byvar]])
+      )
+      byvar_max <- switch(bychange,
+                          NULL = as.numeric(survey::svymean(data[byvar], svydata)) +
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          sd = as.numeric(survey::svymean(data[byvar], svydata)) +
+                            as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                          range = max(data[[byvar]])
+      )
+      bylevs <- seq(byvar_min, byvar_max, length = bynvals)
 
       # Create as many simulation dataframes as there are levels of moderator
       df_list <- lapply(1:length(bylevs), function(i) i <- data)
@@ -676,7 +709,7 @@ svyAME.svrepstatmisc <- function(obj,
                 1),
               2,
               weighted.mean,
-              w = data[[weightvar]])
+              w = data$`(weights)`)
           }))
         }
         res_list[[j]] <- res

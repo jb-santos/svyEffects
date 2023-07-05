@@ -62,12 +62,7 @@ have it, then just skip the first line.
 
     install.packages("remotes")
     library(remotes)
-    remotes::install_github("jb-santos/svyEffects", force = TRUE)
-
-*Note: if you have installed a previous version of this package and want
-to update, ensure you include the argument `force = TRUE` in the
-function call because all versions of a GitHub packages are
-v0.0.0.9000.*
+    remotes::install_github("jb-santos/svyEffects")
 
 ## Introduction
 
@@ -388,9 +383,9 @@ market liberalism (see Appendix).
 ``` r
 VOTECON_marketlib_ame$diffs
 #> # A tibble: 1 × 5
-#>   marketlib              predicted conf.low conf.high type      
-#>   <chr>                      <dbl>    <dbl>     <dbl> <chr>     
-#> 1 Delta (range) : -1 - 1     0.709    0.550     0.827 Difference
+#>   marketlib                   predicted conf.low conf.high type      
+#>   <chr>                           <dbl>    <dbl>     <dbl> <chr>     
+#> 1 Delta (sd) : -0.393 - 0.011     0.167    0.119     0.214 Difference
 plot(VOTECON_marketlib_ame)
 ```
 
@@ -622,30 +617,13 @@ mnlSig(VOTE)
 
 ## Predictions on a categorical variable
 
-For our post-estimation command, we’ll need to specify a few more
-options because `svymultinom` does not store them in its output. These
-are:
-
-- `design`: the survey design object used to estimate the model;
-- `modform`: the model formula used in the `svymultinom` call (in the
-  form `modform = "y ~ x1 + x2 + x3"`); and
-- `weightvar`: the name of the weight variable (in quotes).
-
-*Note: I’ve submitted a pull request to `{svrepmisc}` to make some
-changes that will remove the need to specify these options. These
-changes should be incorporated within a few weeks, so check for
-updates.*
-
 Here’s the effect of education:
 
 ``` r
 VOTE_region_ame <- svyAME(
   VOTE,
   varname = "region",
-  seed = 2019,
-  design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
-  weightvar = "pesweight")
+  seed = 2019)
 VOTE_region_ame$preds
 #> # A tibble: 9 × 6
 #>   y            region   predicted conf.low conf.high type       
@@ -704,10 +682,7 @@ VOTE_marketlib_ame <- svyAME(
   VOTE,
   varname = "marketlib",
   seed = 2019,
-  diffchange = "range",
-  design = ces19_svy_r,
-  modform = "vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad",
-  weightvar = "pesweight")
+  diffchange = "range")
 VOTE_marketlib_ame$preds
 #> # A tibble: 33 × 6
 #>    y            marketlib predicted conf.low conf.high type       

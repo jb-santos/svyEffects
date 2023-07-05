@@ -57,7 +57,7 @@
 #' svyMER(VOTECON, varname = "educ", seed = 2019)
 #' svyMER(VOTECON, varname = "marketlib", seed = 2019)
 #'
-svyMER.glm <- function(obj,
+testfun <- function(obj,
                        varname,
                        nvals = 11,
                        diffchange = c("sd", "range", "unit"),
@@ -299,26 +299,25 @@ svyMER.glm <- function(obj,
     names(xvarylist) <- varname
     varylist <- xvarylist
 
-    bychange <- match.arg(bychange)
-    byvar_min <- switch(bychange,
-                        NULL = as.numeric(survey::svymean(data[byvar], svydata)) -
-                          as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
-                        sd = as.numeric(survey::svymean(data[byvar], svydata)) -
-                          as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
-                        range = min(data[[byvar]]))
-    byvar_max <- switch(bychange,
-                        NULL = as.numeric(survey::svymean(data[byvar], svydata)) +
-                          as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
-                        sd = as.numeric(survey::svymean(data[byvar], svydata)) +
-                          as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
-                        range = max(data[[byvar]]))
-
     byvarylist <- as.list(byvar)
     byvarylist <- lapply(1:length(byvar), function(i) {
       if(is.factor(data[[byvarylist[[i]]]])) {
         byvarylist[[i]] <- levels(data[[byvar[[i]]]])
       } else {
 
+        bychange <- match.arg(bychange)
+        byvar_min <- switch(bychange,
+                            NULL = as.numeric(survey::svymean(data[byvar], svydata)) -
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            sd = as.numeric(survey::svymean(data[byvar], svydata)) -
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            range = min(data[[byvar]]))
+        byvar_max <- switch(bychange,
+                            NULL = as.numeric(survey::svymean(data[byvar], svydata)) +
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            sd = as.numeric(survey::svymean(data[byvar], svydata)) +
+                              as.numeric(sqrt(survey::svyvar(data[byvar], svydata))),
+                            range = max(data[[byvar]]))
         #bylevs <- seq(byvar_min, byvar_max, length = bynvals)
         #byvarylist[[i]] <- bylevs
 
