@@ -5,7 +5,7 @@
 #'
 #'
 #' @param obj Model object of class \code{svyglm} with \code{family = "binomial"}
-#'  or \code{svyolr}
+#'  or \code{svyolr} or class \code{svrepstatmisc}
 #' @param ... Other options (not currently implemented)
 #'
 #' @return A tibble
@@ -34,7 +34,6 @@ svyPRE <- function(obj, ...) {UseMethod("svyPRE")}
 #'
 #'
 #' @param obj Model object of class \code{svyglm} with \code{family = "binomial"}
-#'  or \code{svyolr}
 #' @param ... Other options (not currently implemented)
 #'
 #' @return A tibble
@@ -67,7 +66,7 @@ svyPRE.svyglm <- function(obj, ...) {
   pmc <- survey::svymean(~y, data)[1]  # percent in modal category
   pmc <- ifelse(pmc < .5, 1 - pmc, pmc)
   pcp <- survey::svymean(~correct, data)[1]   # percent correctly classified
-  pre <- (pcp - pmc) / (1 - pmc)   # proportional reduction in error
+  pre <- (pcp - pmc) / (1 - pmc)   # percent reduction in error
 
   pre_stats <- tibble::tibble(
     Measure = c("Percent in modal category",
@@ -93,8 +92,7 @@ svyPRE.svyglm <- function(obj, ...) {
 
 #' Proportional reduction in error of survey-weighted ordered logit models
 #'
-#' @param obj Model object of class \code{svyglm} with \code{family = "binomial"}
-#'   or \code{svyolr}
+#' @param obj Model object of class \code{svyolr}
 #' @param ... Other options (not currently implemented)
 #'
 #' @return A tibble
@@ -121,7 +119,7 @@ svyPRE.svyolr <- function(obj, ...) {
   data$variables$correct <- as.numeric(data$variables$yhat == data$variables$y)
   pmc <- max(survey::svymean(~y, data))   # percent in modal category
   pcp <- survey::svymean(~correct, data)[1]   # percent correctly classified
-  pre <- (pcp - pmc) / (1 - pmc)   # proportional reduction in error
+  pre <- (pcp - pmc) / (1 - pmc)   # percent reduction in error
 
   pre_stats <- tibble::tibble(
     Measure = c("Percent in modal category",
@@ -129,6 +127,87 @@ svyPRE.svyolr <- function(obj, ...) {
                 "Percent reduction in error"),
     Value = c(pmc, pcp, pre))
   attributes(pre_stats)$model <- formula(obj)
+
+  # more detailed output (not currently implemented)
+  # out <- list(
+  #   pre_stats = pre_stats,
+  #   y = data$variables$y,
+  #   fitted.values = fits,
+  #   yhat = data$variables$yhat,
+  #   model.frame = data
+  # )
+
+  return(pre_stats)
+}
+
+
+
+
+#' Proportional reduction in error of survey-weighted multinomial logit models
+#'
+#' @param obj Model object of class \code{svrepstatmisc}
+#' @param ... Other options (not currently implemented)
+#'
+#' @return A tibble
+#'
+#' @importFrom nnet multinom
+#'
+#' @export
+#'
+#' @author John Santos & Dave Armstrong
+#'
+#' @examples
+#' \dontrun{
+#' data(ces19)
+#' library(survey)
+#' ces19_svy <- svydesign(ids = ~1, strata = NULL, weights = ~pesweight,
+#'   data = ces19, digits = 3)
+#' ces19_svy_r <- as.svrepdesign(temp, type = "JK1")
+#' # remotes::install_github("carlganz/svrepmisc")
+#' library(svrepmisc)
+#' VOTE <- svymultinom(vote ~ agegrp + gender + educ + region + relig + marketlib + culturetrad,
+#'   design = ces19_svy_r, trace = FALSE)
+#' svyPRE(VOTE)
+#' }
+#'
+svyPRE.svrepstatmisc <- function(obj, ...) {
+
+  modform <- attr(obj, "formula")
+  yvar <- as.character(attr(obj, "formula")[[2]])
+
+  data <- attr(obj, "svrep.design")$variables
+  data$`(weights)` <- as.vector(attr(obj, "svrep.design")$pweights)
+  data <- data %>% na.omit()
+  svydata <- survey::svydesign(ids = ~1,
+                               strata = NULL,
+                               weights = as.vector(attr(obj, "svrep.design")$pweights),
+                               data = data)
+
+  # Note: use of global assignment ("<<-") is usually not good practice, BUT...
+  # nnet::multinom has different (read: annoying) scoping behaviour versus other
+  # modelling functions, so this was the easiest way to get this done.
+  TEMPWEIGHTVECTOR <<- as.vector(attr(obj, "svrep.design")$pweights)
+  fakemod <- nnet::multinom(formula = modform,
+                            data = svydata$variables,
+                            weights = TEMPWEIGHTVECTOR,
+                            Hess = TRUE,
+                            trace = FALSE)
+  rm(TEMPWEIGHTVECTOR, inherits = TRUE)
+
+  fits <- fitted.values(fakemod)
+  svydata$variables$yhat <- colnames(fits)[apply(fits, 1, which.max)]
+  svydata$variables$correct <- as.numeric(svydata$variables$yhat == svydata$variables[[yvar]])
+
+  pmc <- max(survey::svymean(data[yvar], svydata))   # percent in modal category
+  pcp <- survey::svymean(~correct, svydata)[1]   # percent correctly classified
+  pre <- (pcp - pmc) / (1 - pmc)   # percent reduction in error
+
+  pre_stats <- tibble::tibble(
+    Measure = c("Percent in modal category",
+                "Percent correctly classified",
+                "Percent reduction in error"),
+    Value = c(pmc, pcp, pre))
+  attributes(pre_stats)$model <- modform
 
   # more detailed output (not currently implemented)
   # out <- list(

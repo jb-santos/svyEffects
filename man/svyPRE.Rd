@@ -8,7 +8,7 @@ svyPRE(obj, ...)
 }
 \arguments{
 \item{obj}{Model object of class \code{svyglm} with \code{family = "binomial"}
-or \code{svyolr}}
+or \code{svyolr} or class \code{svrepstatmisc}}
 
 \item{...}{Other options (not currently implemented)}
 }

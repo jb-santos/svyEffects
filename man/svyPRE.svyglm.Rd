@@ -7,8 +7,7 @@
 \method{svyPRE}{svyglm}(obj, ...)
 }
 \arguments{
-\item{obj}{Model object of class \code{svyglm} with \code{family = "binomial"}
-or \code{svyolr}}
+\item{obj}{Model object of class \code{svyglm} with \code{family = "binomial"}}
 
 \item{...}{Other options (not currently implemented)}
 }
