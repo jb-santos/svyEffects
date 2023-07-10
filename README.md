@@ -36,14 +36,15 @@ svyEffects
   - <a href="#predictions-on-a-continuous-variable-2"
     id="toc-predictions-on-a-continuous-variable-2">Predictions on a
     continuous variable</a>
+- <a href="#measures-of-model-fit" id="toc-measures-of-model-fit">Measures
+  of model fit</a>
 - <a href="#marginal-effects-at-reasonable-values"
   id="toc-marginal-effects-at-reasonable-values">Marginal effects at
   reasonable values</a>
-- <a href="#interaction-effects" id="toc-interaction-effects">Interaction
-  effects</a>
-- <a href="#measures-of-model-fit" id="toc-measures-of-model-fit">Measures
-  of model fit</a>
-- <a href="#planned-updates" id="toc-planned-updates">Planned updates</a>
+- <a href="#prediction-by-two-variables-and-interaction-effects"
+  id="toc-prediction-by-two-variables-and-interaction-effects">Prediction
+  by two variables and interaction effects</a>
+- <a href="#future-updates" id="toc-future-updates">Future updates</a>
 - <a href="#references" id="toc-references">References</a>
 - <a href="#appendix-detailed-comparisons-with-stata-results"
   id="toc-appendix-detailed-comparisons-with-stata-results">Appendix:
@@ -739,9 +740,45 @@ plot(VOTE_marketlib_ame, "diffs") +
 
 ------------------------------------------------------------------------
 
-# Marginal effects at reasonable values
+# Measures of model fit
 
-*(documentation in progress)*
+The `svyPRE` function calculates the proportional reduction in error for
+binary (`svyglm`), ordered (`svyolr`), and multinomial
+(`svyrepstatmisc`) logit models.
+
+``` r
+svyPRE(VOTECON)
+#> # A tibble: 3 × 2
+#>   Measure                      Value
+#> * <chr>                        <dbl>
+#> 1 Percent in modal category    0.592
+#> 2 Percent correctly classified 0.747
+#> 3 Percent reduction in error   0.380
+```
+
+``` r
+svyPRE(CONLDR)
+#> # A tibble: 3 × 2
+#>   Measure                      Value
+#> * <chr>                        <dbl>
+#> 1 Percent in modal category    0.477
+#> 2 Percent correctly classified 0.698
+#> 3 Percent reduction in error   0.422
+```
+
+``` r
+svyPRE(VOTE)
+#> # A tibble: 3 × 2
+#>   Measure                      Value
+#> * <chr>                        <dbl>
+#> 1 Percent in modal category    0.408
+#> 2 Percent correctly classified 0.600
+#> 3 Percent reduction in error   0.324
+```
+
+------------------------------------------------------------------------
+
+# Marginal effects at reasonable values
 
 You can choose to calculate predicted probabilities and differences
 using the “marginal effects at reasonable/representative values” (MER)
@@ -758,9 +795,9 @@ simulation methods because they do not use all cases in the data set.
 
 ------------------------------------------------------------------------
 
-# Interaction effects
+# Prediction by two variables and interaction effects
 
-*(documentation in progress)*
+*(expanded documentation in progress)*
 
 Both `svyAME` and `svyMER` support calculating predicted probabilities
 of combinations of two predictor variables. This can be done by using
@@ -801,7 +838,7 @@ VOTECON_educ_region$preds
 plot(VOTECON_educ_region)
 ```
 
-![](man/figures/unnamed-chunk-30-1.png)<!-- -->
+![](man/figures/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 VOTECON_marketlib_educ <- svyAME(VOTECON,
@@ -826,7 +863,7 @@ VOTECON_marketlib_educ$preds
 plot(VOTECON_marketlib_educ)
 ```
 
-![](man/figures/unnamed-chunk-31-1.png)<!-- -->
+![](man/figures/unnamed-chunk-34-1.png)<!-- -->
 
 ``` r
 VOTECON2 <- svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad +
@@ -854,58 +891,31 @@ VOTECON2_marketlib_educ$preds
 plot(VOTECON2_marketlib_educ)
 ```
 
-![](man/figures/unnamed-chunk-32-1.png)<!-- -->
+![](man/figures/unnamed-chunk-35-1.png)<!-- -->
 
 ------------------------------------------------------------------------
 
-# Measures of model fit
+# Future updates
 
-*(documentation in progress)*
+Functionality that will be added in the future includes:
 
-The `svyPRE` function calculates the proportional reduction in error for
-binary (`svyglm`) and ordered (`svyolr`) logit models.
-
-Functionality for multinomial (`svyrepstatmisc`) models is currently
-under development.
-
-``` r
-svyPRE(VOTECON)
-#> # A tibble: 3 × 2
-#>   Measure                      Value
-#> * <chr>                        <dbl>
-#> 1 Percent in modal category    0.592
-#> 2 Percent correctly classified 0.747
-#> 3 Percent reduction in error   0.380
-```
-
-``` r
-svyPRE(CONLDR)
-#> # A tibble: 3 × 2
-#>   Measure                      Value
-#> * <chr>                        <dbl>
-#> 1 Percent in modal category    0.477
-#> 2 Percent correctly classified 0.698
-#> 3 Percent reduction in error   0.422
-```
-
-------------------------------------------------------------------------
-
-# Planned updates
-
-This package is under active development, and updates will include:
-
-1.  Support for “vanilla” `glm`, `polr`, and `multinom` models. While
+1.  More detailed output to help with diagnostics (e.g. data frames of
+    the predictions by simulation number).
+2.  Support for “vanilla” `glm`, `polr`, and `multinom` models. While
     there are other packages that do this, some do not return confidence
     intervals for predictions for some model types. And, to my
     knowledge, none use simulation methods to derive confidence
     intervals. *Note: You can actually already do this with
     `{svyEffects}` by creating a survey design object with a weight of
     “1”, but it would be good to avoid having to use that workaround.*
-2.  Expand functionality with `svyrepstatmisc` model objects to reduce
-    the number of arguments needed to run the functions.
 3.  A second differences function to test for the significance of a
     two-way interaction.
-4.  Explore ways to speed up computational time for calculating AMEs.
+4.  Add expected PRE measures to the PRE functions.
+
+If you have any other suggestions, please let me know!
+
+I’d also like to explore ways of speeding up computational time for
+calculating AMEs.
 
 ------------------------------------------------------------------------
 
@@ -1127,6 +1137,15 @@ Predicted probabilities (AMEs)
 |           |              |          | Mean prediction |        |         | 95%CI lower |        |         | 95%CI upper |        |         |
 |-----------|--------------|----------|-----------------|--------|---------|-------------|--------|---------|-------------|--------|---------|
 | Predictor | Y            | X        | R               | svyjk  | pweight | R           | svyjk  | pweight | R           | svyjk  | pweight |
+| region    | Liberal      | Ontario  | 0.4449          | 0.4482 | 0.4482  | 0.3972      | 0.4005 | 0.4025  | 0.4924      | 0.4958 | 0.4938  |
+| region    | Liberal      | West     | 0.2850          | 0.2846 | 0.2846  | 0.2410      | 0.2369 | 0.2387  | 0.3347      | 0.3323 | 0.3305  |
+| region    | Liberal      | Atlantic | 0.4082          | 0.4082 | 0.4082  | 0.2906      | 0.2815 | 0.2927  | 0.5338      | 0.5350 | 0.5237  |
+| region    | Conservative | Ontario  | 0.3615          | 0.3619 | 0.3619  | 0.3198      | 0.3194 | 0.3211  | 0.4042      | 0.4044 | 0.4027  |
+| region    | Conservative | West     | 0.4606          | 0.4628 | 0.4628  | 0.4176      | 0.4186 | 0.4203  | 0.5026      | 0.5070 | 0.5052  |
+| region    | Conservative | Atlantic | 0.4096          | 0.4132 | 0.4132  | 0.2951      | 0.2983 | 0.3101  | 0.5248      | 0.5280 | 0.5163  |
+| region    | NDP          | Ontario  | 0.1936          | 0.1900 | 0.1900  | 0.1556      | 0.1506 | 0.1524  | 0.2344      | 0.2293 | 0.2275  |
+| region    | NDP          | West     | 0.2544          | 0.2526 | 0.2526  | 0.2126      | 0.2096 | 0.2111  | 0.2982      | 0.2956 | 0.2942  |
+| region    | NDP          | Atlantic | 0.1822          | 0.1786 | 0.1786  | 0.1161      | 0.1044 | 0.1090  | 0.2657      | 0.2528 | 0.2483  |
 | marketlib | Liberal      | -1       | 0.4988          | 0.5054 | 0.5054  | 0.4062      | 0.4087 | 0.4127  | 0.5977      | 0.6022 | 0.5981  |
 | marketlib | Liberal      | -0.8     | 0.4900          | 0.4960 | 0.4960  | 0.4211      | 0.4223 | 0.4254  | 0.5679      | 0.5697 | 0.5666  |
 | marketlib | Liberal      | -0.6     | 0.4717          | 0.4766 | 0.4766  | 0.4199      | 0.4212 | 0.4236  | 0.5302      | 0.5320 | 0.5296  |
@@ -1160,14 +1179,5 @@ Predicted probabilities (AMEs)
 | marketlib | NDP          | 0.6      | 0.0808          | 0.0765 | 0.0765  | 0.0432      | 0.0331 | 0.0350  | 0.1319      | 0.1199 | 0.1180  |
 | marketlib | NDP          | 0.8      | 0.0592          | 0.0548 | 0.0548  | 0.0264      | 0.0151 | 0.0169  | 0.1090      | 0.0945 | 0.0927  |
 | marketlib | NDP          | 1        | 0.0424          | 0.0380 | 0.0380  | 0.0156      | 0.0040 | 0.0055  | 0.0894      | 0.0720 | 0.0705  |
-| region    | Liberal      | Ontario  | 0.4449          | 0.4482 | 0.4482  | 0.3972      | 0.4005 | 0.4025  | 0.4924      | 0.4958 | 0.4938  |
-| region    | Liberal      | West     | 0.2850          | 0.2846 | 0.2846  | 0.2410      | 0.2369 | 0.2387  | 0.3347      | 0.3323 | 0.3305  |
-| region    | Liberal      | Atlantic | 0.4082          | 0.4082 | 0.4082  | 0.2906      | 0.2815 | 0.2927  | 0.5338      | 0.5350 | 0.5237  |
-| region    | Conservative | Ontario  | 0.3615          | 0.3619 | 0.3619  | 0.3198      | 0.3194 | 0.3211  | 0.4042      | 0.4044 | 0.4027  |
-| region    | Conservative | West     | 0.4606          | 0.4628 | 0.4628  | 0.4176      | 0.4186 | 0.4203  | 0.5026      | 0.5070 | 0.5052  |
-| region    | Conservative | Atlantic | 0.4096          | 0.4132 | 0.4132  | 0.2951      | 0.2983 | 0.3101  | 0.5248      | 0.5280 | 0.5163  |
-| region    | NDP          | Ontario  | 0.1936          | 0.1900 | 0.1900  | 0.1556      | 0.1506 | 0.1524  | 0.2344      | 0.2293 | 0.2275  |
-| region    | NDP          | West     | 0.2544          | 0.2526 | 0.2526  | 0.2126      | 0.2096 | 0.2111  | 0.2982      | 0.2956 | 0.2942  |
-| region    | NDP          | Atlantic | 0.1822          | 0.1786 | 0.1786  | 0.1161      | 0.1044 | 0.1090  | 0.2657      | 0.2528 | 0.2483  |
 
 </div>

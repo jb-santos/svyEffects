@@ -172,6 +172,62 @@ svyPRE.svyolr <- function(obj, ...) {
 #'
 svyPRE.svrepstatmisc <- function(obj, ...) {
 
+  data <- attr(obj, "svrep.design")$variables
+  data$`(weights)` <- as.vector(attr(obj, "svrep.design")$pweights)
+  data <- data %>% na.omit()
+  svydata <- survey::svydesign(ids = ~1,
+                               strata = NULL,
+                               weights = as.vector(attr(obj, "svrep.design")$pweights),
+                               data = data)
+
+  yvar <- as.character(attr(obj, "formula")[[2]])
+  ylevs <- levels(data[[yvar]])
+  nYlev <- length(grep("(Intercept)",  rownames(as.data.frame(obj))))
+  nterms <- nrow(as.data.frame(obj)) / nYlev
+
+  B <- as.data.frame(obj)$Coefficient
+  B <- matrix(B, ncol = nterms) %>% t()
+  B <- cbind(0, B)
+  colnames(B) <- ylevs
+
+  X <- model.matrix(attr(VOTE, "formula"), data = attr(VOTE, "svrep.design")$variables)
+
+  EXB <- exp(X %*% B)
+  fits <- prop.table(EXB, 1)
+  yhat <- colnames(fits)[apply(fits, 1, which.max)]
+
+  svydata$variables$yhat <- factor(yhat, levels = ylevs)
+  svydata$variables$correct <- ifelse(svydata$variables[[yvar]] == svydata$variables$yhat, 1, 0)
+
+  pmc <- max(survey::svymean(data[yvar], svydata))   # percent in modal category
+  pcp <- survey::svymean(~correct, svydata)[1]   # percent correctly classified
+  pre <- (pcp - pmc) / (1 - pmc)   # percent reduction in error
+
+  pre_stats <- tibble::tibble(
+    Measure = c("Percent in modal category",
+                "Percent correctly classified",
+                "Percent reduction in error"),
+    Value = c(pmc, pcp, pre))
+  attributes(pre_stats)$model <- attr(obj, "formula")
+
+  # more detailed output (not currently implemented)
+  # out <- list(
+  #   pre_stats = pre_stats,
+  #   y = data$variables$y,
+  #   fitted.values = fits,
+  #   yhat = data$variables$yhat,
+  #   model.frame = data
+  # )
+
+  return(pre_stats)
+}
+
+
+
+
+# Old version of this function
+svyPRE.svrepstatmisc.OLD <- function(obj, ...) {
+
   modform <- attr(obj, "formula")
   yvar <- as.character(attr(obj, "formula")[[2]])
 
@@ -192,7 +248,7 @@ svyPRE.svrepstatmisc <- function(obj, ...) {
                             weights = TEMPWEIGHTVECTOR,
                             Hess = TRUE,
                             trace = FALSE)
-  rm(TEMPWEIGHTVECTOR, inherits = TRUE)
+  #rm(TEMPWEIGHTVECTOR, inherits = TRUE)
 
   fits <- fitted.values(fakemod)
   svydata$variables$yhat <- colnames(fits)[apply(fits, 1, which.max)]
@@ -220,6 +276,9 @@ svyPRE.svrepstatmisc <- function(obj, ...) {
 
   return(pre_stats)
 }
+
+
+
 
 
 
