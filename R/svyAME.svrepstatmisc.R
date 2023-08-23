@@ -94,9 +94,12 @@ svyAME.svrepstatmisc <- function(obj,
   # SETUP ======================================================================
 
   modform <- attr(obj, "formula")
+  modvars <- unformulate(attr(obj, "formula"))$vars
   data <- attr(obj, "svrep.design")$variables
   data$`(weights)` <- as.vector(attr(obj, "svrep.design")$pweights)
-  data <- data %>% na.omit()
+  data <- data %>%
+    select(all_of(modvars), `(weights)`) %>%
+    na.omit()
   svydata <- survey::svydesign(ids = ~1,
                                strata = NULL,
                                weights = data$`(weights)`,

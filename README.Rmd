@@ -512,52 +512,48 @@ because they do not use all cases in the data set.
 --------------------------------------------------------------------------------
 
 
-# Prediction by two variables and interaction effects
+# Interaction effects
 
 *(expanded documentation in progress)*
 
-Both `svyAME` and `svyMER` support calculating predicted probabilities of 
-combinations of two predictor variables. This can be done by using the argument 
-`byvar = "x"` in the function call. This works with or without a product term.
+Both `svyAME` and `svyMER` can calculate predicted probabilities using  
+combinations of two predictor variables (i.e. interaction effects). This can be 
+done by using the argument `byvar = "x"` in the function call. This works with 
+or without a product term.
 
-This will not return differences in predicted probabilities. For limited-dependent 
+Note, this will not return differences in predicted probabilities. For limited-dependent 
 variable models, one would need to calculate a second difference to test for the 
 significance of an interaction between two variables, either from the inclusion 
 of a product term or through the compression inherent in these types of models 
 (see Norton, Wang, and Ai 2004).
 
 Dave Armstrong's `{DAMisc}` package (https://github.com/davidaarmstrong/damisc/)
-has an `R` port for Norton, Wang, and Ai's original `Stata` function, and this 
-will eventually be ported to `{svyEffects}` and adapted for use in survey-weighted models.
+has an `R` port for Norton, Wang, and Ai's original second differences function 
+for `Stata`, and I will eventually port this to `{svyEffects}` and adapt it for 
+use with survey-weighted models.
 
 
 ```{r}
-VOTECON_educ_region <- svyAME(VOTECON,
-                              varname = "educ",
-                              byvar = "region",
-                              seed = 2019)
+VOTECON_educ_region <- svyAME(VOTECON, varname = "educ", 
+                              byvar = "region", seed = 2019)
 VOTECON_educ_region$preds
 plot(VOTECON_educ_region)
 ```
 
 ```{r}
-VOTECON_marketlib_educ <- svyAME(VOTECON,
-                                 varname = "marketlib",
-                                 byvar = "educ",
-                                 seed = 2019)
+VOTECON_marketlib_educ <- svyAME(VOTECON, varname = "marketlib", 
+                                 byvar = "educ", seed = 2019)
 VOTECON_marketlib_educ$preds
 plot(VOTECON_marketlib_educ)
 ```
 
 
 ```{r}
-VOTECON2 <- svyglm(votecon ~ agegrp + gender + educ + region + relig + marketlib + culturetrad +
-                     marketlib:educ, 
+VOTECON2 <- svyglm(votecon ~ agegrp + gender + educ + region + relig + 
+                     marketlib + culturetrad + marketlib:educ, 
                    design = ces19_svy, family = binomial)
-VOTECON2_marketlib_educ <- svyAME(VOTECON2,
-                                  varname = "marketlib",
-                                  byvar = "educ",
-                                  seed = 2019)
+VOTECON2_marketlib_educ <- svyAME(VOTECON2, varname = "marketlib", 
+                                  byvar = "educ", seed = 2019)
 VOTECON2_marketlib_educ$preds
 plot(VOTECON2_marketlib_educ)
 ```
