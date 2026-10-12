@@ -21,65 +21,81 @@ export(svyPRE)
 export(svyR2)
 export(testfun)
 importFrom(MASS,mvrnorm)
-importFrom(dplyr,arrange)
-importFrom(dplyr,as_tibble)
-importFrom(dplyr,filter)
-importFrom(dplyr,group_by)
-importFrom(dplyr,mutate)
-importFrom(dplyr,mutate_if)
-importFrom(dplyr,relocate)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dplyr,summarize)
-importFrom(dplyr,tibble)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,coord_flip)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_errorbar)
-importFrom(ggplot2,geom_hline)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,geom_pointrange)
-importFrom(ggplot2,geom_ribbon)
-importFrom(ggplot2,geom_vline)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,theme)
-importFrom(ggplot2,theme_bw)
-importFrom(ggplot2,theme_classic)
+importFrom(dplyr,
+  arrange,
+  as_tibble,
+  filter,
+  group_by,
+  mutate,
+  mutate_if,
+  relocate,
+  rename,
+  select,
+  summarize,
+  tibble
+)
+importFrom(ggplot2,
+  aes,
+  coord_flip,
+  facet_wrap,
+  geom_errorbar,
+  geom_hline,
+  geom_line,
+  geom_point,
+  geom_pointrange,
+  geom_ribbon,
+  geom_vline,
+  ggplot,
+  labs,
+  theme,
+  theme_bw,
+  theme_classic
+)
 importFrom(glue,glue)
 importFrom(magrittr,"%>%")
 importFrom(nnet,multinom)
 importFrom(rlang,sym)
 importFrom(scales,percent)
-importFrom(stats,as.formula)
-importFrom(stats,coef)
-importFrom(stats,family)
-importFrom(stats,fitted.values)
-importFrom(stats,formula)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,na.omit)
-importFrom(stats,plogis)
-importFrom(stats,pnorm)
-importFrom(stats,predict)
-importFrom(stats,quantile)
-importFrom(stats,reformulate)
-importFrom(stats,runif)
-importFrom(stats,terms)
-importFrom(stats,vcov)
-importFrom(stats,weighted.mean)
-importFrom(stringr,boundary)
-importFrom(stringr,fixed)
-importFrom(stringr,str_extract_all)
-importFrom(stringr,str_split)
-importFrom(survey,svydesign)
-importFrom(survey,svymean)
-importFrom(survey,svyquantile)
-importFrom(survey,svytable)
-importFrom(tibble,as_tibble)
-importFrom(tibble,tibble)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,pivot_wider)
-importFrom(utils,combn)
-importFrom(utils,relist)
+importFrom(stats,
+  as.formula,
+  coef,
+  family,
+  fitted.values,
+  formula,
+  model.frame,
+  model.matrix,
+  na.omit,
+  plogis,
+  pnorm,
+  predict,
+  quantile,
+  reformulate,
+  runif,
+  terms,
+  vcov,
+  weighted.mean
+)
+importFrom(stringr,
+  boundary,
+  fixed,
+  str_extract_all,
+  str_split
+)
+importFrom(survey,
+  svydesign,
+  svymean,
+  svyquantile,
+  svytable
+)
+importFrom(tibble,
+  as_tibble,
+  tibble
+)
+importFrom(tidyr,
+  pivot_longer,
+  pivot_wider
+)
+importFrom(utils,
+  combn,
+  relist
+)
